@@ -26,11 +26,9 @@ project(stm32wb55-Template)
 # Part of project name but made seperate for ease of editing project name
 enable_language(C CXX ASM)
 # Linker File     --- MUST EDIT ---
-set(linker_script_SRC               ${PROJ_PATH}/Drivers/stm32wb55xx_flash_cm4.ld)
+set(linker_script_SRC               ${PROJ_PATH}/core/src/stm32wb55xx_flash_cm4.ld)
 # The use project name for binary file name
 set(EXECUTABLE                      ${CMAKE_PROJECT_NAME})
-
-
 # MCU Sepecific Setting    --- MUST EDIT ---
 # Make multiple for various STM32 core
 # This path is defined in the list() function above
@@ -41,6 +39,8 @@ include(STM32WB55xx_HAL_PARA)
 # This path is defined in the list() function above
 include(SourceList)
 include(IncludeList)
+
+message(STATUS "DEBUG - Definições carregadas: ${compiler_define}")
 
 
 # Executable files

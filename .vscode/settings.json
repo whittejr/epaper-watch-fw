@@ -1,0 +1,42 @@
+{
+  // 1. Desliga o motor IntelliSense da Microsoft
+  "C_Cpp.intelliSenseEngine": "disabled",
+  // 2. Garante que o VS Code use clangd para formatar
+  "[c]": {
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+  },
+  // 3. A configuração do clangd
+  "clangd.arguments": [
+    // Diz ao clangd para "perguntar" ao GCC (no caminho que você encontrou)
+    // quais são os includes de sistema do ARM.
+    "--query-driver=/usr/sbin/arm-none-eabi-gcc",
+  ],
+  "cmake.debugConfig": {
+    "name": "Openocd",
+    "cwd": "${workspaceFolder}",
+    "executable": "${workspaceFolder}/build/Debug/stm32wb55-Template.elf",
+    "request": "launch",
+    "type": "cortex-debug",
+    "servertype": "openocd",
+    "interface": "swd",
+    "showDevDebugOutput": "both",
+    "v1": false,
+    "device": "STM32WB55xx",
+    // "stopAtEntry": true,
+    "runToEntryPoint": "main",
+    "liveWatch": {
+      "enabled": true,
+      "samplesPerSecond": 20
+    },
+    "gdbPath": "/usr/sbin/arm-none-eabi-gdb",
+    "configFiles": [
+      "interface/stlink.cfg",
+      "target/stm32wbx.cfg"
+    ],
+    "svdFile": "STM32WB55_CM4.svd",
+  },
+  "cortex-debug.variableUseNaturalFormat": true
+}

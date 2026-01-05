@@ -15,7 +15,8 @@ RUN pacman -Syu --noconfirm
 # no *mesmo* comando RUN para manter a camada menor.
 # Se você precisar adicionar outra ferramenta (ex: 'vim'), adicione
 # na lista abaixo. Apenas ESTA camada será refeita.
-RUN pacman -S --noconfirm \
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm \
     git \
     python \
     base-devel \
@@ -28,6 +29,7 @@ RUN pacman -S --noconfirm \
     arm-none-eabi-newlib \
     arm-none-eabi-gdb \
     openocd \
+    tree \
     usbutils \
     usbip && \
     pacman -Scc --noconfirm
