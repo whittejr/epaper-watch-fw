@@ -1,47 +1,48 @@
-# Use uma tag de versão específica em vez de 'latest' para evitar
-# quebras de cache inesperadas quando a 'latest' for atualizada.
-# Ex: archlinux:20240101 (verificar tags no Docker Hub)
-# Mas, por enquanto, manteremos 'latest' para simplicidade.
-FROM archlinux:latest
+# Usamos a versão 'slim' do Debian 12 (Bookworm).
+# É estável, segura e muito menor que a versão completa.
+FROM debian:bookworm-slim
 
-# --- Camada de Atualização ---
-# Atualiza os repositórios de pacotes.
-# Esta camada só será refeita se a imagem base (latest) mudar
-# ou se você rodar o build com --no-cache.
-RUN pacman -Syu --noconfirm
+# Evita perguntas interativas durante a instalação (ex: fuso horário)
+ENV DEBIAN_FRONTEND=noninteractive
 
-# --- Camada de Ferramentas ---
-# Instala TODAS as dependências de uma vez e limpa o cache do pacman
-# no *mesmo* comando RUN para manter a camada menor.
-# Se você precisar adicionar outra ferramenta (ex: 'vim'), adicione
-# na lista abaixo. Apenas ESTA camada será refeita.
-RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm \
+# --- Instalação de Ferramentas ---
+# 1. 'apt-get update' baixa a lista de pacotes.
+# 2. Instalamos tudo com '--no-install-recommends' para evitar lixo desnecessário (docs, plugins extras).
+# 3. 'rm -rf /var/lib/apt/lists/*' apaga o cache do apt no final para a imagem ficar pequena.
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
-    python \
-    base-devel \
+    python3 \
+    python3-pip \
+    build-essential \
     make \
     cmake \
-    ninja \
+    ninja-build \
     clang \
-    arm-none-eabi-gcc \
-    arm-none-eabi-binutils \
-    arm-none-eabi-newlib \
-    arm-none-eabi-gdb \
+    clangd \
+    # Toolchain ARM
+    gcc-arm-none-eabi \
+    libnewlib-arm-none-eabi \
+    libstdc++-arm-none-eabi-newlib \
+    # Debuggers e Ferramentas USB
+    gdb-multiarch \
     openocd \
-    tree \
     usbutils \
-    usbip && \
-    pacman -Scc --noconfirm
+    usbip \
+    # Utilitários básicos
+    ca-certificates \
+    sudo \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# --- Camada de Configuração do Usuário ---
-# Esta camada raramente mudará e usará o cache das camadas anteriores.
-RUN useradd -m -s /bin/bash vscode && \
-    echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# --- Configuração do Usuário ---
+# Cria o usuário 'vscode' para evitar problemas de permissão com arquivos do Windows
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
-# Define o usuário padrão para o restante do build e para
-# quando o container for executado
-USER vscode
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# WORKDIR /home/vscode/project
-# ENTRYPOINT ["..."]
+# Define o usuário padrão
+USER $USERNAME

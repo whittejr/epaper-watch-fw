@@ -1,6 +1,7 @@
 {
   // 1. Desliga o motor IntelliSense da Microsoft
   "C_Cpp.intelliSenseEngine": "disabled",
+
   // 2. Garante que o VS Code use clangd para formatar
   "[c]": {
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
@@ -8,12 +9,13 @@
   "[cpp]": {
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
   },
+
   // 3. A configuração do clangd
   "clangd.arguments": [
-    // Diz ao clangd para "perguntar" ao GCC (no caminho que você encontrou)
-    // quais são os includes de sistema do ARM.
-    "--query-driver=/usr/sbin/arm-none-eabi-gcc",
+    // CORREÇÃO: No Debian, o compilador fica em /usr/bin, não /usr/sbin
+    "--query-driver=/usr/bin/arm-none-eabi-gcc"
   ],
+
   "cmake.debugConfig": {
     "name": "Openocd",
     "cwd": "${workspaceFolder}",
@@ -31,12 +33,16 @@
       "enabled": true,
       "samplesPerSecond": 20
     },
-    "gdbPath": "/usr/sbin/arm-none-eabi-gdb",
+    // CORREÇÃO CRÍTICA:
+    // 1. Mudado para 'gdb-multiarch' (o nome usado no Debian)
+    // 2. Mudado o caminho para '/usr/bin' (onde o Debian instala)
+    "gdbPath": "/usr/bin/gdb-multiarch",
+    
     "configFiles": [
       "interface/stlink.cfg",
       "target/stm32wbx.cfg"
     ],
-    "svdFile": "STM32WB55_CM4.svd",
+    "svdFile": "STM32WB55_CM4.svd"
   },
   "cortex-debug.variableUseNaturalFormat": true
 }
