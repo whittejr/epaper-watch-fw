@@ -1,5 +1,5 @@
 /**
- * @file    stm32wb55_driver_ssd1681_interface.c
+ * @file    ssd1681_interface.c
  * @author  Alessandro Davi
  * @brief   none
  * @version 0.1.0

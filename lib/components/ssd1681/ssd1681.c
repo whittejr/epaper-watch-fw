@@ -8,7 +8,6 @@
 #include "ssd1681.h"
 #include "driver_ssd1681_font.h"
 
-
 #define SSD1681_CMD_SW_RESET 0x12
 /**
  * @brief chip information definition
@@ -100,7 +99,7 @@
 static uint8_t a_ssd1681_multiple_write_byte(ssd1681_handle_t *handle, uint8_t command, uint8_t *data, uint16_t len) {
     uint8_t res;
     uint8_t value;
-    uint16_t i;
+
     uint16_t timeout_counter = 0;
     value = 1;
 
@@ -410,8 +409,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle) {
 //     return 0;
 // }
 
-uint8_t ssd1681_set_driver_output(ssd1681_handle_t *handle, uint16_t mux, ssd1681_bool_t gd, ssd1681_bool_t sm,
-                                  ssd1681_bool_t tb) {
+uint8_t ssd1681_set_driver_output(ssd1681_handle_t *handle, uint16_t mux, ssd1681_bool_t gd, ssd1681_bool_t sm, ssd1681_bool_t tb) {
     uint8_t res;
     uint8_t b;
     uint8_t buf[3];
@@ -474,10 +472,9 @@ uint8_t ssd1681_set_gate_driving_voltage(ssd1681_handle_t *handle, ssd1681_gate_
         return 3; /* return error */
     }
 
-    buf[0] = voltage; /* set the voltage */
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_GATE_DRIVING_VOLTAGE_CONTROL, (uint8_t *)buf,
-                                        1); /* write byte */
-    if (res != 0)                           /* check the result */
+    buf[0] = voltage;                                                                                         /* set the voltage */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_GATE_DRIVING_VOLTAGE_CONTROL, (uint8_t *)buf, 1); /* write byte */
+    if (res != 0)                                                                                             /* check the result */
     {
         handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                           failed */
@@ -501,8 +498,7 @@ uint8_t ssd1681_set_gate_driving_voltage(ssd1681_handle_t *handle, ssd1681_gate_
  *            - 3 handle is not initialized
  * @note      vsh1 >= vsh2
  */
-uint8_t ssd1681_set_source_driving_voltage(ssd1681_handle_t *handle, ssd1681_vsh_t vsh1, ssd1681_vsh_t vsh2,
-                                           ssd1681_vsl_t vsl) {
+uint8_t ssd1681_set_source_driving_voltage(ssd1681_handle_t *handle, ssd1681_vsh_t vsh1, ssd1681_vsh_t vsh2, ssd1681_vsl_t vsl) {
     uint8_t res;
     uint8_t buf[3];
 
@@ -515,12 +511,11 @@ uint8_t ssd1681_set_source_driving_voltage(ssd1681_handle_t *handle, ssd1681_vsh
         return 3; /* return error */
     }
 
-    buf[0] = vsh1; /* set vsh1 */
-    buf[1] = vsh2; /* set vsh2 */
-    buf[2] = vsl;  /* set vsl */
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SOURCE_DRIVING_VOLTAGE_CONTROL, (uint8_t *)buf,
-                                        3); /* write byte */
-    if (res != 0)                           /* check the result */
+    buf[0] = vsh1;                                                                                              /* set vsh1 */
+    buf[1] = vsh2;                                                                                              /* set vsh2 */
+    buf[2] = vsl;                                                                                               /* set vsl */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SOURCE_DRIVING_VOLTAGE_CONTROL, (uint8_t *)buf, 3); /* write byte */
+    if (res != 0)                                                                                               /* check the result */
     {
 
         return 1; /* return error */
@@ -552,7 +547,7 @@ uint8_t ssd1681_otp_initial(ssd1681_handle_t *handle) {
     }
 
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_INITIAL_CODE_SETTING_OTP_PROGRAM, NULL, 0); /* write byte */
-    if (res != 0) /* check the result */
+    if (res != 0)                                                                                       /* check the result */
     {
 
         return 1; /* return error */
@@ -584,9 +579,8 @@ uint8_t ssd1681_otp_initial_write(ssd1681_handle_t *handle, uint8_t param[4]) {
         return 3; /* return error */
     }
 
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_REGISTER_FOR_INITIAL_CODE_SETTING, param,
-                                        4); /* write byte */
-    if (res != 0)                           /* check the result */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_REGISTER_FOR_INITIAL_CODE_SETTING, param, 4); /* write byte */
+    if (res != 0)                                                                                               /* check the result */
     {
 
         return 1; /* return error */
@@ -617,9 +611,8 @@ uint8_t ssd1681_otp_initial_read(ssd1681_handle_t *handle) {
         return 3; /* return error */
     }
 
-    res = a_ssd1681_multiple_read_byte(handle, SSD1681_CMD_READ_REGISTER_FOR_INITIAL_CODE_SETTING, NULL,
-                                       0); /* read byte */
-    if (res != 0)                          /* check the result */
+    res = a_ssd1681_multiple_read_byte(handle, SSD1681_CMD_READ_REGISTER_FOR_INITIAL_CODE_SETTING, NULL, 0); /* read byte */
+    if (res != 0)                                                                                            /* check the result */
     {
 
         return 1; /* return error */
@@ -642,8 +635,7 @@ uint8_t ssd1681_otp_initial_read(ssd1681_handle_t *handle) {
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_set_booster_soft_start(ssd1681_handle_t *handle, uint8_t phase1, uint8_t phase2, uint8_t phase3,
-                                       uint8_t duration) {
+uint8_t ssd1681_set_booster_soft_start(ssd1681_handle_t *handle, uint8_t phase1, uint8_t phase2, uint8_t phase3, uint8_t duration) {
     uint8_t res;
     uint8_t buf[4];
 
@@ -717,8 +709,7 @@ uint8_t ssd1681_set_mode(ssd1681_handle_t *handle, ssd1681_mode_t mode) {
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_set_data_entry_mode(ssd1681_handle_t *handle, ssd1681_address_mode_t mode,
-                                    ssd1681_address_direction_t direction) {
+uint8_t ssd1681_set_data_entry_mode(ssd1681_handle_t *handle, ssd1681_address_mode_t mode, ssd1681_address_direction_t direction) {
     uint8_t res;
     uint8_t buf[1];
 
@@ -758,8 +749,7 @@ uint8_t ssd1681_set_data_entry_mode(ssd1681_handle_t *handle, ssd1681_address_mo
  *            cool_down_loop_num <= 7
  *            duration = 10ms x (cool_down_duration + 1)
  */
-uint8_t ssd1681_set_hv_ready_detection(ssd1681_handle_t *handle, uint8_t cool_down_duration,
-                                       uint8_t cool_down_loop_num) {
+uint8_t ssd1681_set_hv_ready_detection(ssd1681_handle_t *handle, uint8_t cool_down_duration, uint8_t cool_down_loop_num) {
     uint8_t res;
     uint8_t buf[1];
 
@@ -852,7 +842,7 @@ uint8_t ssd1681_set_temperature_sensor(ssd1681_handle_t *handle, ssd1681_tempera
         return 3; /* return error */
     }
 
-    buf[0] = sensor; /* set the temperature sensor */
+    buf[0] = sensor;                                                                             /* set the temperature sensor */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_TEMPERATURE_SENSOR_CONTROL, buf, 1); /* write byte */
     if (res != 0)                                                                                /* check the result */
     {
@@ -893,10 +883,10 @@ uint8_t ssd1681_write_temperature_sensor(ssd1681_handle_t *handle, uint16_t cont
         return 4; /* return error */
     }
 
-    buf[0] = (control >> 4) & 0xFF;        /* set the temperature data */
-    buf[1] = ((control >> 0) << 4) & 0xFF; /* set the temperature data */
+    buf[0] = (control >> 4) & 0xFF;                                                                    /* set the temperature data */
+    buf[1] = ((control >> 0) << 4) & 0xFF;                                                             /* set the temperature data */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_TEMPERATURE_SENSOR_CONTROL_WRITE, buf, 2); /* write byte */
-    if (res != 0) /* check the result */
+    if (res != 0)                                                                                      /* check the result */
     {
 
         return 1; /* return error */
@@ -930,7 +920,7 @@ uint8_t ssd1681_read_temperature_sensor(ssd1681_handle_t *handle, uint16_t *cont
     }
 
     res = a_ssd1681_multiple_read_byte(handle, SSD1681_CMD_TEMPERATURE_SENSOR_CONTROL_READ, buf, 2); /* read byte */
-    if (res != 0) /* check the result */
+    if (res != 0)                                                                                    /* check the result */
     {
 
         return 1; /* return error */
@@ -963,9 +953,8 @@ uint8_t ssd1681_write_temperature_sensor_ext(ssd1681_handle_t *handle, uint8_t p
         return 3; /* return error */
     }
 
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_TEMPERATURE_SENSOR_CONTROL_WRITE_EXT, param,
-                                        3); /* write byte */
-    if (res != 0)                           /* check the result */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_TEMPERATURE_SENSOR_CONTROL_WRITE_EXT, param, 3); /* write byte */
+    if (res != 0)                                                                                            /* check the result */
     {
 
         return 1; /* return error */
@@ -1018,8 +1007,7 @@ uint8_t ssd1681_set_master_activate(ssd1681_handle_t *handle) {
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_set_display_update_control(ssd1681_handle_t *handle, ssd1681_display_control_t red_control,
-                                           ssd1681_display_control_t black_control) {
+uint8_t ssd1681_set_display_update_control(ssd1681_handle_t *handle, ssd1681_display_control_t red_control, ssd1681_display_control_t black_control) {
     uint8_t res;
     uint8_t buf[1];
 
@@ -1032,7 +1020,7 @@ uint8_t ssd1681_set_display_update_control(ssd1681_handle_t *handle, ssd1681_dis
         return 3; /* return error */
     }
 
-    buf[0] = (uint8_t)((red_control << 4) | (black_control << 0)); /* set the display update control */
+    buf[0] = (uint8_t)((red_control << 4) | (black_control << 0));                             /* set the display update control */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_DISPLAY_UPDATA_CONTROL_1, buf, 1); /* write byte */
     if (res != 0)                                                                              /* check the result */
     {
@@ -1069,7 +1057,7 @@ uint8_t ssd1681_set_display_sequence(ssd1681_handle_t *handle, ssd1681_display_s
         return 3; /* return error */
     }
 
-    buf[0] = sequence; /* set the display sequence */
+    buf[0] = sequence;                                                                         /* set the display sequence */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_DISPLAY_UPDATA_CONTROL_2, buf, 1); /* write byte */
     if (res != 0)                                                                              /* check the result */
     {
@@ -1315,7 +1303,7 @@ uint8_t ssd1681_set_vcom_control_reg(ssd1681_handle_t *handle) {
     buf[0] = 0x04;                                                                                    /* command 1 */
     buf[1] = 0x63;                                                                                    /* command 2 */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_REGISTER_FOR_VCOM_CONTROL, buf, 2); /* write byte */
-    if (res != 0) /* check the result */
+    if (res != 0)                                                                                     /* check the result */
     {
         handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                           failed */
@@ -1386,9 +1374,8 @@ uint8_t ssd1681_otp_read_register(ssd1681_handle_t *handle, uint8_t param[11]) {
         return 3; /* return error */
     }
 
-    res = a_ssd1681_multiple_read_byte(handle, SSD1681_CMD_OTP_REGISTER_READ_FOR_DISPLAY_OPTION, param,
-                                       11); /* read byte */
-    if (res != 0)                           /* check the result */
+    res = a_ssd1681_multiple_read_byte(handle, SSD1681_CMD_OTP_REGISTER_READ_FOR_DISPLAY_OPTION, param, 11); /* read byte */
+    if (res != 0)                                                                                            /* check the result */
     {
         handle->debug_print("ssd1681: multiple read byte failed.\n"); /* multiple read byte
                                                                          failed */
@@ -1701,9 +1688,8 @@ uint8_t ssd1681_otp_write_register(ssd1681_handle_t *handle, uint8_t param[11]) 
         return 3; /* return error */
     }
 
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_REGISTER_FOR_DISPLAY_OPTION, param,
-                                        11); /* write byte */
-    if (res != 0)                            /* check the result */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_REGISTER_FOR_DISPLAY_OPTION, param, 11); /* write byte */
+    if (res != 0)                                                                                          /* check the result */
     {
         handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                           failed */
@@ -1800,8 +1786,7 @@ uint8_t ssd1681_otp_program_mode(ssd1681_handle_t *handle, ssd1681_otp_mode_t mo
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_set_border_waveform(ssd1681_handle_t *handle, ssd1681_vbd_t vbd, ssd1681_vbd_fix_level_t level,
-                                    ssd1681_gs_transition_t gs_tran, ssd1681_vbd_transition_t vbd_tran) {
+uint8_t ssd1681_set_border_waveform(ssd1681_handle_t *handle, ssd1681_vbd_t vbd, ssd1681_vbd_fix_level_t level, ssd1681_gs_transition_t gs_tran, ssd1681_vbd_transition_t vbd_tran) {
     uint8_t res;
     uint8_t buf[1];
 
@@ -2007,8 +1992,7 @@ uint8_t ssd1681_set_ram_y(ssd1681_handle_t *handle, uint16_t start, uint16_t end
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_set_auto_write_red_ram(ssd1681_handle_t *handle, ssd1681_step_height_t height,
-                                       ssd1681_step_width_t width) {
+uint8_t ssd1681_set_auto_write_red_ram(ssd1681_handle_t *handle, ssd1681_step_height_t height, ssd1681_step_width_t width) {
     uint8_t res;
     uint8_t buf[1];
 
@@ -2021,10 +2005,9 @@ uint8_t ssd1681_set_auto_write_red_ram(ssd1681_handle_t *handle, ssd1681_step_he
         return 3; /* return error */
     }
 
-    buf[0] = (uint8_t)((height << 4) | (width << 0)); /* set the param */
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_AUTO_WRITE_RED_RAM_FOR_REGULAR_PATTERN, buf,
-                                        1); /* write byte */
-    if (res != 0)                           /* check the result */
+    buf[0] = (uint8_t)((height << 4) | (width << 0));                                                        /* set the param */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_AUTO_WRITE_RED_RAM_FOR_REGULAR_PATTERN, buf, 1); /* write byte */
+    if (res != 0)                                                                                            /* check the result */
     {
         handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                           failed */
@@ -2047,8 +2030,7 @@ uint8_t ssd1681_set_auto_write_red_ram(ssd1681_handle_t *handle, ssd1681_step_he
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_set_auto_write_black_ram(ssd1681_handle_t *handle, ssd1681_step_height_t height,
-                                         ssd1681_step_width_t width) {
+uint8_t ssd1681_set_auto_write_black_ram(ssd1681_handle_t *handle, ssd1681_step_height_t height, ssd1681_step_width_t width) {
     uint8_t res;
     uint8_t buf[1];
 
@@ -2061,10 +2043,9 @@ uint8_t ssd1681_set_auto_write_black_ram(ssd1681_handle_t *handle, ssd1681_step_
         return 3; /* return error */
     }
 
-    buf[0] = (uint8_t)((height << 4) | (width << 0)); /* set the param */
-    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_AUTO_WRITE_BW_RAM_FOR_REGULAR_PATTERN, buf,
-                                        1); /* write byte */
-    if (res != 0)                           /* check the result */
+    buf[0] = (uint8_t)((height << 4) | (width << 0));                                                       /* set the param */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_AUTO_WRITE_BW_RAM_FOR_REGULAR_PATTERN, buf, 1); /* write byte */
+    if (res != 0)                                                                                           /* check the result */
     {
         handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                           failed */
@@ -2150,8 +2131,8 @@ uint8_t ssd1681_set_ram_y_address_counter(ssd1681_handle_t *handle, uint16_t cnt
         return 4; /* return error */
     }
 
-    buf[0] = cnt & 0xFF;        /* set the counter low */
-    buf[1] = (cnt >> 8) & 0x01; /* set the counter high */
+    buf[0] = cnt & 0xFF;                                                                        /* set the counter low */
+    buf[1] = (cnt >> 8) & 0x01;                                                                 /* set the counter high */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_Y_ADDRESS_COUNTER, buf, 2); /* write byte */
     if (res != 0)                                                                               /* check the result */
     {
@@ -2210,8 +2191,7 @@ uint8_t ssd1681_nop(ssd1681_handle_t *handle) {
  *            - 1 gram draw point failed
  * @note      none
  */
-static uint8_t a_ssd1681_gram_draw_point(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t x, uint8_t y,
-                                         uint8_t data) {
+static uint8_t a_ssd1681_gram_draw_point(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t x, uint8_t y, uint8_t data) {
     uint8_t pos;
     uint8_t bx;
     uint8_t temp = 0;
@@ -2256,8 +2236,7 @@ static uint8_t a_ssd1681_gram_draw_point(ssd1681_handle_t *handle, ssd1681_color
  *            - 1 gram show char failed
  * @note      none
  */
-static uint8_t a_ssd1681_gram_show_char(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t x, uint8_t y,
-                                        uint8_t chr, uint8_t size, uint8_t mode) {
+static uint8_t a_ssd1681_gram_show_char(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t x, uint8_t y, uint8_t chr, uint8_t size, uint8_t mode) {
     uint8_t temp, t, t1;
     uint8_t y0 = y;
     uint8_t csize = (size / 8 + ((size % 8) ? 1 : 0)) * (size / 2); /* get size */
@@ -2322,7 +2301,6 @@ uint8_t ssd1681_clear(ssd1681_handle_t *handle, ssd1681_color_t color) {
     uint8_t j;
     uint8_t res;
     uint8_t buf[2];
-    uint8_t value = 0;
 
     if (handle == NULL) /* check handle */
     {
@@ -2473,7 +2451,7 @@ uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_update_type_t type
 
         buf[0] = 0x00;                                                                              /* set 0x00 */
         res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_X_ADDRESS_COUNTER, buf, 1); /* write byte */
-        if (res != 0) /* check the result */
+        if (res != 0)                                                                               /* check the result */
         {
             handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                               failed */
@@ -2556,8 +2534,7 @@ uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_update_type_t type
  *            -
  * @note      none
  */
-uint8_t ssd1681_gram_draw_partial(ssd1681_handle_t *handle, uint16_t x_start, uint16_t y_start,
-                                  const unsigned char *datas, uint16_t PART_COLUMN, uint16_t PART_LINE) {
+uint8_t ssd1681_gram_draw_partial(ssd1681_handle_t *handle, uint16_t x_start, uint16_t y_start, const unsigned char *datas, uint16_t PART_COLUMN, uint16_t PART_LINE) {
     unsigned int x_end, y_end;
     uint8_t buf[4];
 
@@ -2784,8 +2761,7 @@ uint8_t ssd1681_gram_read_point(ssd1681_handle_t *handle, ssd1681_color_t color,
  *            - 4 x or y is invalid
  * @note      none
  */
-uint8_t ssd1681_gram_write_string(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t x, uint8_t y, char *str,
-                                  uint16_t len, uint8_t data, ssd1681_font_t font) {
+uint8_t ssd1681_gram_write_string(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t x, uint8_t y, char *str, uint16_t len, uint8_t data, ssd1681_font_t font) {
     if (handle == NULL) /* check handle */
     {
         return 2; /* return error */
@@ -2844,8 +2820,7 @@ uint8_t ssd1681_gram_write_string(ssd1681_handle_t *handle, ssd1681_color_t colo
  *            - 6 left > right or top > bottom
  * @note      none
  */
-uint8_t ssd1681_gram_fill_rect(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t left, uint8_t top,
-                               uint8_t right, uint8_t bottom, uint8_t data) {
+uint8_t ssd1681_gram_fill_rect(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t left, uint8_t top, uint8_t right, uint8_t bottom, uint8_t data) {
     uint8_t x, y;
 
     if (handle == NULL) /* check handle */
@@ -2910,8 +2885,7 @@ uint8_t ssd1681_gram_fill_rect(ssd1681_handle_t *handle, ssd1681_color_t color, 
  *            - 6 left > right or top > bottom
  * @note      none
  */
-uint8_t ssd1681_gram_draw_picture(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t left, uint8_t top,
-                                  uint8_t right, uint8_t bottom, uint8_t *img) {
+uint8_t ssd1681_gram_draw_picture(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t left, uint8_t top, uint8_t right, uint8_t bottom, uint8_t *img) {
     uint8_t x, y;
 
     if (handle == NULL) /* check handle */
@@ -2972,8 +2946,7 @@ uint8_t ssd1681_gram_draw_picture(ssd1681_handle_t *handle, ssd1681_color_t colo
  * @param img Ponteiro para o buffer do bitmap (Row-Major, 1bpp).
  * @return 0 em sucesso, >0 em erro.
  */
-uint8_t ssd1681_gram_draw_bitmap(ssd1681_handle_t *handle, uint8_t left, uint8_t top, uint8_t right, uint8_t bottom,
-                                 const uint8_t *img) {
+uint8_t ssd1681_gram_draw_bitmap(ssd1681_handle_t *handle, uint8_t left, uint8_t top, uint8_t right, uint8_t bottom, const uint8_t *img) {
     uint16_t x, y;         // Coordenadas da TELA (são uint16_t para segurança)
     uint16_t bmp_x, bmp_y; // Coordenadas locais do BITMAP
     uint8_t pixel_data;    // O valor do pixel (0x00 ou 0x01)

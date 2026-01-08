@@ -1,53 +1,60 @@
 # Lista de arquivos-fonte do projeto
 set(source_list
 # --- Arquivo de Startup (Assembly) ---
-    ${PROJ_PATH}/core/src/startup_stm32wb55xx_cm4.s
+    ${PROJ_PATH}core/src/startup_stm32wb55xx_cm4.s
 
 
     # --- Arquivos do core da Aplicação ---
-    ${PROJ_PATH}/core/src/main.c
-    ${PROJ_PATH}/core/src/it.c              # Adicione se tiver este arquivo para interrupções
+    ${PROJ_PATH}core/src/main.c
+    ${PROJ_PATH}core/src/it.c              # Adicione se tiver este arquivo para interrupções
     # ${PROJ_PATH}/core/src/stm32wbxx_hal_msp.c        # Adicione se tiver este arquivo para inicialização de periféricos
-    ${PROJ_PATH}/core/src/system_stm32wbxx.c
+    ${PROJ_PATH}core/src/system_stm32wbxx.c
 
     
     # --- Seus lib Customizados ---
 
-    # Hw_config
-    ${PROJ_PATH}/lib/bsp/src/resources.c
+    # hardware config
+    ${PROJ_PATH}lib/bsp/src/resources.c
 
-    # Display E-Paper SSD1681
-    ${PROJ_PATH}/lib/components/ssd1681/ssd1681.c
-    ${PROJ_PATH}/lib/bsp/src/ssd1681_interface.c
+    # display
+    ${PROJ_PATH}lib/components/ssd1681/ssd1681.c
+    ${PROJ_PATH}lib/bsp/src/ssd1681_interface.c
+    ${PROJ_PATH}app/display/app_display.c
+    ${PROJ_PATH}app/display/assets/bmp.c
 
-    # MAX30102
-    ${PROJ_PATH}/lib/components/max30102/max30102.c
-    ${PROJ_PATH}/lib/bsp/src/max30102_interface.c
+    # oximeter
+    ${PROJ_PATH}lib/components/max30102/max30102.c
+    ${PROJ_PATH}lib/bsp/src/max30102_interface.c
+    ${PROJ_PATH}app/oximeter/app_oximeter.c
+
+    # system
+    ${PROJ_PATH}app/system/app_system.c
 
     # Interface (SPI, etc)
-    ${PROJ_PATH}/lib/bsp/src/spi.c
-    ${PROJ_PATH}/lib/bsp/src/gpio.c
-    ${PROJ_PATH}/lib/bsp/src/delay.c
-    ${PROJ_PATH}/lib/bsp/src/i2c.c
+    ${PROJ_PATH}lib/bsp/src/clock.c
+    ${PROJ_PATH}lib/bsp/src/spi.c
+    ${PROJ_PATH}lib/bsp/src/gpio.c
+    ${PROJ_PATH}lib/bsp/src/delay.c
+    ${PROJ_PATH}lib/bsp/src/i2c.c
 
     # --- lib da ST HAL (apenas os que você usa) ---
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_cortex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_dma.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_dma_ex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_exti.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash_ex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_gpio.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr_ex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc_ex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi.c       # Essencial para o seu display
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi_ex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c       # Adicione se usar Timers
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c
-    ${PROJ_PATH}/lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_i2c.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_cortex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_dma.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_dma_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_exti.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_gpio.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi.c       # Essencial para o seu display
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c       # Adicione se usar Timers
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_i2c.c
 
     # Adicione outros drivers HAL aqui conforme for usando (ex: i2c, uart)
 )

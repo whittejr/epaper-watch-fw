@@ -52,27 +52,27 @@ extern "C" {
  */
 
 /**
- * @brief  interface iic bus init
+ * @brief  interface i2c bus init
  * @return status code
  *         - 0 success
- *         - 1 iic init failed
+ *         - 1 i2c init failed
  * @note   none
  */
-uint8_t max30102_interface_iic_init(void);
+uint8_t max30102_interface_i2c_init(void);
 
 /**
- * @brief  interface iic bus deinit
+ * @brief  interface i2c bus deinit
  * @return status code
  *         - 0 success
- *         - 1 iic deinit failed
+ *         - 1 i2c deinit failed
  * @note   none
  */
-uint8_t max30102_interface_iic_deinit(void);
+uint8_t max30102_interface_i2c_deinit(void);
 
 /**
- * @brief      interface iic bus read
- * @param[in]  addr iic device write address
- * @param[in]  reg iic register address
+ * @brief      interface i2c bus read
+ * @param[in]  addr i2c device write address
+ * @param[in]  reg i2c register address
  * @param[out] *buf pointer to a data buffer
  * @param[in]  len length of the data buffer
  * @return     status code
@@ -80,12 +80,12 @@ uint8_t max30102_interface_iic_deinit(void);
  *             - 1 read failed
  * @note       none
  */
-uint8_t max30102_interface_iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len);
+uint8_t max30102_interface_i2c_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len);
 
 /**
- * @brief     interface iic bus write
- * @param[in] addr iic device write address
- * @param[in] reg iic register address
+ * @brief     interface i2c bus write
+ * @param[in] addr i2c device write address
+ * @param[in] reg i2c register address
  * @param[in] *buf pointer to a data buffer
  * @param[in] len length of the data buffer
  * @return    status code
@@ -93,7 +93,7 @@ uint8_t max30102_interface_iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uin
  *            - 1 write failed
  * @note      none
  */
-uint8_t max30102_interface_iic_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len);
+uint8_t max30102_interface_i2c_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len);
 
 /**
  * @brief     interface delay ms

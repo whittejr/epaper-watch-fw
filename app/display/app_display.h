@@ -1,5 +1,5 @@
 /**
- * @file driver_ssd1681_basic.h
+ * @file app_display.h
  * @brief  none
  * @version 0.1
  * @author Alessandro Davi
@@ -9,7 +9,7 @@
 #ifndef DRIVER_SSD1681_BASIC_H
 #define DRIVER_SSD1681_BASIC_H
 
-#include "driver_ssd1681_interface.h"
+#include "ssd1681_interface.h"
 
 /**
  * @brief ssd1681 basic example default definition
@@ -54,8 +54,8 @@
 #define SSD1681_BASIC_DEFAULT_DURATION               ((SSD1681_PHASE_DURATION_10MS << 4) | (SSD1681_PHASE_DURATION_40MS << 2) | (SSD1681_PHASE_DURATION_40MS << 0)) /**< 10ms && 40ms && 40ms */
 #define SSD1681_BASIC_DEFAULT_MODE                   SSD1681_MODE_NORMAL                                                                                            /**< normal mode */
 
-uint8_t ssd1681_basic_init(void);
+uint8_t app_display_init(void);
 
-void ssd1681_menu_test(void);
+uint8_t app_display_menu_test(void);
 
 #endif // DRIVER_SSD1681_BASIC_H

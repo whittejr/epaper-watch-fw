@@ -9,7 +9,7 @@
 #ifndef MAX30102_APP_H
 #define MAX30102_APP_H
 
-#include "driver_max30102_interface.h"
+#include "max30102_interface.h"
 #include <stdint.h>
 
 /**
@@ -50,7 +50,7 @@ uint8_t max30102_fifo_irq_handler(void);
  *            - 1 init failed
  * @note      none
  */
-uint8_t max30102_fifo_init(void (*fifo_receive_callback)(uint8_t type));
+uint8_t app_oximeter_init(void);
 
 /**
  * @brief  fifo example deinit

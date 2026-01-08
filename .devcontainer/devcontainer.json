@@ -16,7 +16,6 @@
                 "twxs.cmake",
                 "ms-vscode.cmake-tools",
                 "ms-vscode.cpptools",
-                "thecreativedodo.usbip-connect",
                 "mcu-debug.debug-tracker-vscode",
                 "marus25.cortex-debug",
                 "mcu-debug.memory-view",
@@ -28,7 +27,6 @@
                 "zixuanwang.linkerscript",
                 "cweijan.vscode-office"
             ]
-            
         }
         
     }

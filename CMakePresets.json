@@ -15,7 +15,6 @@
       }
     },
 
-
     {
       "name": "Debug",
       "inherits": "default",
@@ -36,13 +35,6 @@
       "inherits": "default",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "MinSizeRel",
-      "inherits": "default",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "MinSizeRel"
       }
     }
   ]

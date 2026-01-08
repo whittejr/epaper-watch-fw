@@ -1,18 +1,19 @@
 /**
- * @file    driver_ssd1681_basic.c
+ * @file    app_display.c
  * @brief   none
  * @version 0.1.0
  * @author  Alessandro Davi
  * @date    2025-12-26
  */
-
-#include "ssd1681_app.h"
+#define BMP_DEFINE
+#include "app_display.h"
 #include "bmp.h"
 #include "stm32wbxx_hal.h"
 
-static ssd1681_handle_t gs_handle;
+ssd1681_handle_t gs_handle;
+extern uint8_t gs_lut[];
 
-uint8_t ssd1681_basic_init(void) {
+uint8_t app_display_init(void) {
 
     uint8_t res;
     /* link functions */
@@ -169,47 +170,16 @@ uint8_t ssd1681_basic_init(void) {
     return 0;
 }
 
-void ssd1681_menu_test(void) {
+uint8_t app_display_menu_test(void) {
     uint8_t full_white[5000];
     for (int i = 0; i < 5000; i++)
         full_white[i] = 0x00;
 
     ssd1681_gram_draw_bitmap(&gs_handle, 0, 0, 199, 199, full_white);
     ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_FULL);
-    // ssd1681_gram_draw(ssd1681_handle_t * handle, ssd1681_menu_data_t * items);
-    for (int i = 0; i < 5; i++) {
-        // 1st
-        // ssd1681_gram_draw_partial(&gs_handle, 0, 0, full_white, 100, 100);
-        HAL_Delay(3000);
-        ssd1681_gram_draw_partial(&gs_handle, icon_sel_background_pos_x, icon_sel_background_pos_y + 96, full_white, select_icon_size_y, select_icon_size_x);
-        ssd1681_gram_draw_partial(&gs_handle, icon_sel_background_pos_x, icon_sel_background_pos_y, item_sel_background, select_icon_size_y, select_icon_size_x);
-        ssd1681_gram_draw_partial(&gs_handle, icon_battery_pos_x, icon_battery_pos_y, icon_battery, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_accel_pos_x, icon_accel_pos_y, icon_accel, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_oxy_pos_x, icon_oxy_pos_y, icon_oxi, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_meds_pos_x, icon_meds_pos_y, icon_meds, icons_size, icons_size);
-        ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_PARTIAL);
-        // EPD_Update(&gs_handle, SSD1681_UPDATE_TYPE_FAST);
 
-        ssd1681_gram_draw_partial(&gs_handle, icon_sel_background_pos_x, icon_sel_background_pos_y, full_white, select_icon_size_y, select_icon_size_x);
-        ssd1681_gram_draw_partial(&gs_handle, icon_sel_background_pos_x, (icon_sel_background_pos_y + 48), item_sel_background, select_icon_size_y, select_icon_size_x);
-        ssd1681_gram_draw_partial(&gs_handle, icon_battery_pos_x, icon_battery_pos_y, icon_battery, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_accel_pos_x, icon_accel_pos_y, icon_accel, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_oxy_pos_x, icon_oxy_pos_y, icon_oxi, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_meds_pos_x, icon_meds_pos_y, icon_meds, icons_size, icons_size);
-        ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_PARTIAL);
-
-        // ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_FULL);
-        // EPD_Update(&gs_handle, SSD1681_UPDATE_TYPE_FAST);
-        ssd1681_gram_draw_partial(&gs_handle, icon_sel_background_pos_x, icon_sel_background_pos_y, full_white, select_icon_size_y, select_icon_size_x);
-        ssd1681_gram_draw_partial(&gs_handle, icon_sel_background_pos_x, (icon_sel_background_pos_y + 96), item_sel_background, select_icon_size_y, select_icon_size_x);
-        ssd1681_gram_draw_partial(&gs_handle, icon_battery_pos_x, icon_battery_pos_y, icon_battery, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_accel_pos_x, icon_accel_pos_y, icon_accel, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_oxy_pos_x, icon_oxy_pos_y, icon_oxi, icons_size, icons_size);
-        ssd1681_gram_draw_partial(&gs_handle, icon_meds_pos_x, icon_meds_pos_y, icon_meds, icons_size, icons_size);
-        ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_PARTIAL);
-
-        ssd1681_gram_draw_bitmap(&gs_handle, 0, 0, 199, 199, full_white);
-        ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_FULL);
-    }
+    
     ssd1681_set_mode(&gs_handle, SSD1681_MODE_DEEP_SLEEP_1);
+
+    return 0;
 }

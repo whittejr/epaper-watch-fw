@@ -1,8 +1,6 @@
 {
-  // 1. Desliga o motor IntelliSense da Microsoft
   "C_Cpp.intelliSenseEngine": "disabled",
 
-  // 2. Garante que o VS Code use clangd para formatar
   "[c]": {
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
   },
@@ -10,10 +8,8 @@
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
   },
 
-  // 3. A configuração do clangd
   "clangd.arguments": [
-    // CORREÇÃO: No Debian, o compilador fica em /usr/bin, não /usr/sbin
-    "--query-driver=/usr/bin/arm-none-eabi-gcc"
+    "--query-driver=/opt/arm-gcc/bin/arm-none-eabi-*"
   ],
 
   "cmake.debugConfig": {
@@ -33,9 +29,6 @@
       "enabled": true,
       "samplesPerSecond": 20
     },
-    // CORREÇÃO CRÍTICA:
-    // 1. Mudado para 'gdb-multiarch' (o nome usado no Debian)
-    // 2. Mudado o caminho para '/usr/bin' (onde o Debian instala)
     "gdbPath": "/usr/bin/gdb-multiarch",
     
     "configFiles": [

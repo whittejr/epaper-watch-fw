@@ -1,37 +1,42 @@
-# Usamos a versão 'slim' do Debian 12 (Bookworm).
-# É estável, segura e muito menor que a versão completa.
+FROM debian:bookworm-slim as build
+
+RUN apt-get update && apt-get install -y wget xz-utils
+
+WORKDIR /tmp
+
+RUN wget --progress=dot:giga https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+
+# 3. EXTRAÇÃO BLINDADA (A Correção)
+# Em vez de extrair e tentar mover (mv), criamos a pasta de destino e extraímos direto nela.
+# --strip-components=1 remove a primeira pasta do arquivo compactado, jogando os binários direto em /opt/arm-gcc
+RUN mkdir -p /opt/arm-gcc \
+    && tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt/arm-gcc --strip-components=1
+
+WORKDIR /opt/arm-gcc
+RUN rm -rf share/doc share/man share/info \
+    && rm -rf lib/gcc/arm-none-eabi/*/plugin
+
 FROM debian:bookworm-slim
 
-# Evita perguntas interativas durante a instalação (ex: fuso horário)
-ENV DEBIAN_FRONTEND=noninteractive
-
-# --- Instalação de Ferramentas ---
-# 1. 'apt-get update' baixa a lista de pacotes.
-# 2. Instalamos tudo com '--no-install-recommends' para evitar lixo desnecessário (docs, plugins extras).
-# 3. 'rm -rf /var/lib/apt/lists/*' apaga o cache do apt no final para a imagem ficar pequena.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
-    python3 \
-    python3-pip \
-    build-essential \
-    make \
     cmake \
+    build-essential \
     ninja-build \
     clang \
     clangd \
-    # Toolchain ARM
-    gcc-arm-none-eabi \
-    libnewlib-arm-none-eabi \
-    libstdc++-arm-none-eabi-newlib \
     # Debuggers e Ferramentas USB
     gdb-multiarch \
     openocd \
     usbutils \
-    usbip \
+    ncdu \
+    tree \
     # Utilitários básicos
     ca-certificates \
     sudo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+    
+    COPY --from=build /opt/arm-gcc /opt/arm-gcc
 
 # --- Configuração do Usuário ---
 # Cria o usuário 'vscode' para evitar problemas de permissão com arquivos do Windows
@@ -44,5 +49,4 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-# Define o usuário padrão
 USER $USERNAME
