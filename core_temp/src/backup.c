@@ -77,7 +77,7 @@ int main(void) {
     // Vincula as funções de hardware ao driver
     // max30102_interface_bind(&max_handle);
 
-    // Configuração padrão
+    // Configuração padrão do sensor
     max30102_interface_default_config(&max_handle);
 
     // AJUSTE CRÍTICO: Forçar 50Hz para a matemática (100 amostras = 2s) funcionar
