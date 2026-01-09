@@ -178,7 +178,6 @@ uint8_t app_display_menu_test(void) {
     ssd1681_gram_draw_bitmap(&gs_handle, 0, 0, 199, 199, full_white);
     ssd1681_gram_update(&gs_handle, SSD1681_UPDATE_TYPE_FULL);
 
-    
     ssd1681_set_mode(&gs_handle, SSD1681_MODE_DEEP_SLEEP_1);
 
     return 0;
