@@ -8,20 +8,32 @@
 
 #ifndef GPIO_H
 #define GPIO_H
+
 #include <stdint.h>
 
 /*
  * Display
  */
-uint8_t epd_cmd_data_gpio_init(void);
-uint8_t epd_cmd_data_gpio_write(uint8_t value);
+
+//  SSD1681
+uint8_t ssd1681_cmd_data_gpio_init(void);
+uint8_t ssd1681_cmd_data_gpio_write(uint8_t value);
 uint8_t busy_gpio_read(uint8_t *value);
-uint8_t epd_cmd_data_gpio_deinit(void);
-uint8_t epd_rst_gpio_init(void);
-uint8_t epd_rst_gpio_deinit(void);
-uint8_t epd_rst_gpio_write(uint8_t value);
-uint8_t epd_busy_gpio_init(void);
-uint8_t epd_busy_gpio_deinit(void);
+uint8_t ssd1681_cmd_data_gpio_deinit(void);
+uint8_t ssd1681_rst_gpio_init(void);
+uint8_t ssd1681_rst_gpio_deinit(void);
+uint8_t ssd1681_rst_gpio_write(uint8_t value);
+uint8_t ssd1681_busy_gpio_init(void);
+uint8_t ssd1681_busy_gpio_deinit(void);
+
+//  LS013B7DH03
+uint8_t ls013b7dh03_gpio_init(void);
+uint8_t ls013b7dh03_extcomin_gpio_init(void);
+uint8_t ls013b7dh03_gpio_cs_control(uint8_t state);
+/*------------------------------------------------------------------------------------------------------------------------*/
+/*
+* Oximeter
+*/
 
 /*
  * MAX30102

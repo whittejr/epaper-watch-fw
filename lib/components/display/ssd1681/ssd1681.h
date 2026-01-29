@@ -10,12 +10,6 @@
 #include "stdint.h"
 #include "string.h"
 
-
-
-/* TESTE */
-
-/* TESTE */
-
 #define EPD_154
 
 #ifdef EPD_154
@@ -710,18 +704,6 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @note      none
  */
 #define DRIVER_SSD1681_LINK_DEBUG_PRINT(HANDLE, FUC) (HANDLE)->debug_print = FUC
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

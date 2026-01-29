@@ -9,7 +9,8 @@
 #ifndef DRIVER_SSD1681_BASIC_H
 #define DRIVER_SSD1681_BASIC_H
 
-#include "ssd1681_interface.h"
+#include "ssd1681.h"
+#include "ls013b7dh03.h"
 
 /**
  * @brief ssd1681 basic example default definition

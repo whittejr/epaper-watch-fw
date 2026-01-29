@@ -1,7 +1,6 @@
 #ifndef DRIVER_SSD1681_INTERFACE_H
 #define DRIVER_SSD1681_INTERFACE_H
 
-#include "ssd1681.h"
 #include <stdint.h>
 
 uint8_t ssd1681_interface_spi_init(void);

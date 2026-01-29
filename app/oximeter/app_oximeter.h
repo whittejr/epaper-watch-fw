@@ -76,5 +76,8 @@ uint8_t max30102_fifo_read(uint32_t *raw_red, uint32_t *raw_ir, uint8_t *len);
 /**
  * @}
  */
+ uint8_t max30102_event();
+ uint8_t oximeter_proccess();
+
 
 #endif // MAX30102_APP_H

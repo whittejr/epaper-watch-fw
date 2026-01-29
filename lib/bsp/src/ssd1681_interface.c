@@ -21,7 +21,7 @@
 uint8_t ssd1681_interface_spi_init(void) {
 
     /* RST | DC | BUSY Initialization  */
-    epd_cmd_data_gpio_init();
+    ssd1681_cmd_data_gpio_init();
 
     if (spi_init() != 0)
         return 1;
@@ -46,35 +46,35 @@ void ssd1681_interface_delay_ms(uint32_t ms) {
 }
 
 uint8_t ssd1681_interface_spi_cmd_data_gpio_init(void) {
-    return epd_cmd_data_gpio_init();
+    return ssd1681_cmd_data_gpio_init();
 }
 
 uint8_t ssd1681_interface_spi_cmd_data_gpio_deinit(void) {
-    return epd_cmd_data_gpio_deinit();
+    return ssd1681_cmd_data_gpio_deinit();
 }
 
 uint8_t ssd1681_interface_spi_cmd_data_gpio_write(uint8_t value) {
-    return epd_cmd_data_gpio_write(value);
+    return ssd1681_cmd_data_gpio_write(value);
 }
 
 uint8_t ssd1681_interface_reset_gpio_init(void) {
-    return epd_rst_gpio_init();
+    return ssd1681_rst_gpio_init();
 }
 
 uint8_t ssd1681_interface_reset_gpio_deinit(void) {
-    return epd_rst_gpio_deinit();
+    return ssd1681_rst_gpio_deinit();
 }
 
 uint8_t ssd1681_interface_reset_gpio_write(uint8_t value) {
-    return epd_rst_gpio_write(value);
+    return ssd1681_rst_gpio_write(value);
 }
 
 uint8_t ssd1681_interface_busy_gpio_init(void) {
-    return epd_busy_gpio_init();
+    return ssd1681_busy_gpio_init();
 }
 
 uint8_t ssd1681_interface_busy_gpio_deinit(void) {
-    return epd_busy_gpio_deinit();
+    return ssd1681_busy_gpio_deinit();
 }
 
 uint8_t ssd1681_interface_busy_gpio_read(uint8_t *value) {

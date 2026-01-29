@@ -36,6 +36,24 @@ extern SPI_HandleTypeDef hspi1;
 #define EPD_BSY_PIN  GPIO_PIN_9
 
 /*
+*   MIP_CONFIG
+*/
+// MIP GPIO CONFIG
+#define MIP_SPI_INSTANCE      SPI1
+#define MIP_MOSI_PORT         GPIOA
+#define MIP_MOSI_PIN          GPIO_PIN_7
+#define MIP_SCK_PORT          GPIOA
+#define MIP_SCK_PIN           GPIO_PIN_1
+#define MIP_CS_PORT           GPIOA
+#define MIP_CS_PIN            GPIO_PIN_4
+#define MIP_DISP_PORT         GPIOA
+#define MIP_DISP_PIN          GPIO_PIN_3
+#define MIP_EXTCOMIN_PORT     GPIOA
+#define MIP_EXTCOMIN_PIN      GPIO_PIN_0 //PWM
+
+
+
+/*
  * I2C_CONFIG
  */
 #define I2C_SLAVE_ADDR 0x57

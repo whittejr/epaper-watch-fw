@@ -17,10 +17,17 @@ set(source_list
     ${PROJ_PATH}lib/bsp/src/resources.c
 
     # display
-    ${PROJ_PATH}lib/components/ssd1681/ssd1681.c
+    # epaper
+    ${PROJ_PATH}lib/components/display/ssd1681/ssd1681.c
     ${PROJ_PATH}lib/bsp/src/ssd1681_interface.c
     ${PROJ_PATH}app/display/app_display.c
     ${PROJ_PATH}app/display/assets/bmp.c
+    # mip
+    ${PROJ_PATH}lib/components/display/ls013b7dh03/ls013b7dh03.c
+    ${PROJ_PATH}lib/bsp/src/ls013b7dh03_interface.c
+    ${PROJ_PATH}lib/components/display/ls013b7dh03/shmfonts.c
+    
+
 
     # oximeter
     ${PROJ_PATH}lib/components/max30102/max30102.c

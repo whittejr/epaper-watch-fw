@@ -143,13 +143,13 @@ static uint8_t a_ssd1681_multiple_write_byte(ssd1681_handle_t *handle, uint8_t c
     return 0;
 }
 
-static void ssd1681_wait_busy(ssd1681_handle_t *handle, uint8_t *value) {
-    // Assumindo que 1 (HIGH) = Ocupado. Verifique seu hardware.
-    while (handle->busy_gpio_read(value) == 1) {
+// static void ssd1681_wait_busy(ssd1681_handle_t *handle, uint8_t *value) {
+//     // Assumindo que 1 (HIGH) = Ocupado. Verifique seu hardware.
+//     while (handle->busy_gpio_read(value) == 1) {
 
-        handle->delay_ms(10); // Espera 10ms
-    }
-}
+//         handle->delay_ms(10); // Espera 10ms
+//     }
+// }
 
 static uint8_t a_ssd1681_multiple_read_byte(ssd1681_handle_t *handle, uint8_t command, uint8_t *data, uint16_t len) {
     uint8_t res;
@@ -2438,24 +2438,19 @@ uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_update_type_t type
     uint8_t res;
     uint8_t buf[2];
 
-    if (handle == NULL) /* check handle */
-    {
-        return 2; /* return error */
-    }
-    if (handle->inited != 1) /* check handle initialization */
-    {
-        return 3; /* return error */
-    }
+    if (handle == NULL)
+        return 2;
+
+    if (handle->inited != 1)
+        return 3;
 
     if (type != SSD1681_UPDATE_TYPE_PARTIAL) {
 
         buf[0] = 0x00;                                                                              /* set 0x00 */
         res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_X_ADDRESS_COUNTER, buf, 1); /* write byte */
-        if (res != 0)                                                                               /* check the result */
-        {
+        if (res != 0) {
             handle->debug_print("ssd1681: multiple write byte failed.\n"); /* multiple write byte
                                                                               failed */
-
             return 1; /* return error */
         }
         buf[0] = 0xC7; // 199

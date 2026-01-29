@@ -7,9 +7,14 @@
  */
 
 #include "app_oximeter.h"
+#include "gpio.h"
 
 max30102_handle_t max_handle; /**< max30102 handle */
-static volatile uint8_t g_oximeter_data_ready = 0;
+volatile uint8_t g_oximeter_data_ready = 0;
+volatile uint8_t g_oximeter_event = 0;
+uint32_t red_buffer[32];
+uint32_t ir_buffer[32];
+uint8_t len = 32;
 
 /**
  * @brief  fifo receive callback
@@ -20,14 +25,23 @@ static volatile uint8_t g_oximeter_data_ready = 0;
  */
 static void _max30102_interface_receive_callback(uint8_t type) {
     switch (type) {
+    case MAX30102_INTERRUPT_STATUS_PPG_RDY:        
+        break;
     case MAX30102_INTERRUPT_STATUS_FIFO_FULL:
-    case MAX30102_INTERRUPT_STATUS_PPG_RDY:
-        // Levanta a bandeira interna
         g_oximeter_data_ready = 1;
         break;
     default:
         break;
     }
+}
+
+
+uint8_t max30102_event() {
+    if (g_oximeter_event) {
+        g_oximeter_event = 0;
+        return 1;
+    }
+    return 0;
 }
 
 /**
@@ -67,6 +81,8 @@ uint8_t app_oximeter_init(void) {
     DRIVER_MAX30102_LINK_DELAY_MS(&max_handle, max30102_interface_delay_ms);
     DRIVER_MAX30102_LINK_DEBUG_PRINT(&max_handle, max30102_interface_debug_print);
     DRIVER_MAX30102_LINK_RECEIVE_CALLBACK(&max_handle, _max30102_interface_receive_callback);
+
+    max_irq_gpio_init();
 
     /* init the max30102 */
     res = max30102_init(&max_handle);
@@ -305,4 +321,18 @@ uint8_t max30102_fifo_read(uint32_t *raw_red, uint32_t *raw_ir, uint8_t *len) {
     } else {
         return 0;
     }
+}
+
+uint8_t oximeter_proccess() {
+
+    if (max30102_event()) {
+        max30102_irq_handler(&max_handle);
+
+        if (g_oximeter_data_ready) {
+            len = 32;
+            max30102_fifo_read(red_buffer, ir_buffer, &len);
+            g_oximeter_data_ready = 0;
+        }
+    }
+    
 }

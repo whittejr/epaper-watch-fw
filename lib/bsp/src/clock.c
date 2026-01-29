@@ -14,6 +14,7 @@ uint8_t clock_init() {
     __HAL_RCC_GPIOE_CLK_ENABLE();
     __HAL_RCC_SPI1_CLK_ENABLE();
     __HAL_RCC_I2C1_CLK_ENABLE();
+    __HAL_RCC_TIM17_CLK_ENABLE();
 
     return 0;
 }

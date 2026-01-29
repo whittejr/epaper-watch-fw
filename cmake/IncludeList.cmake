@@ -12,9 +12,13 @@ ${PROJ_PATH}lib/CMSIS/RTOS2/Include
 ${PROJ_PATH}core/inc
 ${PROJ_PATH}lib/bsp/inc
 # display
+# epaper
 ${PROJ_PATH}app/display
 ${PROJ_PATH}app/display/assets
-${PROJ_PATH}lib/components/ssd1681
+${PROJ_PATH}lib/components/display/ssd1681
+# mip
+${PROJ_PATH}lib/components/display/ls013b7dh03
+
 # oximeter
 ${PROJ_PATH}app/oximeter
 ${PROJ_PATH}lib/components/max30102

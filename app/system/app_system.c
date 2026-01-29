@@ -13,6 +13,7 @@
 #include "clock.h"
 #include "stm32wbxx_hal.h"
 #include <stdint.h>
+#include "ls013b7dh03_interface.h"
 
 extern ssd1681_handle_t gs_handle;
 extern uint8_t gs_lut[];
@@ -25,11 +26,18 @@ uint8_t app_system_init() {
         return 1;
     // if (app_oximeter_init() != 0)
     //     return 1;
+    
+    return 0;
 }
 
 uint8_t app_system_loop() {
+    
+    // oximeter_proccess();
+
     if (app_display_menu_test() != 0)
         return 1;
+    
+    return 0;
 }
 
 // GPIO_InitTypeDef led;
