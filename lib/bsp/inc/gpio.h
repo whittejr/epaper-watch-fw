@@ -30,6 +30,7 @@ uint8_t ssd1681_busy_gpio_deinit(void);
 uint8_t ls013b7dh03_gpio_init(void);
 uint8_t ls013b7dh03_extcomin_gpio_init(void);
 uint8_t ls013b7dh03_gpio_cs_control(uint8_t state);
+void ls013b7dh03_delay_ms(uint32_t ms);
 /*------------------------------------------------------------------------------------------------------------------------*/
 /*
 * Oximeter

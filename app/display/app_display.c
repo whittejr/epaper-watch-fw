@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include "app_display.h"
+#include "ls013b7dh03.h"
 #include "ssd1681_interface.h"
 #include "ls013b7dh03_interface.h"
 
@@ -211,7 +212,8 @@ uint8_t app_display_init(void) {
     DRIVER_LS013B7DH03_LINK_SPI_WRITE_REFRESH(&sharp_handle, ls013b7dh03_interface_spi_write_refresh);
     DRIVER_LS013B7DH03_LINK_CS_CONTROL(&sharp_handle, ls013b7dh03_interface_cs_control);
     DRIVER_LS013B7DH03_LINK_GPIO_INIT(&sharp_handle, ls013b7dh03_interface_gpio_init);
-    DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_WRITE(&gs_handle, ssd1681_interface_spi_cmd_data_gpio_write);
+    DRIVER_LS013B7DH03_LINK_DELAY_MS(&sharp_handle, ls013b7dh03_interface_delay_ms);
+    
 
     // res = ls013b7dh03_init(&sharp_handle);
     // if (res != 0)

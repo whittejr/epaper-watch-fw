@@ -188,3 +188,7 @@ uint8_t ls013b7dh03_gpio_cs_control(uint8_t state) {
 
     return 0;
 }
+
+void ls013b7dh03_delay_ms(uint32_t ms) {
+    HAL_Delay(ms);
+}

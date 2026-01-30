@@ -10,6 +10,7 @@
 #include "ls013b7dh03_interface.h"
 #include "spi.h"
 #include "gpio.h"
+#include "stm32wbxx_hal.h"
 
 uint8_t ls013b7dh03_interface_spi_init(void) {
     return mip_display_spi_init();
@@ -41,5 +42,5 @@ uint8_t ls013b7dh03_interface_gpio_deinit(void) {
 }
 
 void ls013b7dh03_interface_delay_ms(uint32_t ms) {
-
+    ls013b7dh03_delay_ms(ms);
 }
