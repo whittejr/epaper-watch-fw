@@ -7,209 +7,181 @@
 */
 
 // #include "shm_graphics.h"
+#include "ls013b7dh03.h"
+#include "display_hal.h"
 #include "resources.h"
 #include "shmfonts.h"
-#include "LS013B7DH03.h"
-#include "main.h"
-#include "stm32wbxx_hal.h"
 #include <string.h>
-
-// Screen object
-LCD_128x128_t shm_128x128;
-
-// Screenbuffer
-uint8_t LCD_128x128_Buffer[LCD_BUFFER_SIZE];
 
 /*
 *   FUNCTIONS
 */
+static uint8_t reverse_byte(uint8_t b) {
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
+}
 
 uint8_t ls013b7dh03_init(ls013b7dh03_handle_t *handle) {
-	
-	/*
-	*	verify
-	*/
-	if (handle->spi_init == NULL)
-		return 1;
+	/* verify */
+	if (handle->spi_init == NULL) return 1;
+	if (handle->spi_deinit == NULL) return 1;
+	if (handle->spi_write == NULL) return 1;
+	if (handle->gpio_init == NULL) return 1;
 
-	if (handle->spi_deinit == NULL)
-		return 1;
+	/* init */
+    if (handle->spi_init() != 0) return 1;
+    if (handle->gpio_init() != 0) return 1;
 
-	if (handle->spi_write_cmd == NULL)
-		return 1;
-
-	if (handle->gpio_init == NULL)
-		return 1;
-
-	/*
-	*	init
-	*/
-	if (handle->gpio_init() != 0)
-		return 1;
-
-	if (handle->spi_init() != 0)
-		return 1;
-
-    /*Configure Display Struct*/
-	shm_128x128.CurrentX = 0;
-	shm_128x128.CurrentY = 0;
-	shm_128x128.Inverted = 0; // false?
-	shm_128x128.Initialized = 1; // true?
+    if (handle->width == 0) handle->width = LS013B7DH03_WIDTH;
+    if (handle->height == 0) handle->height = LS013B7DH03_HEIGHT;
+    
+    // allow display to stabilize before initialize communication (30us)
+    handle->delay_ms(1);
 
 	return 0;
 }
 
-uint8_t ls013b7dh03_clear(ls013b7dh03_handle_t *handle) {
-    uint8_t res;
-    uint8_t buf[2] = {SHARPMEM_BIT_CLEAR , 0x00};
-    if (handle == NULL)
-        return 1;
 
-    res = handle->spi_write_cmd(buf, 2);
-    if (res != 0)
-        return 1;
+uint8_t ls013b7dh03_clear(ls013b7dh03_handle_t *handle) {    
+    if (handle == NULL) return 1;
 
-    if(shm_128x128.Inverted == 0)
-		memset((void*)LCD_128x128_Buffer, 0x00, LCD_BUFFER_SIZE);
-    else 
-	    memset((void*)LCD_128x128_Buffer, 0xFF, LCD_BUFFER_SIZE);
-    
-    shm_128x128.CurrentX = 0;
-	shm_128x128.CurrentY = 0;
+    memset(handle->framebuffer, 0x00, LS013B7DH03_BUFFER_SIZE);
+
+    /* 
+    * CLEAR command without VCOM bit.
+    * VCOM is provided externally via EXTCOMIN pin.
+    */
+    uint8_t cmd[2] = { reverse_byte(SHARPMEM_BIT_CLEAR) , 0x00};
+
+    handle->cs_control(LS_CS_SELECT);
+    handle->spi_write(cmd, 2);
+    handle->cs_control(LS_CS_DESELECT);
 
     return 0;
 }
 
-/**
-  * @brief  Draw a single pixel on LCD.
-  * @note   Send the Clear command to the display and initialise the LCD_128x128_Buffer.
-  * @param  uint8_t x => X position .
-  * @param  uint8_t y => Y position .
-  * @param  LCD_COLOR color => Color of the pixel, Black or White .
-  * @retval None.
-  */
-void ls013b7dh03_drawPixel(uint8_t x, uint8_t y, LCD_COLOR color){
-	uint16_t buff_addr = x/8 + (LCD_WIDTH/8)*y ;
-	uint8_t bit_to_set = 1 << ((x % 8));
+void ls013b7dh03_drawPixel(ls013b7dh03_handle_t *handle, uint8_t x, uint8_t y, ls_color_t color) {
+    if (handle == NULL || handle->framebuffer == NULL) return;
+    if ((x < 0) || (x >= handle->width) || (y < 0) || (y >= handle->height)) return;
 
-    if(x >= LCD_WIDTH || y >= LCD_HEIGHT) {	// Don't write outside the buffer
-        return;
+    // Find the right byte: (line * 16) + (column / 8)
+    uint16_t byte_idx = (y * (handle->width / 8)) + (x / 8);
+
+    // Bit 0 = left pixel, Bit 7 = right pixel (inside the byte)
+    uint8_t bit_mask = 1 << (x % 8);
+
+    if (color == LS_COLOR_WHITE) {
+        handle->framebuffer[byte_idx] |= bit_mask;  // Set bit (Branco)
+    } else {
+        handle->framebuffer[byte_idx] &= ~bit_mask; // Clear bit (Preto)
     }
-    // Check if pixel should be inverted
-    if(shm_128x128.Inverted)
-        color = (LCD_COLOR)!color;
-
-    // Draw in the right color
-    if(color == White)
-    	LCD_128x128_Buffer[buff_addr] |= bit_to_set;
-    else
-    	LCD_128x128_Buffer[buff_addr] &= ~bit_to_set;
 }
 
-/**
-  * @brief  Write single character on LCD.
-  * @note   Automatic new line and checking of remaining space.
-  * @param  char ch => Character to write .
-  * @param  FontDef Font => Font to use .
-  * @param  LCD_COLOR color => Color, Black or White .
-  * @retval Return written char for validation.
-  */
-char ls013b7dh03_writeChar(char ch, FontDef Font, LCD_COLOR color){
-    uint32_t i, b, j;
+void ls013b7dh03_split_horizontal(ls013b7dh03_handle_t *handle) {
+    // Percorre todas as linhas (Y)
+    for (uint8_t y = 0; y < handle->height; y++) {
+        
+        // Define a cor baseada na linha atual
+        // Se estiver na metade de cima (< 64), é PRETO. Senão, BRANCO.
+        ls_color_t cor_atual = (y < (handle->height / 2)) ? LS_COLOR_BLACK : LS_COLOR_WHITE;
 
-    // Check if character is valid
-    if (ch < 32 || ch > 126)
-        return 0;
-    // Check remaining space on current line
-    if(LCD_WIDTH < (shm_128x128.CurrentX + Font.FontWidth)) {
-    	if(LCD_HEIGHT > (shm_128x128.CurrentY + 2*Font.FontHeight -2)){		// -2 => Margin of the character
-    		shm_128x128.CurrentX = 0;
-    		shm_128x128.CurrentY = shm_128x128.CurrentY + Font.FontHeight - 1;		//-1 => Margin of the character fort
-    	} else {
-    		return 0;
-    	}
-    }
-
-    // Use the font to write
-    for(i = 0; i < Font.FontHeight; i++) {
-        b = Font.data[(ch - 32) * Font.FontHeight + i];
-        for(j = 0; j < Font.FontWidth; j++) {
-            if((b << j) & 0x8000)  {
-            	ls013b7dh03_drawPixel(shm_128x128.CurrentX + j, (shm_128x128.CurrentY + i), (LCD_COLOR) color);
-            } else {
-            	ls013b7dh03_drawPixel(shm_128x128.CurrentX + j, (shm_128x128.CurrentY + i), (LCD_COLOR)!color);
-            }
+        // Percorre todas as colunas (X) daquela linha
+        for (uint8_t x = 0; x < handle->width; x++) {
+            ls013b7dh03_drawPixel(handle, x, y, cor_atual);
         }
     }
-    // The current space is now taken
-    shm_128x128.CurrentX += Font.FontWidth;
 
-    // Return written char for validation
-    return ch;
+    // IMPORTANTE: Só atualiza a tela DEPOIS de pintar tudo na memória
+    ls013b7dh03_refresh(handle);
 }
 
+/*
+* @brief       
+* @param[in]   
+* @return      
+*            - 
+*            - 
+* @note       
+*/
+uint8_t ls013b7dh03_refresh(ls013b7dh03_handle_t *handle) {
+    if (handle == NULL) return 1;
 
-/**
-  * @brief  LCD refresh - send the complete LCD_128x128_Buffer to internal memory display.
-  * @note   Blocking function.
-  * @param  None.
-  * @retval None.
-  */
-uint8_t ls013b7dh03_refresh(ls013b7dh03_handle_t *handle){
-	uint8_t linebuf[18];
-    uint8_t cmd = SHARPMEM_BIT_WRITECMD;
+    uint8_t cmd = reverse_byte(SHARPMEM_BIT_WRITECMD);
     uint8_t dummy = 0x00;
 
-    handle->cs_control(1);
+    handle->cs_control(LS_CS_SELECT);
+    handle->spi_write(&cmd, 1);
 
-    handle->spi_write_refresh(&cmd, 1);
+    for (uint8_t line = 1; line <= handle->height; line++) {
+        uint8_t line_addr = reverse_byte(line); 
+        handle->spi_write(&line_addr, 1);
 
-    for (uint8_t line = 1; line <= 128; line++) {
-        linebuf[0] = line;
+        uint8_t *line_ptr = &handle->framebuffer[(line - 1) * (handle->width / 8)];
+        handle->spi_write(line_ptr, (handle->width / 8));
 
-        memcpy(&linebuf[1],
-               &LCD_128x128_Buffer[16 * (line - 1)],
-               16);
-
-        linebuf[17] = 0x00; // EOL obrigatório
-
-        handle->spi_write_refresh(linebuf, 18);
+        handle->spi_write(&dummy, 1);
     }
 
-    handle->spi_write_refresh(&dummy, 1); // EOF
+    handle->spi_write(&dummy, 1);
 
-    handle->cs_control(0);
+    handle->cs_control(LS_CS_DESELECT);
 
     return 0;
 }
 
 void ls013b7dh03_test(ls013b7dh03_handle_t *handle)
 {
-    if (handle == NULL)
-        return;
+    if (handle == NULL) return;
 
-    /* 1. Init do driver */
-    if (ls013b7dh03_init(handle) != 0)
-        return;
+    // 1. Init
+    ls013b7dh03_init(handle);
 
-    HAL_Delay(1000);
-    /* 2. Limpa a tela */
-    // if (ls013b7dh03_clear(handle) != 0)
-    //     return;
+    // --------------------------------------------------
+    // TESTE 1: TELA DIVIDIDA (ESQUERDA PRETA / DIREITA BRANCA)
+    // --------------------------------------------------
+    
+    // Limpa buffer para Branco
+    ls013b7dh03_clear(handle);
 
-    /* 3. Teste de pixels (diagonal) */
-    // for (uint8_t i = 0; i < 64; i++) {
-    //     ls013b7dh03_drawPixel(i, i, Black);
-    // }
+    for (uint8_t y = 0; y < handle->height; y++) {
+        for (uint8_t x = 0; x < handle->width; x++) {
+            if (x < 64) {
+                ls013b7dh03_drawPixel(handle, x, y, LS_COLOR_BLACK);
+            } else {
+                ls013b7dh03_drawPixel(handle, x, y, LS_COLOR_WHITE);
+            }
+        }
+    }
+    ls013b7dh03_refresh(handle);
 
-    /* 4. Teste de texto */
-    // shm_128x128.CurrentX = 0;
-    // shm_128x128.CurrentY = 20;
+    if(handle->delay_ms) handle->delay_ms(2000);
+    
+    ls013b7dh03_clear(handle);
 
-    // ls013b7dh03_writeChar('O', Font_7x10, Black);
-    // ls013b7dh03_writeChar('K', Font_7x10, Black);
-    memset((void*)LCD_128x128_Buffer, 0x00, LCD_BUFFER_SIZE);
-    /* 5. Refresh */
+    for (uint8_t i = 0; i < 128; i++) {
+        ls013b7dh03_drawPixel(handle, i, 0, LS_COLOR_BLACK);
+        ls013b7dh03_drawPixel(handle, i, 127, LS_COLOR_BLACK);
+        
+        ls013b7dh03_drawPixel(handle, 0, i, LS_COLOR_BLACK);
+        ls013b7dh03_drawPixel(handle, 127, i, LS_COLOR_BLACK);
+
+ 
+        ls013b7dh03_drawPixel(handle, i, i, LS_COLOR_BLACK);
+    }
     
     ls013b7dh03_refresh(handle);
 }
+
+
+void ls013b7dh03_test1(ls013b7dh03_handle_t *handle) {
+    ls013b7dh03_init(handle);
+
+    ls013b7dh03_clear(handle);
+
+    // ls013b7dh03_drawPixel(handle, 10, 10, LS_COLOR_BLACK);
+
+    ls013b7dh03_refresh(handle);
+}
+

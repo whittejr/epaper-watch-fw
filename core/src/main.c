@@ -24,6 +24,5 @@ int main(void) {
 }
 
 void errorHandler(void) {
-    while (1)
-        ;
+    while (1);
 }

@@ -7,6 +7,7 @@
  */
 
 #include "resources.h"
+#include "stm32wbxx_hal_spi.h"
 
 // Framebuffer global
 uint8_t framebuffer[(EPD_W / 8) * EPD_H];
@@ -36,7 +37,7 @@ spi_config_t spi_config = {.mosi = {.port = EPD_MOSI_PORT, .pin = EPD_MOSI_PIN},
                                           .Init.CLKPhase = SPI_PHASE_2EDGE,
                                           .Init.CLKPolarity = SPI_POLARITY_HIGH,
                                           .Init.NSS = SPI_NSS_SOFT,
-                                          .Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32,
+                                          .Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128,
                                           .Init.TIMode = SPI_TIMODE_DISABLE,
                                           .Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED,
                                           .Init.CRCPolynomial = 7}};

@@ -15,7 +15,7 @@ uint8_t ls013b7dh03_interface_spi_init(void);
 
 uint8_t ls013b7dh03_interface_spi_deinit(void);
 
-uint8_t ls013b7dh03_interface_spi_write_cmd(uint8_t *buf, uint16_t len);
+uint8_t ls013b7dh03_interface_spi_write(uint8_t *buf, uint16_t len);
 
 uint8_t ls013b7dh03_interface_spi_write_refresh(uint8_t *buf, uint16_t len);
 

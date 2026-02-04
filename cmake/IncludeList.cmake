@@ -24,5 +24,4 @@ ${PROJ_PATH}app/oximeter
 ${PROJ_PATH}lib/components/max30102
 # system
 ${PROJ_PATH}app/system
-
 )

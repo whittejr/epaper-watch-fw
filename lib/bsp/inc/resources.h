@@ -116,7 +116,6 @@ typedef struct {
 /*
  * SPI_CFG
  */
-
 typedef struct {
     bsp_pin_t mosi;
     bsp_pin_t sck;

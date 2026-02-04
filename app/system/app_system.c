@@ -26,7 +26,7 @@ uint8_t app_system_init() {
         return 1;
     // if (app_oximeter_init() != 0)
     //     return 1;
-    
+
     return 0;
 }
 

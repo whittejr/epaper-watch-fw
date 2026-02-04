@@ -8,15 +8,15 @@
 
 #include <stdio.h>
 #include "app_display.h"
-#include "ls013b7dh03.h"
-#include "ssd1681_interface.h"
-#include "ls013b7dh03_interface.h"
+#include "display_hal.h"
+#include "stm32wbxx_hal.h"
+
+
 
 #define BMP_DEFINE
 #include "bmp.h"
 
 ssd1681_handle_t gs_handle;
-ls013b7dh03_handle_t sharp_handle;
 
 extern uint8_t gs_lut[];
 extern uint32_t red_buffer[32];
@@ -203,25 +203,12 @@ uint8_t app_display_menu_test(void) {
 * MIP
 */
 uint8_t app_display_init(void) {
-    uint8_t res;
+    display_init();
+    display_clear();
+    // display_split();
 
-    DRIVER_LS013B7DH03_LINK_INIT(&sharp_handle, ls013b7dh03_handle_t);
-    DRIVER_LS013B7DH03_LINK_SPI_INIT(&sharp_handle, ls013b7dh03_interface_spi_init);
-    DRIVER_LS013B7DH03_LINK_SPI_DEINIT(&sharp_handle, ls013b7dh03_interface_spi_deinit);
-    DRIVER_LS013B7DH03_LINK_SPI_WRITE_CMD(&sharp_handle, ls013b7dh03_interface_spi_write_cmd);
-    DRIVER_LS013B7DH03_LINK_SPI_WRITE_REFRESH(&sharp_handle, ls013b7dh03_interface_spi_write_refresh);
-    DRIVER_LS013B7DH03_LINK_CS_CONTROL(&sharp_handle, ls013b7dh03_interface_cs_control);
-    DRIVER_LS013B7DH03_LINK_GPIO_INIT(&sharp_handle, ls013b7dh03_interface_gpio_init);
-    DRIVER_LS013B7DH03_LINK_DELAY_MS(&sharp_handle, ls013b7dh03_interface_delay_ms);
-    
+    display_update();
 
-    // res = ls013b7dh03_init(&sharp_handle);
-    // if (res != 0)
-    //     return 1;
-
-    // return 0;
-    ls013b7dh03_test(&sharp_handle);
-    
+    // display_test();
     return 0;
 }
-

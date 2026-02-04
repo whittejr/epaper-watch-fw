@@ -20,7 +20,7 @@ uint8_t ls013b7dh03_interface_spi_deinit(void) {
     return mip_display_spi_deinit();
 }
 
-uint8_t ls013b7dh03_interface_spi_write_cmd(uint8_t *buf, uint16_t len) {
+uint8_t ls013b7dh03_interface_spi_write(uint8_t *buf, uint16_t len) {
     return mip_display_spi_write(buf, len);     
 }
 

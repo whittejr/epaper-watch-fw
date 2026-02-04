@@ -26,13 +26,16 @@ set(source_list
     ${PROJ_PATH}lib/components/display/ls013b7dh03/ls013b7dh03.c
     ${PROJ_PATH}lib/bsp/src/ls013b7dh03_interface.c
     ${PROJ_PATH}lib/components/display/ls013b7dh03/shmfonts.c
-    
+
 
 
     # oximeter
     ${PROJ_PATH}lib/components/max30102/max30102.c
     ${PROJ_PATH}lib/bsp/src/max30102_interface.c
     ${PROJ_PATH}app/oximeter/app_oximeter.c
+
+    # app_glue
+    ${PROJ_PATH}app/display/display_hal.c
 
     # system
     ${PROJ_PATH}app/system/app_system.c
@@ -62,6 +65,8 @@ set(source_list
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c       # Adicione se usar Timers
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_i2c.c
+
+
 
     # Adicione outros drivers HAL aqui conforme for usando (ex: i2c, uart)
 )

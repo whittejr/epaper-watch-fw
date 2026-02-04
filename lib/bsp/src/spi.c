@@ -164,24 +164,8 @@ uint8_t mip_display_spi_deinit() {
 }
 
 uint8_t mip_display_spi_write(uint8_t *buf, uint16_t len) {
-    uint8_t res;
-
-    HAL_GPIO_WritePin(epd.pins.cs.port, epd.pins.cs.pin, GPIO_PIN_SET); // INVERSE CHIP SELECT
-
-    if (len > 0) {
-        /* receive to the buffer */
-        res = HAL_SPI_Transmit(&spi_config.spi_handle, buf, len, HAL_MAX_DELAY);
-        if (res != HAL_OK) {
-            /* set cs low */
-            HAL_GPIO_WritePin(epd.pins.cs.port, epd.pins.cs.pin, GPIO_PIN_RESET);
-
-            return 1;
-        }
-    }
-    /* set cs low */
-    HAL_GPIO_WritePin(epd.pins.cs.port, epd.pins.cs.pin, GPIO_PIN_RESET);
-
-    return 0;
+    if (HAL_SPI_Transmit(&spi_config.spi_handle, buf, len, HAL_MAX_DELAY) != 0)
+        return 1;
 }
 
 uint8_t mip_display_spi_write_refresh(uint8_t *buf, uint16_t len) {

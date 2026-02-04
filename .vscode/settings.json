@@ -37,5 +37,5 @@
     ],
     "svdFile": "STM32WB55_CM4.svd"
   },
-  "cortex-debug.variableUseNaturalFormat": true
+  "cortex-debug.variableUseNaturalFormat": false
 }
