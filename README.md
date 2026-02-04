@@ -1,2 +1,2 @@
 # epaper-watch-fw
-Firmware para um watch baseado em stm32wb55 utilizando sensores de batimento, oxigenação, display e-paper, detecção de queda focado em baixo consumo.
+Watch based on stm32wb using oximeter, epaper/mip display, accelerometer for fall detection and bluetooh, focused on low power consumption.
