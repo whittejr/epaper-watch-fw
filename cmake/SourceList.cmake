@@ -5,6 +5,7 @@ set(source_list
 
 
     # --- Arquivos do core da Aplicação ---
+    ${PROJ_PATH}core/src/peripherals.c
     ${PROJ_PATH}core/src/main.c
     ${PROJ_PATH}core/src/it.c              # Adicione se tiver este arquivo para interrupções
     # ${PROJ_PATH}/core/src/stm32wbxx_hal_msp.c        # Adicione se tiver este arquivo para inicialização de periféricos
@@ -26,8 +27,6 @@ set(source_list
     ${PROJ_PATH}lib/components/display/ls013b7dh03/ls013b7dh03.c
     ${PROJ_PATH}lib/bsp/src/ls013b7dh03_interface.c
     ${PROJ_PATH}lib/components/display/ls013b7dh03/shmfonts.c
-
-
 
     # oximeter
     ${PROJ_PATH}lib/components/max30102/max30102.c

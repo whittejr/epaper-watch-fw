@@ -203,11 +203,16 @@ uint8_t app_display_menu_test(void) {
 * MIP
 */
 uint8_t app_display_init(void) {
-    display_init();
-    display_clear();
+    // display_init();
+    
     // display_split();
+    // display_update();
+    // display_clear();
+    
 
-    display_update();
+    tesst_code();
+    
+    
 
     // display_test();
     return 0;

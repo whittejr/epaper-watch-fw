@@ -11,6 +11,6 @@
 
 #include <stdint.h>
 
-uint8_t clock_init();
+uint8_t clock_config();
 
 #endif // CLOCK_H

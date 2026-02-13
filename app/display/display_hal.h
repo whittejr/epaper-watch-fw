@@ -23,6 +23,7 @@ uint8_t display_write();
 uint8_t display_test();
 
 uint8_t display_split();
+uint8_t tesst_code();
 
 
 #endif // DISPLAY_HAL_H

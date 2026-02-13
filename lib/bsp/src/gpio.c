@@ -13,7 +13,8 @@
 #include <stm32wbxx_hal.h>
 
 extern epd_user_config_t epd;
-static TIM_HandleTypeDef htim17 = {0};
+TIM_HandleTypeDef htim17 = {0};
+TIM_HandleTypeDef htim16 = {0};
 
 uint8_t ssd1681_cmd_data_gpio_init(void) {
     GPIO_InitTypeDef GPIOHandle = {0};
@@ -134,20 +135,43 @@ uint8_t max_irq_gpio_init(void) {
 // EXTMODE E DISP PINS NÃO PRECISO PORQUE O EXTMODE JA ESTÁ HIGH (INVERSAO POR HARDWARE NO PINO EXTCOMIN)
 // E DISP ESTÁ HIGH (DISPLAY ATIVO)
 uint8_t ls013b7dh03_gpio_init(void) {
-    if (ls013b7dh03_extcomin_gpio_init() != 0)
-        return 1;
+
+    if (ls013b7dh03_extcomin_gpio_init() != 0) return 1;
+
+    GPIO_InitTypeDef GPIO_Handle = {0};
+    GPIO_Handle.Pin = MIP_DISP_PIN;
+    GPIO_Handle.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_Handle.Pull = GPIO_PULLDOWN;
+    GPIO_Handle.Speed = GPIO_SPEED_FREQ_MEDIUM;
+    HAL_GPIO_Init(MIP_DISP_PORT, &GPIO_Handle);
+    
+    
+    // if (ls013b7dh03_vcom_tim() != 0) return 1; 
 
     return 0;
 }
 
 uint8_t ls013b7dh03_extcomin_gpio_init(void) {
+    // CS PIN
+    GPIO_InitTypeDef GPIOHandle = {0};
+
+    GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIOHandle.Pull = GPIO_NOPULL;
+    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
+
+    GPIOHandle.Pin = epd.pins.cs.pin;
+    HAL_GPIO_Init(epd.pins.cs.port, &GPIOHandle);
+    HAL_GPIO_WritePin(epd.pins.cs.port, epd.pins.cs.pin, GPIO_PIN_RESET);
+
+    ////////////////////////////////
+
     // GPIO CONFIG
     GPIO_InitTypeDef GPIO_Handle = {0};
     // PWM CONFIG
     TIM_OC_InitTypeDef sConfigOC = {0};
 
     htim17.Instance = TIM17;
-    htim17.Init.Prescaler = 1;
+    htim17.Init.Prescaler = 2;
     htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim17.Init.Period = 33332;
     htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -159,7 +183,7 @@ uint8_t ls013b7dh03_extcomin_gpio_init(void) {
         return 1;
 
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = 16666;
+    sConfigOC.Pulse = 16667;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -171,11 +195,11 @@ uint8_t ls013b7dh03_extcomin_gpio_init(void) {
     GPIO_Handle.Pin = GPIO_PIN_9;
     GPIO_Handle.Mode = GPIO_MODE_AF_PP;
     GPIO_Handle.Pull = GPIO_NOPULL;
-    GPIO_Handle.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_Handle.Speed = GPIO_SPEED_FREQ_MEDIUM;
     GPIO_Handle.Alternate = GPIO_AF14_TIM17;
     HAL_GPIO_Init(GPIOB, &GPIO_Handle);
 
-    HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
+    // HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
 
     return 0;
 }
@@ -192,3 +216,26 @@ uint8_t ls013b7dh03_gpio_cs_control(uint8_t state) {
 void ls013b7dh03_delay_ms(uint32_t ms) {
     HAL_Delay(ms);
 }
+
+
+// uint8_t ls013b7dh03_vcom_tim() {
+//   htim16.Instance = TIM16;
+//   htim16.Init.Prescaler = 99;
+//   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+//   htim16.Init.Period = 4000;
+//   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+//   htim16.Init.RepetitionCounter = 0;
+//   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+
+//   /* 2. Configurar a Interrupção no NVIC (Processador) */
+//     // Prioridade baixa (ex: 3) para não travar coisas críticas como Bluetooth
+//     HAL_NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 3, 0); 
+    
+//     // Habilitar a linha de interrupção
+//     HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
+
+//   if (HAL_TIM_Base_Init(&htim16) != 0) return 1;
+//   if (HAL_TIM_Base_Start_IT(&htim16) != 0) return 1;
+
+//   return 0;
+// }

@@ -27,6 +27,7 @@ typedef struct ls013b7dh03_handle_t
     void (*cs_control)(uint8_t state);
     void (*delay_ms)(uint32_t ms); 
     
+    uint8_t vcom_state;
     uint8_t *framebuffer;
     uint16_t width;
     uint16_t height;
@@ -37,9 +38,10 @@ typedef struct ls013b7dh03_handle_t
 #define LS013B7DH03_HEIGHT      128
 #define LS013B7DH03_BUFFER_SIZE (LS013B7DH03_WIDTH * LS013B7DH03_HEIGHT / 8)
 
-#define SHARPMEM_BIT_WRITECMD (0x01)     // 0x80 in LSB format
-#define SHARPMEM_BIT_VCOM 	  (0x02)     // 0x40 in LSB format
-#define SHARPMEM_BIT_CLEAR    (0x04)    // 0x20 in LSB format
+// 0x01, 0x40, 0x20 respectively (so we don't need reverse_bytes() function in these commands.)
+#define SHARPMEM_BIT_WRITECMD   0x80         // 0x80 in LSB format 
+#define SHARPMEM_BIT_VCOM 	    0x40        // 0x40 in LSB format
+#define SHARPMEM_BIT_CLEAR      0x20        // 0x20 in LSB format
 
 // Enumeration for screen colors
 typedef enum {
@@ -80,5 +82,6 @@ uint8_t ls013b7dh03_refresh(ls013b7dh03_handle_t *handle);
 void ls013b7dh03_drawPixel(ls013b7dh03_handle_t *handle, uint8_t x, uint8_t y, ls_color_t color);
 void ls013b7dh03_test(ls013b7dh03_handle_t *handle);
 void ls013b7dh03_split_horizontal(ls013b7dh03_handle_t *handle);
+void ls013b7dh03_vcom_control(ls013b7dh03_handle_t *handle);
 
 #endif // LS013B7DH03_H

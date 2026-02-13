@@ -130,11 +130,14 @@ static uint8_t a_mip_spi_cs_init(void) {
 
 
 uint8_t mip_display_spi_init() {
+
+    // a_mip_spi_cs_init();
+
     GPIO_InitTypeDef GPIOHandle = {0};
 
     //--- Pinos de SPI: SCK e MOSI ---
     GPIOHandle.Mode = GPIO_MODE_AF_PP; // Alternate Function Push-Pull
-    GPIOHandle.Pull = GPIO_NOPULL;
+    GPIOHandle.Pull = GPIO_PULLDOWN;
     GPIOHandle.Speed = GPIO_SPEED_FREQ_HIGH;
     GPIOHandle.Alternate = GPIO_AF5_SPI1; // Confirme o AF correto no datasheet
                                           // (SPI1=AF5, SPI2=AF5 geralmente)
@@ -147,11 +150,12 @@ uint8_t mip_display_spi_init() {
     GPIOHandle.Pin = spi_config.mosi.pin;
     HAL_GPIO_Init(spi_config.mosi.port, &GPIOHandle);
 
-    if (HAL_SPI_Init(&spi_config.spi_handle) != HAL_OK) {
-        return 1; // Erro
-    }
+    
 
-    return a_mip_spi_cs_init();
+    if (HAL_SPI_Init(&spi_config.spi_handle) != HAL_OK) return 1;
+    
+    
+    return 0;
 }
 
 uint8_t mip_display_spi_deinit() {
@@ -166,6 +170,8 @@ uint8_t mip_display_spi_deinit() {
 uint8_t mip_display_spi_write(uint8_t *buf, uint16_t len) {
     if (HAL_SPI_Transmit(&spi_config.spi_handle, buf, len, HAL_MAX_DELAY) != 0)
         return 1;
+
+    return 0;
 }
 
 uint8_t mip_display_spi_write_refresh(uint8_t *buf, uint16_t len) {
