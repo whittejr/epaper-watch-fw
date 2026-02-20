@@ -34,6 +34,7 @@ set(source_list
 
     # app_glue
     ${PROJ_PATH}app/display/display_hal.c
+    ${PROJ_PATH}app/oximeter/oximeter_hal.c
 
     # system
     ${PROJ_PATH}app/system/app_system.c
