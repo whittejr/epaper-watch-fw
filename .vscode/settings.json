@@ -7,35 +7,9 @@
   "[cpp]": {
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
   },
-
   "clangd.arguments": [
-    "--query-driver=/opt/arm-gcc/bin/arm-none-eabi-*"
+    "--query-driver=/opt/arm-gcc/bin/arm-none-eabi-*",
+    "clangd"
   ],
-
-  "cmake.debugConfig": {
-    "name": "Openocd",
-    "cwd": "${workspaceFolder}",
-    "executable": "${workspaceFolder}/build/Debug/stm32wb55-Template.elf",
-    "request": "launch",
-    "type": "cortex-debug",
-    "servertype": "openocd",
-    "interface": "swd",
-    "showDevDebugOutput": "both",
-    "v1": false,
-    "device": "STM32WB55xx",
-    // "stopAtEntry": true,
-    "runToEntryPoint": "main",
-    "liveWatch": {
-      "enabled": true,
-      "samplesPerSecond": 20
-    },
-    "gdbPath": "/usr/bin/gdb-multiarch",
-    
-    "configFiles": [
-      "interface/stlink.cfg",
-      "target/stm32wbx.cfg"
-    ],
-    "svdFile": "STM32WB55_CM4.svd"
-  },
   "cortex-debug.variableUseNaturalFormat": false
 }

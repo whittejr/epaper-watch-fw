@@ -9,17 +9,21 @@
 #include "gpio.h"
 #include "resources.h"
 #include "stm32wbxx_hal_gpio.h"
-#include "stm32wbxx_hal_tim.h"
+#include "stm32wbxx_hal_gpio_ex.h"
 #include <stm32wbxx_hal.h>
 
 extern epd_user_config_t epd;
 TIM_HandleTypeDef htim17 = {0};
 TIM_HandleTypeDef htim16 = {0};
 
+/* static functions */
+static void ssd1681_gpio_init(void);
+static void max30102_gpio_init(void);
+
 uint8_t ssd1681_cmd_data_gpio_init(void) {
     GPIO_InitTypeDef GPIOHandle = {0};
 
-    //--- Pinos de saída: DC ---
+    //--- OUTPUT PIN: DC ---
     GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
     GPIOHandle.Pull = GPIO_NOPULL;
     GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
@@ -42,21 +46,12 @@ uint8_t ssd1681_cmd_data_gpio_write(uint8_t value) {
 }
 
 uint8_t busy_gpio_read(uint8_t *value) {
-
     if (value == NULL)
         return 1;
 
     return *value = HAL_GPIO_ReadPin(epd.pins.busy.port, epd.pins.busy.pin);
-
-    //  *value;
 }
 
-/*
- * @brief      ssd1681_cmd_data_deinit
- * @return     status code
- *            - 0 sucess
- * @note
- */
 uint8_t ssd1681_cmd_data_gpio_deinit(void) {
     HAL_GPIO_DeInit(epd.pins.dc.port, epd.pins.dc.pin);
 
@@ -110,6 +105,13 @@ uint8_t ssd1681_busy_gpio_deinit(void) {
     return 0;
 }
 
+static void ssd1681_gpio_init(void) {
+
+    ssd1681_rst_gpio_init();
+    ssd1681_cmd_data_gpio_init();
+    ssd1681_busy_gpio_init();    
+}
+
 /*
  * MAX30102
  */
@@ -126,6 +128,10 @@ uint8_t max_irq_gpio_init(void) {
     HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
     return 0;
+}
+
+static void max30102_gpio_init(void) {
+    max_irq_gpio_init();
 }
 
 
@@ -217,25 +223,25 @@ void ls013b7dh03_delay_ms(uint32_t ms) {
     HAL_Delay(ms);
 }
 
+uint8_t uart_gpio_init(void) {
 
-// uint8_t ls013b7dh03_vcom_tim() {
-//   htim16.Instance = TIM16;
-//   htim16.Init.Prescaler = 99;
-//   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-//   htim16.Init.Period = 4000;
-//   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-//   htim16.Init.RepetitionCounter = 0;
-//   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    /* LPUART1 GPIO Init */
+    GPIO_InitTypeDef GPIOHandle;
+    GPIOHandle.Mode = GPIO_MODE_AF_PP;
+    GPIOHandle.Alternate = GPIO_AF8_LPUART1;
+    GPIOHandle.Pin = GPIO_PIN_2;
+    GPIOHandle.Speed = GPIO_SPEED_FREQ_MEDIUM;
 
-//   /* 2. Configurar a Interrupção no NVIC (Processador) */
-//     // Prioridade baixa (ex: 3) para não travar coisas críticas como Bluetooth
-//     HAL_NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 3, 0); 
+    HAL_GPIO_Init(GPIOA, &GPIOHandle);
     
-//     // Habilitar a linha de interrupção
-//     HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
+    return 0;
+}
 
-//   if (HAL_TIM_Base_Init(&htim16) != 0) return 1;
-//   if (HAL_TIM_Base_Start_IT(&htim16) != 0) return 1;
 
-//   return 0;
-// }
+uint8_t gpio_init(void) {
+    uart_gpio_init();
+    ssd1681_gpio_init();
+    max30102_gpio_init();
+
+    return 0;
+}

@@ -31,4 +31,6 @@ uint8_t ssd1681_interface_busy_gpio_read(uint8_t *value);
 
 void ssd1681_interface_delay_ms(uint32_t ms);
 
+void ssd1681_interface_debug_print(const char *const fmt, ...);
+
 #endif // DRIVER_SSD1681_INTERFACE_H

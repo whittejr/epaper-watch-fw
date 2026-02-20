@@ -6,9 +6,6 @@ WORKDIR /tmp
 
 RUN wget --progress=dot:giga https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
 
-# 3. EXTRAÇÃO BLINDADA (A Correção)
-# Em vez de extrair e tentar mover (mv), criamos a pasta de destino e extraímos direto nela.
-# --strip-components=1 remove a primeira pasta do arquivo compactado, jogando os binários direto em /opt/arm-gcc
 RUN mkdir -p /opt/arm-gcc \
     && tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt/arm-gcc --strip-components=1
 
@@ -20,13 +17,12 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    gdb-multiarch \
     cmake \
     build-essential \
     ninja-build \
-    clang \
     clangd \
     # Debuggers e Ferramentas USB
-    gdb-multiarch \
     openocd \
     usbutils \
     ncdu \

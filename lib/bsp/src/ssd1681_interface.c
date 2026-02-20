@@ -10,6 +10,10 @@
 #include "delay.h"
 #include "gpio.h"
 #include "spi.h"
+#include "uart.h"
+#include "string.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 /**
  * @brief  interface spi bus init
@@ -79,4 +83,18 @@ uint8_t ssd1681_interface_busy_gpio_deinit(void) {
 
 uint8_t ssd1681_interface_busy_gpio_read(uint8_t *value) {
     return busy_gpio_read(value);
+}
+
+void ssd1681_interface_debug_print(const char *const fmt, ...) {
+    char str[256];
+    uint16_t len;
+    va_list args;
+    
+    memset((char *)str, 0, sizeof(char) * 256); 
+    va_start(args, fmt);
+    vsnprintf((char *)str, 255, (char const *)fmt, args);
+    va_end(args);
+    
+    len = strlen((char *)str);
+    (void)uart_write((uint8_t *)str, len);
 }

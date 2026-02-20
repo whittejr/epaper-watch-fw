@@ -34,7 +34,7 @@ uint8_t i2c_init(void) {
     uint8_t dummy_data;
     HAL_I2C_Mem_Read(&i2c_config.i2c_handle, I2C_SLAVE_ADDR, 0x00, I2C_MEMADD_SIZE_8BIT, &dummy_data, 1, 100);
 
-    // Lê o Registrador 0x01 (Interrupt Status 2) - Só por garantia
+    // read register 0x01 (Interrupt Status 2)
     HAL_I2C_Mem_Read(&i2c_config.i2c_handle, I2C_SLAVE_ADDR, 0x01, I2C_MEMADD_SIZE_8BIT, &dummy_data, 1, 100);
     return 0;
 }
@@ -66,8 +66,7 @@ uint8_t i2c_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
     uint8_t status;
     status = HAL_I2C_Mem_Read(&i2c_config.i2c_handle, addr, reg, I2C_MEMADD_SIZE_8BIT, buf, len, HAL_MAX_DELAY);
 
-    if (status != 0)
-        return 1;
+    if (status != 0) return 1;
 
     return 0;
 }

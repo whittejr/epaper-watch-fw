@@ -51,8 +51,6 @@ extern SPI_HandleTypeDef hspi1;
 #define MIP_EXTCOMIN_PORT     GPIOA
 #define MIP_EXTCOMIN_PIN      GPIO_PIN_0 //PWM
 
-
-
 /*
  * I2C_CONFIG
  */

@@ -11,10 +11,13 @@
 
 #include <stdint.h>
 
+
+/* GENERAL */
+uint8_t gpio_init(void);
+
 /*
  * Display
  */
-
 //  SSD1681
 uint8_t ssd1681_cmd_data_gpio_init(void);
 uint8_t ssd1681_cmd_data_gpio_write(uint8_t value);

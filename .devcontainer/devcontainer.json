@@ -1,5 +1,5 @@
 {
-    "name": "STM32 WB55 Embedded Env",
+    "name": "stm32wbxx embedded environment",
     "build": {
         "dockerfile": "Dockerfile"
     },
@@ -14,20 +14,14 @@
             "extensions": [
                 "llvm-vs-code-extensions.vscode-clangd",
                 "twxs.cmake",
-                "ms-vscode.cmake-tools",
-                "ms-vscode.cpptools",
                 "mcu-debug.debug-tracker-vscode",
                 "marus25.cortex-debug",
                 "mcu-debug.memory-view",
                 "mcu-debug.rtos-views",
                 "cschlosser.doxdocgen",
-                "ms-vscode-remote.remote-containers",
-                "ms-azuretools.vscode-docker",
                 "eamodio.gitlens",
-                "zixuanwang.linkerscript",
                 "cweijan.vscode-office"
             ]
-        }
-        
+        }     
     }
 }

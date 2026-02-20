@@ -1,11 +1,10 @@
 # Lista de arquivos-fonte do projeto
 set(source_list
 # --- Arquivo de Startup (Assembly) ---
-    ${PROJ_PATH}core/src/startup_stm32wb55xx_cm4.s
+    ${PROJ_PATH}core/startup/startup_stm32wb55xx_cm4.s
 
 
     # --- Arquivos do core da Aplicação ---
-    ${PROJ_PATH}core/src/peripherals.c
     ${PROJ_PATH}core/src/main.c
     ${PROJ_PATH}core/src/it.c              # Adicione se tiver este arquivo para interrupções
     # ${PROJ_PATH}/core/src/stm32wbxx_hal_msp.c        # Adicione se tiver este arquivo para inicialização de periféricos
@@ -45,27 +44,22 @@ set(source_list
     ${PROJ_PATH}lib/bsp/src/gpio.c
     ${PROJ_PATH}lib/bsp/src/delay.c
     ${PROJ_PATH}lib/bsp/src/i2c.c
+    ${PROJ_PATH}lib/bsp/src/uart.c
 
     # --- lib da ST HAL (apenas os que você usa) ---
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_cortex.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_dma.c
-    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_dma_ex.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_exti.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash.c
-    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash_ex.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_gpio.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr_ex.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc.c
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc_ex.c
-    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi.c       # Essencial para o seu display
-    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi_ex.c
-    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c       # Adicione se usar Timers
-    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi.c   
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c       
     ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_i2c.c
+    ${PROJ_PATH}lib/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart.c
 
-
-
-    # Adicione outros drivers HAL aqui conforme for usando (ex: i2c, uart)
 )

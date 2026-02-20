@@ -14,6 +14,7 @@
  */
 
 #include "stm32wbxx_hal.h"
+#include "stm32wbxx_hal_rcc.h"
 
 uint8_t clock_config(void) {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -63,5 +64,11 @@ uint8_t clock_config(void) {
     return 1;
   }
 
+
+
+  /* user cfg */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_LPUART1_CLK_ENABLE();
+  
   return 0;
 }
