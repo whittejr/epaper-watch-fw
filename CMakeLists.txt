@@ -23,7 +23,7 @@ set(compiler_define ${compiler_define}
 )
 
 set(PROJ_PATH                       ${CMAKE_CURRENT_SOURCE_DIR})
-set(LINKER_SCRIPT               ${PROJ_PATH}/core/src/stm32wb55xx_flash_cm4.ld)
+set(LINKER_SCRIPT               		${PROJ_PATH}/core/linker/stm32wb55xx_flash_cm4.ld)
 # The use project name for binary file name
 set(EXECUTABLE                      ${CMAKE_PROJECT_NAME})
 
@@ -61,12 +61,3 @@ set_target_properties(${EXECUTABLE}
     PROPERTIES
     SUFFIX ".elf"
 )
-
-# # Convert output to hex and binary
-# add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
-# 	COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${EXECUTABLE}> ${EXECUTABLE}.hex
-# )
-# # Convert to bin file -> add conditional check?
-# add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
-# 	COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${EXECUTABLE}> ${EXECUTABLE}.bin
-# )
