@@ -30,9 +30,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Utilitários básicos
     ca-certificates \
     sudo \
+    python3 \
+    python3-pip \
+    python3-venv \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
     
     COPY --from=build /opt/arm-gcc /opt/arm-gcc
+
+# Venv configuration
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY tools/dsp_analysis/requirements.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # --- Configuração do Usuário ---
 # Cria o usuário 'vscode' para evitar problemas de permissão com arquivos do Windows

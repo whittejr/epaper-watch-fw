@@ -1,7 +1,8 @@
 {
     "name": "stm32wbxx embedded environment",
     "build": {
-        "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile",
+        "context": ".."
     },
 
     "runArgs": [
