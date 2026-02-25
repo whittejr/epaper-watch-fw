@@ -10,15 +10,19 @@
 #include "max30102_interface.h"
 #include "stdint.h"
 #include "oximeter_hal.h"
+#include "uart.h"
 
 static max30102_handle_t gs_handle;
-max30102_bool_t enable;
+volatile uint8_t g_flag; 
+static uint32_t g_raw_red[32]; 
+static uint32_t g_raw_ir[32];   
+volatile uint8_t g_oximeter_data_ready = 0;
+volatile uint8_t g_oximeter_event = 0;
 
 static uint8_t oximeter_setup(void);
 
 uint8_t oximeter_init(void) {
     uint8_t res;
-    max30102_bool_t enable;
 
     /* link interface function */
     DRIVER_MAX30102_LINK_INIT(&gs_handle, max30102_handle_t);
@@ -45,7 +49,7 @@ uint8_t oximeter_init(void) {
         return 1;
     }
     
-        return 1;
+        return 0;
 }
 
 static uint8_t oximeter_setup(void) {
@@ -124,7 +128,7 @@ static uint8_t oximeter_setup(void) {
     }
 
     /* set led red pulse amplitude */
-    res = max30102_set_led_red_pulse_amplitude(&gs_handle, MAX30102_FIFO_DEFAULT_LED_RED_PULSE_AMPLITUDE);
+    res = max30102_set_led_red_pulse_amplitude(&gs_handle, 0x2f);
     if (res != 0) {
         max30102_interface_debug_print("max30102: set led red pulse amplitude failed.\n");
         (void)max30102_deinit(&gs_handle);
@@ -133,7 +137,7 @@ static uint8_t oximeter_setup(void) {
     }
 
     /* set led ir pulse amplitude */
-    res = max30102_set_led_ir_pulse_amplitude(&gs_handle, MAX30102_FIFO_DEFAULT_LED_IR_PULSE_AMPLITUDE);
+    res = max30102_set_led_ir_pulse_amplitude(&gs_handle, 0x2f);
     if (res != 0) {
         max30102_interface_debug_print("max30102: set led ir pulse amplitude failed.\n");
         (void)max30102_deinit(&gs_handle);
@@ -232,14 +236,51 @@ static uint8_t oximeter_setup(void) {
     }
 
     /* get status */
-    res = max30102_get_interrupt_status(&gs_handle, MAX30102_INTERRUPT_STATUS_FIFO_FULL, &enable);
-    if (res != 0) {
-        max30102_interface_debug_print("max30102: get interrupt status failed.\n");
-        (void)max30102_deinit(&gs_handle);
+    // res = max30102_get_interrupt_status(&gs_handle, MAX30102_INTERRUPT_STATUS_FIFO_FULL, &enable);
+    // if (res != 0) {
+    //     max30102_interface_debug_print("max30102: get interrupt status failed.\n");
+    //     (void)max30102_deinit(&gs_handle);
 
-        return 1;
-    }
+    //     return 1;
+    // }
 
     return 0;
 }
 
+uint8_t oximeter_read(uint32_t *red_buf, uint32_t *ir_buf, uint8_t *len) {
+    uint8_t res;
+    // O 'len' entra dizendo o tamanho máximo do buffer e sai dizendo quantas amostras foram lidas
+    res = max30102_read(&gs_handle, red_buf, ir_buf, len);
+    return res;
+
+    
+    return 0;
+}
+
+void oximeter_irq_handler(void) {
+    max30102_irq_handler(&gs_handle);
+}
+
+uint8_t oximeter_event() {
+    oximeter_irq_handler();
+    
+    if (g_oximeter_data_ready) {
+        g_oximeter_data_ready = 0;
+
+        uint8_t samples = 32;
+        uint16_t len;
+        if (oximeter_read(g_raw_red, g_raw_ir, &samples) == 0) {
+
+            char tx_buffer[64];
+
+            for (uint8_t i = 0; i < samples; i++) {
+                len = snprintf(tx_buffer, sizeof(tx_buffer), "%u,%u\r\n", 
+                                    g_raw_red[i], g_raw_ir[i]);
+
+                if (len > 0)
+                    uart_write((uint8_t*) tx_buffer, len);  
+            }
+        }
+    }
+    return 0;
+}

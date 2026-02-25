@@ -3,7 +3,6 @@
 #include "stm32wbxx_hal.h"
 #include "stm32wbxx_hal_tim.h"
 extern TIM_HandleTypeDef htim16;
-extern max30102_handle_t max_handle;
 extern volatile uint8_t g_oximeter_event;
 
 void SysTick_Handler(void) {

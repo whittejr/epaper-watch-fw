@@ -12,7 +12,6 @@
       "type": "shell",
       "command": "cmake --build --preset Debug",
       "dependsOn": "configure",
-      "problemMatcher": "$gcc",
       "group": "build"
     },
     {

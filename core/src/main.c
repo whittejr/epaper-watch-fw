@@ -7,6 +7,7 @@
  */
 
 #include "app_system.h"
+#include "oximeter_hal.h"
 #include <stdio.h>
 
 void errorHandler(void);

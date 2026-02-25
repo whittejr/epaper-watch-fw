@@ -34,5 +34,8 @@
 
 
 uint8_t oximeter_init(void);
+uint8_t oximeter_read(uint32_t *red_buf, uint32_t *ir_buf, uint8_t *len);
+void oximeter_irq_handler(void);
+uint8_t oximeter_event(void);
 
 #endif // OXIMETER_HAL_H

@@ -12,6 +12,8 @@
 #include <stdarg.h>
 #include "uart.h"
 
+extern volatile uint8_t g_oximeter_data_ready; /* oximeter_hal.c variable*/
+
 /**
  * @brief  interface i2c bus init
  * @return status code
@@ -20,7 +22,8 @@
  * @note   none
  */
 uint8_t max30102_interface_i2c_init(void) {
-    return i2c_init();
+    // return i2c_init();
+    return 0;
 }
 
 /**
@@ -90,4 +93,16 @@ void max30102_interface_debug_print(const char *const fmt, ...) {
     
     len = strlen((char *)str);
     (void)uart_write((uint8_t *)str, len);
+}
+
+void max30102_interface_receive_callback(uint8_t type) {
+    switch (type) {
+    case MAX30102_INTERRUPT_STATUS_PPG_RDY:        
+        break;
+    case MAX30102_INTERRUPT_STATUS_FIFO_FULL:
+        g_oximeter_data_ready = 1;
+        break;
+    default:
+        break;
+    }
 }
