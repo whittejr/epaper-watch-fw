@@ -7,82 +7,82 @@
  */
 
 #include "ssd1681_interface.h"
-#include "delay.h"
+#include "board_config.h"
 #include "gpio.h"
 #include "spi.h"
 #include "uart.h"
-#include "string.h"
+#include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-/**
- * @brief  interface spi bus init
- * @return status code
- *         - 0 success
- *         - 1 spi init failed
- * @note   none
- */
 uint8_t ssd1681_interface_spi_init(void) {
-
-    /* RST | DC | BUSY Initialization  */
-    ssd1681_cmd_data_gpio_init();
-
-    if (spi_init() != 0)
-        return 1;
-
     return 0;
 }
 
 uint8_t ssd1681_interface_spi_deinit(void) {
-    return spi_deinit();
+    return 0;
 }
 
 uint8_t ssd1681_interface_spi_write_cmd(uint8_t *buf, uint16_t len) {
-    return spi_write_cmd(buf, len);
+    uint8_t res;
+    res = spi_write(buf, len);
+
+    return res;
 }
 
 uint8_t ssd1681_interface_spi_read_cmd(uint8_t *buf, uint16_t len) {
-    return spi_read_cmd(buf, len);
+    uint8_t res;
+
+    res = spi_read(buf, len);
+
+
+    return res;
 }
 
 void ssd1681_interface_delay_ms(uint32_t ms) {
-    delay_ms(ms);
+    bsp_delay_ms(ms);
 }
 
 uint8_t ssd1681_interface_spi_cmd_data_gpio_init(void) {
-    return ssd1681_cmd_data_gpio_init();
+    return 0; 
 }
 
 uint8_t ssd1681_interface_spi_cmd_data_gpio_deinit(void) {
-    return ssd1681_cmd_data_gpio_deinit();
+    return 0;
 }
 
 uint8_t ssd1681_interface_spi_cmd_data_gpio_write(uint8_t value) {
-    return ssd1681_cmd_data_gpio_write(value);
+    bsp_gpio_write(EPD_DC_PORT, EPD_DC_PIN, value);
+    return 0;
 }
 
 uint8_t ssd1681_interface_reset_gpio_init(void) {
-    return ssd1681_rst_gpio_init();
+    return 0;
 }
 
 uint8_t ssd1681_interface_reset_gpio_deinit(void) {
-    return ssd1681_rst_gpio_deinit();
+    return 0;
 }
 
 uint8_t ssd1681_interface_reset_gpio_write(uint8_t value) {
-    return ssd1681_rst_gpio_write(value);
+    bsp_gpio_write(EPD_RST_PORT, EPD_RST_PIN, value);
+    return 0;
 }
 
 uint8_t ssd1681_interface_busy_gpio_init(void) {
-    return ssd1681_busy_gpio_init();
+    return 0;
 }
 
 uint8_t ssd1681_interface_busy_gpio_deinit(void) {
-    return ssd1681_busy_gpio_deinit();
+    return 0;
 }
 
 uint8_t ssd1681_interface_busy_gpio_read(uint8_t *value) {
-    return busy_gpio_read(value);
+    if (value == NULL) {
+        return 1;
+    }
+    *value = bsp_gpio_read(EPD_BSY_PORT, EPD_BSY_PIN);
+    return 0;
 }
 
 void ssd1681_interface_debug_print(const char *const fmt, ...) {

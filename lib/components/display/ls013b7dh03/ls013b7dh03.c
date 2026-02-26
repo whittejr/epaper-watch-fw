@@ -9,7 +9,6 @@
 // #include "shm_graphics.h"
 #include "ls013b7dh03.h"
 #include "display_hal.h"
-#include "resources.h"
 #include "shmfonts.h"
 #include <string.h>
 

@@ -17,7 +17,7 @@
 #define MAX30102_FIFO_DEFAULT_SAMPLE_AVERAGING          MAX30102_SAMPLE_AVERAGING_8      /**< sample 8 */
 #define MAX30102_FIFO_DEFAULT_FIFO_ROLL                 MAX30102_BOOL_TRUE               /**< enable */
 #define MAX30102_FIFO_DEFAULT_FIFO_ALMOST_FULL          0xF                              /**< 0xF */
-#define MAX30102_FIFO_DEFAULT_MODE                      MAX30102_MODE_SPO2               /**< spo2 mode */
+#define MAX30102_FIFO_DEFAULT_MODE                      MAX30102_MODE_HEART_RATE         /**< heartrate mode */
 #define MAX30102_FIFO_DEFAULT_SPO2_ADC_RANGE            MAX30102_SPO2_ADC_RANGE_4096     /**< adc range 4096 */
 #define MAX30102_FIFO_DEFAULT_SPO2_SAMPLE_RATE          MAX30102_SPO2_SAMPLE_RATE_100_HZ /**< 100 Hz */
 #define MAX30102_FIFO_DEFAULT_ADC_RESOLUTION            MAX30102_ADC_RESOLUTION_18_BIT   /**< 18 bits */

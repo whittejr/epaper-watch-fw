@@ -6,35 +6,33 @@
 * @date    2026-01-27
 */
 
-#include <stdint.h>
 #include "ls013b7dh03_interface.h"
+#include "board_config.h"
 #include "spi.h"
 #include "gpio.h"
-#include "stm32wbxx_hal.h"
 
 uint8_t ls013b7dh03_interface_spi_init(void) {
-    return mip_display_spi_init();
+    return 0;
 }
 
 uint8_t ls013b7dh03_interface_spi_deinit(void) {
-    return mip_display_spi_deinit();
+    return 0;
 }
 
 uint8_t ls013b7dh03_interface_spi_write(uint8_t *buf, uint16_t len) {
-    return mip_display_spi_write(buf, len);     
+    return spi_write(buf, len);     
 }
 
 uint8_t ls013b7dh03_interface_spi_write_refresh(uint8_t *buf, uint16_t len) {
-    return mip_display_spi_write_refresh(buf, len);
+    return spi_write(buf, len);
 }
 
 void ls013b7dh03_interface_cs_control(uint8_t state) {
-    ls013b7dh03_gpio_cs_control(state);
+    bsp_gpio_write(MIP_CS_PORT, MIP_CS_PIN, state);
 }
 
-
 uint8_t ls013b7dh03_interface_gpio_init(void) {
-    return ls013b7dh03_gpio_init();
+    return 0;
 }
 
 uint8_t ls013b7dh03_interface_gpio_deinit(void) {
@@ -42,5 +40,5 @@ uint8_t ls013b7dh03_interface_gpio_deinit(void) {
 }
 
 void ls013b7dh03_interface_delay_ms(uint32_t ms) {
-    ls013b7dh03_delay_ms(ms);
+    bsp_delay_ms(ms);
 }

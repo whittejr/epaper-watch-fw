@@ -12,10 +12,7 @@ set(source_list
 
     
     # --- Seus lib Customizados ---
-
-    # hardware config
-    ${PROJ_PATH}lib/bsp/src/resources.c
-
+    
     # display
     # epaper
     ${PROJ_PATH}lib/components/display/ssd1681/ssd1681.c

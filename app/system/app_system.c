@@ -23,10 +23,11 @@ extern volatile uint8_t g_oximeter_data_ready;
 
 uint8_t app_system_init() {
     HAL_Init();
-    if (clock_config() != 0) return 1;
-    if (gpio_init() != 0) return 1;
-    if (i2c_init() != 0) return 1;
-    if (uart_init() != 0) return 1;
+    if (clock_config() != 0)    return 1;
+    if (gpio_init() != 0)       return 1;
+    if (i2c_init() != 0)        return 1;
+    if (uart_init() != 0)       return 1;
+    
     if (app_oximeter_init() != 0) return 1;
     // if (app_display_init() != 0)    return 1;
 

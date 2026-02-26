@@ -7,174 +7,45 @@
  */
 
 #include "gpio.h"
-#include "resources.h"
-#include "stm32wbxx_hal_gpio.h"
-#include "stm32wbxx_hal_gpio_ex.h"
-#include <stm32wbxx_hal.h>
+#include "board_config.h"
 
-extern epd_user_config_t epd;
-TIM_HandleTypeDef htim17 = {0};
-TIM_HandleTypeDef htim16 = {0};
+static TIM_HandleTypeDef htim17;
 
-/* static functions */
-static void ssd1681_gpio_init(void);
-static void max30102_gpio_init(void);
-
-uint8_t ssd1681_cmd_data_gpio_init(void) {
+uint8_t gpio_init(void) {
     GPIO_InitTypeDef GPIOHandle = {0};
 
-    //--- OUTPUT PIN: DC ---
-    GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIOHandle.Mode = GPIO_MODE_AF_PP;
+    GPIOHandle.Alternate = GPIO_AF8_LPUART1;
+    GPIOHandle.Pin = GPIO_PIN_2;
+    GPIOHandle.Speed = GPIO_SPEED_FREQ_MEDIUM;
     GPIOHandle.Pull = GPIO_NOPULL;
-    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIOHandle);
 
-    // DC
-    GPIOHandle.Pin = epd.pins.dc.pin;
-    HAL_GPIO_Init(epd.pins.dc.port, &GPIOHandle);
-
-    return 0;
-}
-
-uint8_t ssd1681_cmd_data_gpio_write(uint8_t value) {
-    if (value == 0) // CMD
-        HAL_GPIO_WritePin(epd.pins.dc.port, epd.pins.dc.pin, GPIO_PIN_RESET);
-
-    else if (value == 1) // DATA
-        HAL_GPIO_WritePin(epd.pins.dc.port, epd.pins.dc.pin, GPIO_PIN_SET);
-
-    return 0;
-}
-
-uint8_t busy_gpio_read(uint8_t *value) {
-    if (value == NULL)
-        return 1;
-
-    return *value = HAL_GPIO_ReadPin(epd.pins.busy.port, epd.pins.busy.pin);
-}
-
-uint8_t ssd1681_cmd_data_gpio_deinit(void) {
-    HAL_GPIO_DeInit(epd.pins.dc.port, epd.pins.dc.pin);
-
-    return 0;
-}
-
-uint8_t ssd1681_rst_gpio_init(void) {
-    GPIO_InitTypeDef GPIOHandle = {0};
-
-    GPIOHandle.Pin = epd.pins.rst.pin;
     GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
     GPIOHandle.Pull = GPIO_PULLDOWN;
-    HAL_GPIO_Init(epd.pins.rst.port, &GPIOHandle);
-    HAL_GPIO_WritePin(epd.pins.rst.port, epd.pins.rst.pin, GPIO_PIN_SET);
+    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIOHandle.Pin = EPD_RST_PIN;
+    HAL_GPIO_Init(EPD_RST_PORT, &GPIOHandle);
+    HAL_GPIO_WritePin(EPD_RST_PORT, EPD_RST_PIN, GPIO_PIN_SET);
 
-    return 0;
-}
+    GPIOHandle.Pull = GPIO_NOPULL;
+    GPIOHandle.Pin = EPD_DC_PIN;
+    HAL_GPIO_Init(EPD_DC_PORT, &GPIOHandle);
 
-uint8_t ssd1681_rst_gpio_deinit(void) {
+    GPIOHandle.Pin = EPD_CS_PIN;
+    HAL_GPIO_Init(EPD_CS_PORT, &GPIOHandle);
+    HAL_GPIO_WritePin(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_SET);
 
-    HAL_GPIO_DeInit(epd.pins.rst.port, epd.pins.rst.pin);
-
-    return 0;
-}
-
-uint8_t ssd1681_rst_gpio_write(uint8_t value) {
-    if (value != 0)
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
-    else
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
-
-    return 0;
-}
-
-uint8_t ssd1681_busy_gpio_init(void) {
-
-    GPIO_InitTypeDef GPIOHandle = {0};
-
-    //--- Pino de entrada: BUSY ---
-    GPIOHandle.Pin = epd.pins.busy.pin;
     GPIOHandle.Mode = GPIO_MODE_INPUT;
     GPIOHandle.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(epd.pins.busy.port, &GPIOHandle);
-
-    return 0;
-}
-
-uint8_t ssd1681_busy_gpio_deinit(void) {
-    HAL_GPIO_DeInit(epd.pins.busy.port, epd.pins.busy.pin);
-
-    return 0;
-}
-
-static void ssd1681_gpio_init(void) {
-
-    ssd1681_rst_gpio_init();
-    ssd1681_cmd_data_gpio_init();
-    ssd1681_busy_gpio_init();    
-}
-
-/*
- * MAX30102
- */
-uint8_t max_irq_gpio_init(void) {
-    GPIO_InitTypeDef GPIOHandle;
-
-    GPIOHandle.Pin = GPIO_PIN_4;
-    GPIOHandle.Mode = GPIO_MODE_IT_FALLING;
-    GPIOHandle.Pull = GPIO_PULLUP;
-
-    HAL_GPIO_Init(GPIOB, &GPIOHandle);
-
-    HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
-    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
-
-    return 0;
-}
-
-static void max30102_gpio_init(void) {
-    max_irq_gpio_init();
-}
-
-
-/*
-*   LS013B7DH03
-*/
-// EXTMODE E DISP PINS NÃO PRECISO PORQUE O EXTMODE JA ESTÁ HIGH (INVERSAO POR HARDWARE NO PINO EXTCOMIN)
-// E DISP ESTÁ HIGH (DISPLAY ATIVO)
-uint8_t ls013b7dh03_gpio_init(void) {
-
-    if (ls013b7dh03_extcomin_gpio_init() != 0) return 1;
-
-    GPIO_InitTypeDef GPIO_Handle = {0};
-    GPIO_Handle.Pin = MIP_DISP_PIN;
-    GPIO_Handle.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_Handle.Pull = GPIO_PULLDOWN;
-    GPIO_Handle.Speed = GPIO_SPEED_FREQ_MEDIUM;
-    HAL_GPIO_Init(MIP_DISP_PORT, &GPIO_Handle);
-    
-    
-    // if (ls013b7dh03_vcom_tim() != 0) return 1; 
-
-    return 0;
-}
-
-uint8_t ls013b7dh03_extcomin_gpio_init(void) {
-    // CS PIN
-    GPIO_InitTypeDef GPIOHandle = {0};
+    GPIOHandle.Pin = EPD_BSY_PIN;
+    HAL_GPIO_Init(EPD_BSY_PORT, &GPIOHandle);
 
     GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIOHandle.Pull = GPIO_NOPULL;
-    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
-
-    GPIOHandle.Pin = epd.pins.cs.pin;
-    HAL_GPIO_Init(epd.pins.cs.port, &GPIOHandle);
-    HAL_GPIO_WritePin(epd.pins.cs.port, epd.pins.cs.pin, GPIO_PIN_RESET);
-
-    ////////////////////////////////
-
-    // GPIO CONFIG
-    GPIO_InitTypeDef GPIO_Handle = {0};
-    // PWM CONFIG
-    TIM_OC_InitTypeDef sConfigOC = {0};
+    GPIOHandle.Pull = GPIO_PULLDOWN;
+    GPIOHandle.Speed = GPIO_SPEED_FREQ_MEDIUM;
+    GPIOHandle.Pin = MIP_DISP_PIN;
+    HAL_GPIO_Init(MIP_DISP_PORT, &GPIOHandle);
 
     htim17.Instance = TIM17;
     htim17.Init.Prescaler = 2;
@@ -183,11 +54,10 @@ uint8_t ls013b7dh03_extcomin_gpio_init(void) {
     htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim17.Init.RepetitionCounter = 0;
     htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim17) != 0)
-        return 1;
-    if (HAL_TIM_PWM_Init(&htim17) != 0)
-        return 1;
+    if (HAL_TIM_Base_Init(&htim17) != HAL_OK) return 1;
+    if (HAL_TIM_PWM_Init(&htim17) != HAL_OK) return 1;
 
+    TIM_OC_InitTypeDef sConfigOC = {0};
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = 16667;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
@@ -195,53 +65,38 @@ uint8_t ls013b7dh03_extcomin_gpio_init(void) {
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
     sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
     sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-    if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != 0)
-        return 1;
+    if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) return 1;
 
-    GPIO_Handle.Pin = GPIO_PIN_9;
-    GPIO_Handle.Mode = GPIO_MODE_AF_PP;
-    GPIO_Handle.Pull = GPIO_NOPULL;
-    GPIO_Handle.Speed = GPIO_SPEED_FREQ_MEDIUM;
-    GPIO_Handle.Alternate = GPIO_AF14_TIM17;
-    HAL_GPIO_Init(GPIOB, &GPIO_Handle);
-
-    // HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
-
-    return 0;
-}
-
-uint8_t ls013b7dh03_gpio_cs_control(uint8_t state) {
-    if (state)
-        HAL_GPIO_WritePin(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_SET);
-    else
-        HAL_GPIO_WritePin(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_RESET);
-
-    return 0;
-}
-
-void ls013b7dh03_delay_ms(uint32_t ms) {
-    HAL_Delay(ms);
-}
-
-uint8_t uart_gpio_init(void) {
-
-    /* LPUART1 GPIO Init */
-    GPIO_InitTypeDef GPIOHandle;
+    GPIOHandle.Pin = GPIO_PIN_9;
     GPIOHandle.Mode = GPIO_MODE_AF_PP;
-    GPIOHandle.Alternate = GPIO_AF8_LPUART1;
-    GPIOHandle.Pin = GPIO_PIN_2;
+    GPIOHandle.Pull = GPIO_NOPULL;
     GPIOHandle.Speed = GPIO_SPEED_FREQ_MEDIUM;
+    GPIOHandle.Alternate = GPIO_AF14_TIM17;
+    HAL_GPIO_Init(GPIOB, &GPIOHandle);
 
-    HAL_GPIO_Init(GPIOA, &GPIOHandle);
-    
+    GPIOHandle.Pin = GPIO_PIN_4; 
+    GPIOHandle.Mode = GPIO_MODE_IT_FALLING;
+    GPIOHandle.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(GPIOB, &GPIOHandle);
+
+    HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
     return 0;
 }
 
+void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
+    if (state) {
+        HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
+    } else {
+        HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
+    }
+}
 
-uint8_t gpio_init(void) {
-    uart_gpio_init();
-    ssd1681_gpio_init();
-    max30102_gpio_init();
+uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
+    return HAL_GPIO_ReadPin(port, pin);
+}
 
-    return 0;
+void bsp_delay_ms(uint32_t ms) {
+    HAL_Delay(ms);
 }

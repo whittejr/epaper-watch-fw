@@ -7,80 +7,40 @@
 */
 
 #include "max30102_interface.h"
-#include "delay.h"
+#include "board_config.h"
 #include "i2c.h"
-#include <stdarg.h>
+#include "gpio.h"
 #include "uart.h"
+#include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
 
 extern volatile uint8_t g_oximeter_data_ready; /* oximeter_hal.c variable*/
 
-/**
- * @brief  interface i2c bus init
- * @return status code
- *         - 0 success
- *         - 1 i2c init failed
- * @note   none
- */
 uint8_t max30102_interface_i2c_init(void) {
-    // return i2c_init();
+    // O I2C é inicializado no BSP (app_system_init -> i2c_init)
     return 0;
 }
 
-/**
- * @brief  interface i2c bus deinit
- * @return status code
- *         - 0 success
- *         - 1 i2c deinit failed
- * @note   none
- */
 uint8_t max30102_interface_i2c_deinit(void) {
-    return i2c_deinit();
+    // O driver não desliga o barramento I2C compartilhado
+    return 0;
 }
 
-/**
- * @brief      interface i2c bus read
- * @param[in]  addr i2c device write address
- * @param[in]  reg i2c register address
- * @param[out] *buf pointer to a data buffer
- * @param[in]  len length of the data buffer
- * @return     status code
- *             - 0 success
- *             - 1 read failed
- * @note       none
- */
 uint8_t max30102_interface_i2c_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
+    // Repassa a chamada para o BSP genérico do I2C
     return i2c_read(addr, reg, buf, len);
 }
 
-/**
- * @brief     interface i2c bus write
- * @param[in] addr i2c device write address
- * @param[in] reg i2c register address
- * @param[in] *buf pointer to a data buffer
- * @param[in] len length of the data buffer
- * @return    status code
- *            - 0 success
- *            - 1 write failed
- * @note      none
- */
 uint8_t max30102_interface_i2c_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
+    // Repassa a chamada para o BSP genérico do I2C
     return i2c_write(addr, reg, buf, len);
 }
 
-/**
- * @brief     interface delay ms
- * @param[in] ms time
- * @note      none
- */
 void max30102_interface_delay_ms(uint32_t ms) {
-    delay_ms(ms);
+    bsp_delay_ms(ms);
 }
 
-/**
- * @brief     interface print format data
- * @param[in] fmt format data
- * @note      none
- */
 void max30102_interface_debug_print(const char *const fmt, ...) {
     char str[256];
     uint16_t len;

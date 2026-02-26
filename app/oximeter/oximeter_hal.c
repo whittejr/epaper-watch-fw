@@ -92,7 +92,7 @@ static uint8_t oximeter_setup(void) {
     }
 
     /* set mode */
-    res = max30102_set_mode(&gs_handle, MAX30102_FIFO_DEFAULT_MODE);
+    res = max30102_set_mode(&gs_handle, MAX30102_FIFO_DEFAULT_MODE); // configured for hr_mode (red led only)
     if (res != 0) {
         max30102_interface_debug_print("max30102: set mode failed.\n");
         (void)max30102_deinit(&gs_handle);
