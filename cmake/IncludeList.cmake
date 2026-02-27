@@ -11,6 +11,10 @@ ${PROJ_PATH}lib/CMSIS/RTOS2/Include
 # # # # # #  # # # #
 ${PROJ_PATH}core/inc
 ${PROJ_PATH}lib/bsp/inc
+
+
+# ui
+${PROJ_PATH}app/ui
 # display
 # epaper
 ${PROJ_PATH}app/display

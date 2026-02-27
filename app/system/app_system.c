@@ -28,7 +28,7 @@ uint8_t app_system_init() {
     if (i2c_init() != 0)        return 1;
     if (uart_init() != 0)       return 1;
     
-    if (app_oximeter_init() != 0) return 1;
+    if (app_oximeter_init() != 0)   return 1;
     // if (app_display_init() != 0)    return 1;
 
     app_system_loop();

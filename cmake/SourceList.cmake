@@ -29,6 +29,12 @@ set(source_list
     ${PROJ_PATH}lib/bsp/src/max30102_interface.c
     ${PROJ_PATH}app/oximeter/app_oximeter.c
 
+    # ui
+    ${PROJ_PATH}app/ui/ui_manager.c
+    ${PROJ_PATH}app/ui/screens/screen_watchface.c
+    ${PROJ_PATH}app/ui/screens/screen_menu.c
+    ${PROJ_PATH}app/ui/screens/screen_oximeter.c
+
     # app_glue
     ${PROJ_PATH}app/display/display_hal.c
     ${PROJ_PATH}app/oximeter/oximeter_hal.c
