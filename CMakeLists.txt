@@ -1,63 +1,74 @@
 cmake_minimum_required(VERSION 3.22)
+project(${TARGET_MCU} C CXX ASM)
 
-project(stm32wb55-Template C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-message("Build type: "              ${CMAKE_BUILD_TYPE})
+set(EXECUTABLE "firmware")
 
-set(CMAKE_C_STANDARD                11)
-set(CMAKE_C_STANDARD_REQUIRED       ON)
-set(CMAKE_C_EXTENSIONS              ON)
-set(CMAKE_CXX_STANDARD              17)
-set(CMAKE_CXX_STANDARD_REQUIRED     ON)
-set(CMAKE_CXX_EXTENSIONS            ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS   ON)
+if(NOT DEFINED MCU_FAMILY)
+    message(FATAL_ERROR "MCU_FAMILY não definida!")
+endif()
 
-# includes
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-include(SourceList)
-include(IncludeList)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/mcu/${MCU_FAMILY}.cmake")
 
-set(compiler_define ${compiler_define}
-    "USE_HAL_DRIVER"
-    "STM32WB55xx"
+if("${LINKER_SCRIPT}" STREQUAL "")
+    message(FATAL_ERROR "ERRO: A variável LINKER_SCRIPT está vazia! Verifique o seu arquivo ${MCU_FAMILY}.cmake.")
+endif()
+
+if("${HAL_SOURCES}" STREQUAL "")
+    message(FATAL_ERROR "ERRO: A variável HAL_SOURCES está vazia! A HAL não será compilada.")
+endif()
+
+file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
+    "core/src/*.c"
+    "lib/BSP/src/*.c"
+    "lib/components/*.c"
+)
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS 
+    "core/inc/*.h" 
+    "lib/BSP/inc/*.h" 
+    "lib/components/*.h"
 )
 
-set(PROJ_PATH                       ${CMAKE_CURRENT_SOURCE_DIR})
-set(LINKER_SCRIPT               		${PROJ_PATH}/core/linker/stm32wb55xx_flash_cm4.ld)
-# The use project name for binary file name
-set(EXECUTABLE                      ${CMAKE_PROJECT_NAME})
+set(APP_INCLUDES "")
+foreach(HEADER ${HEADER_FILES})
+    get_filename_component(HEADER_DIR ${HEADER} DIRECTORY)
+    list(APPEND APP_INCLUDES ${HEADER_DIR})
+endforeach()
 
-add_executable(${EXECUTABLE} ${source_list})
-target_include_directories(${EXECUTABLE} PRIVATE ${include_list}) 
-target_compile_definitions(${EXECUTABLE} PRIVATE ${compiler_define})
+if(APP_INCLUDES)
+    list(REMOVE_DUPLICATES APP_INCLUDES)
+endif()
 
-# Compiler options
-target_compile_options(${EXECUTABLE} PRIVATE
-	# ${CPU_FLAGS}
-	-Wall
-	-Wpedantic
-	-Wno-unused-parameter
+add_executable(${EXECUTABLE} ${APP_SOURCES} ${HAL_SOURCES})
+
+target_include_directories(${EXECUTABLE} PRIVATE 
+    ${APP_INCLUDES}
+    ${HAL_INCLUDES} 
 )
-# Linker options
+
+target_compile_definitions(${EXECUTABLE} PRIVATE USE_HAL_DRIVER ${TARGET_MCU})
+target_compile_options(${EXECUTABLE} PRIVATE 
+    -Wall 
+    -Wpedantic 
+    -Wno-unused-parameter
+    -Wno-macro-redefined
+)
+
 target_link_options(${EXECUTABLE} PRIVATE
-	-T${LINKER_SCRIPT}
-	# ${CPU_FLAGS}
-	-Wl,-Map=${CMAKE_PROJECT_NAME}.map
-	--specs=nosys.specs
-	#-u _printf_float                # STDIO float formatting support
-	-Wl,--start-group
-	-lc
-	-lm
-	-lstdc++
-	-lsupc++
-	-Wl,--end-group
-	-Wl,--print-memory-usage
+    -T${LINKER_SCRIPT}
+    -Wl,-Map=${CMAKE_PROJECT_NAME}.map
+    --specs=nosys.specs
+    --specs=nano.specs
+    -Wl,--print-memory-usage
+    -Wl,--gc-sections
 )
-# Execute post-build to print size
+
+target_link_libraries(${EXECUTABLE} PRIVATE -lc -lm)
+
 add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
-	COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${EXECUTABLE}>
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${EXECUTABLE}>
 )
-set_target_properties(${EXECUTABLE}
-    PROPERTIES
-    SUFFIX ".elf"
-)
+set_target_properties(${EXECUTABLE} PROPERTIES SUFFIX ".elf")

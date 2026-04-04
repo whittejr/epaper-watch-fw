@@ -2,34 +2,26 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "OpenOCD",
+      "name": "OpenOCD Debug",
       "type": "cortex-debug",
       "request": "launch",
-
-      "preLaunchTask": "build",
-
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/Debug/stm32wb55-Template.elf",
-
+      "executable": "${workspaceFolder}/build/debug/firmware.elf",
       "servertype": "openocd",
       "interface": "swd",
-      "device": "STM32WB55xx",
-
       "runToEntryPoint": "main",
-      "showDevDebugOutput": "both",
-
       "gdbPath": "/usr/bin/gdb-multiarch",
 
+      "preLaunchTask": "Build",
       "configFiles": [
         "interface/stlink.cfg",
-        "target/stm32wbx.cfg"
+        "target/stm32wbx.cfg" /* change to the correct target */
       ],
-      "svdFile": "${workspaceFolder}/documentation/STM32WB55_CM4.svd",
-
+      "svdFile": "${workspaceFolder}/tools/STM32WB55_CM4.svd", /* change to the correct target */
       "liveWatch": {
         "enabled": true,
         "samplesPerSecond": 20
-      },
+      }
     }
   ]
 }

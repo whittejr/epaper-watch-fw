@@ -1,5 +1,5 @@
 {
-    "name": "stm32wbxx embedded environment",
+    "name": "embedded environment",
     "build": {
         "dockerfile": "Dockerfile",
         "context": ".."
@@ -9,6 +9,7 @@
         "--privileged",
         "-v", "/dev/bus/usb:/dev/bus/usb"
     ],
+    "remoteUser": "root",
     
     "customizations": {
         "vscode": {
@@ -19,9 +20,7 @@
                 "marus25.cortex-debug",
                 "mcu-debug.memory-view",
                 "mcu-debug.rtos-views",
-                "cschlosser.doxdocgen",
-                "eamodio.gitlens",
-                "cweijan.vscode-office"
+                "eamodio.gitlens"
             ]
         }     
     }

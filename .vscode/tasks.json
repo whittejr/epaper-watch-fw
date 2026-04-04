@@ -2,29 +2,30 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "configure",
+      "label": "Configure",
       "type": "shell",
-      "command": "cmake --preset Debug",
+      "command": "cmake --preset chip-debug"
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "cmake --build --preset chip-debug",
+      "dependsOn": [
+        "Configure"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Flash",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32wbx.cfg -c 'program build/debug/firmware.elf verify reset exit'", /* change to the correct target */
+      "dependsOn": [
+        "Build"
+      ],
       "problemMatcher": []
-    },
-    {
-      "label": "build",
-      "type": "shell",
-      "command": "cmake --build --preset Debug",
-      "dependsOn": "configure",
-      "group": "build"
-    },
-    {
-    "label": "flash",
-    "type": "shell",
-    "command": "openocd",
-    "args": [
-      "-f", "interface/stlink.cfg",
-      "-f", "target/stm32wbx.cfg",
-      "-c", "program ${workspaceFolder}/build/Debug/stm32wb55-Template.elf verify reset exit"
-    ],
-    "dependsOn": "build",
-    "problemMatcher": []
     }
   ]
 }

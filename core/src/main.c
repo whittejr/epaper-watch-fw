@@ -1,25 +1,39 @@
 /**
- * @file    main.c
- * @brief
- * @version 1.0.0
- * @author  Alessandro Davi
- * @date    2025-12-31
- */
+* @file    main.c
+* @brief   none
+* @version 0.1.0
+* @a* @author  Your name here
+* @date    2026-03-31
+*/
 
-#include "app_system.h"
-#include "oximeter_hal.h"
-#include <stdio.h>
+#include "stm32wbxx_hal.h"
 
-void errorHandler(void);
+#define led_pin GPIO_PIN_4
+#define led_port GPIOE
 
-int main(void) {
-    if (app_system_init() != 0) errorHandler();
+void clk_enable(void);
 
-    while (1) {
-        
+int main(void)
+{
+    HAL_Init();
+
+    clk_enable();
+
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = led_pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(led_port, &GPIO_InitStruct);
+
+    while (1)
+    {
+        HAL_GPIO_TogglePin(led_port, led_pin);
+        HAL_Delay(300);
     }
+    return 0;
 }
 
-void errorHandler(void) {
-    while (1);
+void clk_enable(void) {
+    __HAL_RCC_GPIOE_CLK_ENABLE();
 }
