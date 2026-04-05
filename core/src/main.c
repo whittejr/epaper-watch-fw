@@ -14,9 +14,6 @@
 int main(void) {
     app_system_init();
 
-    app_display_draw_text();
-    app_display_update();
-
     app_system_loop();
     return 0;
 }

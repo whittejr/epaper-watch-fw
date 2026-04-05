@@ -9,7 +9,6 @@
 #include "display_hal.h"
 #include "ssd1681.h"
 #include "ssd1681_interface.h"
-#include "stm32wbxx_hal.h"
 
 ssd1681_handle_t gs_handle;
 uint8_t gs_lut[153] = {
@@ -138,13 +137,13 @@ static uint8_t ssd1681_setup(ssd1681_handle_t *handle) {
         }
 
         /* set the lut register */
-        res = ssd1681_set_lut_register(handle, gs_lut, 153);
-        if (res != 0) {
-            ssd1681_interface_debug_print("ssd1681: set lut register failed.\n");
-            (void)ssd1681_deinit(&gs_handle);
+        // res = ssd1681_set_lut_register(handle, gs_lut, 153);
+        // if (res != 0) {
+        //     ssd1681_interface_debug_print("ssd1681: set lut register failed.\n");
+        //     (void)ssd1681_deinit(&gs_handle);
 
-            return 1;
-        }
+        //     return 1;
+        // }
 
         /* set the default end option */
         res = ssd1681_set_end_option(handle, SSD1681_BASIC_DEFAULT_END_OPT);
@@ -299,28 +298,63 @@ uint8_t display_init() {extern uint8_t gs_lut[];
 }
 
 uint8_t display_clear() {
+    // ssd1681_gram_clear(&gs_handle, S aD1681_COLOR_BLACK);
+    memset(gs_handle.black_gram, 0x00, sizeof(gs_handle.black_gram));
 
     return 0;
 }
 
-uint8_t display_write() {
+uint8_t display_write(uint8_t x, uint8_t y, const char *text) {
+    uint16_t size = strlen(text);
+
+    ssd1681_gram_write_string(&gs_handle, SSD1681_COLOR_BLACK, x, y, 
+                            (char*)text, size, SSD1681_COLOR_BLACK, SSD1681_FONT_24);
+    return 0;
+}
+
+uint8_t display_update(display_update_mode_t mode) {
     uint8_t res = 0;
-    char value[] = "78 BPM";
-    uint16_t size = strlen(value);
 
-    res = ssd1681_gram_write_string(&gs_handle, SSD1681_COLOR_BLACK, 0, 0,
-                                    value, size, SSD1681_COLOR_BLACK, SSD1681_FONT_24);
-    if (res != 0) gs_handle.debug_print("failed to write");
+    switch (mode) {
+        case SSD1681_UPDATE_FULL:
+            ssd1681_set_b_ram(&gs_handle);
+            
+            // 2. Copia a tela base para a RAM Vermelha e trava ela lá
+            memcpy(gs_handle.red_gram, gs_handle.black_gram, sizeof(gs_handle.black_gram));
+            ssd1681_set_r_ram(&gs_handle); 
+            
+            // 3. Pisca a tela inteira e fixa a imagem
+            res = ssd1681_gram_update(&gs_handle, SSD1681_COLOR_BLACK, SSD1681_UPDATE_FULL);
+            break;
 
-    return 0;
-}
+        case SSD1681_UPDATE_PARTIAL:
+            ssd1681_set_b_ram(&gs_handle);
+            
+            // 3. Manda atualizar. 
+            res = ssd1681_gram_partial_update(&gs_handle); 
+            
+            // ATENÇÃO: Nunca copie a RAM preta para a vermelha aqui no partial!
+            break;
+            
+        case SSD1681_UPDATE_FAST:
+            ssd1681_set_b_ram(&gs_handle);
+            
+            // 2. Manda a tela atualizar fisicamente
+            res = ssd1681_gram_update(&gs_handle, SSD1681_COLOR_BLACK, SSD1681_UPDATE_FAST);
+            
+            // 3. AGORA SIM! A tela já atualizou.
+            // Copiamos a imagem nova para a RAM Vermelha (passado), 
+            // para que a PRÓXIMA transição não borre (evita ghosting).
+            memcpy(gs_handle.red_gram, gs_handle.black_gram, sizeof(gs_handle.black_gram));
+            ssd1681_set_r_ram(&gs_handle); 
+            
+            break;
 
-uint8_t display_update() {
-    uint8_t res;
-
-    res = ssd1681_gram_update(&gs_handle, SSD1681_COLOR_BLACK);
+        default:
+            gs_handle.debug_print("Modo de update invalido!\n");
+            return 1;
+    }
 
     if (res != 0) gs_handle.debug_print("failed to update");
-
-    return 0;
+    return res;
 }

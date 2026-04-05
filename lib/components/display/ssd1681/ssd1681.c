@@ -2364,7 +2364,7 @@ uint8_t ssd1681_clear(ssd1681_handle_t *handle, ssd1681_color_t color)
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_color_t color)
+uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_color_t color, display_update_mode_t mode)
 {
     uint8_t i;
     uint8_t j;
@@ -2458,7 +2458,7 @@ uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_color_t color)
         }
     }
     
-    buf[0] = 0xF7;                                                                                     /* set 0xF7 */
+    buf[0] = mode;                                                                                     /* set 0xF7 */
     res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_DISPLAY_UPDATA_CONTROL_2, buf, 1);         /* write byte */
     if (res != 0)                                                                                      /* check the result */
     {
@@ -3224,4 +3224,112 @@ uint8_t ssd1681_info(ssd1681_info_t *info)
     info->driver_version = DRIVER_VERSION;                          /* set driver version */
     
     return 0;                                                       /* success return 0 */
+}
+
+/**
+ * @brief      update the gram data partially (NO FULL REFRESH)
+ * @param[in] *handle pointer to an ssd1681 handle structure
+ * @return    status code
+ * - 0 success
+ * - 1 gram update failed
+ * - 2 handle is NULL
+ * - 3 handle is not initialized
+ */
+uint8_t ssd1681_gram_partial_update(ssd1681_handle_t *handle)
+{
+    uint8_t res;
+    uint8_t buf[1];
+
+    // 1. Opcional, mas recomendado para partial refresh:
+    // Carregar a LUT (Look-Up Table) de partial refresh se o chip precisar.
+    // O comando 0xFF (abaixo) geralmente usa a LUT de fast-update/partial da memória OTP interna.
+
+    // 2. Configura o Update Control 2 (0x22) para Partial Refresh
+    buf[0] = 0xFF; /* 0xFF = Desativa limpeza (ping-pong), apenas sobrepõe a tinta */
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_DISPLAY_UPDATA_CONTROL_2, buf, 1);
+    if (res != 0)
+    {
+        handle->debug_print("ssd1681: multiple write byte failed (0x22).\n");
+        return 1;
+    }
+
+    // 3. Ativa a sequência (0x20)
+    res = a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_MASTER_ACTIVATION, NULL, 0);
+    if (res != 0)
+    {
+        handle->debug_print("ssd1681: multiple write byte failed (0x20).\n");
+        return 1;
+    }
+    
+    // 4. Aguarda ficar pronto (o driver faz isso antes do próximo comando via busy_pin)
+    return 0;
+}
+
+// 
+
+
+// 
+
+uint8_t ssd1681_set_b_ram(ssd1681_handle_t *handle)
+{
+    uint8_t res;
+    uint8_t buf[2];
+    
+    if (handle == NULL) return 2;
+    if (handle->inited != 1) return 3;
+    
+    // 1. Reseta o ponteiro X para 0
+    buf[0] = 0x00; 
+    a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_X_ADDRESS_COUNTER, buf, 1); 
+    
+    // 2. Reseta o ponteiro Y para o início (0xC7)
+    buf[0] = 0xC7; 
+    buf[1] = 0x00; 
+    a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_Y_ADDRESS_COUNTER, buf, 2); 
+
+    // 3. Envia o comando 0x24 (Write Black RAM)
+    a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_RAM_BLACK, NULL, 0);
+    
+    // 4. Muda o pino DC para DADO e despeja o buffer inteiro
+    handle->spi_cmd_data_gpio_write(SSD1681_DATA);
+    for (uint16_t x = 0; x < 200; x++) {
+        for (uint16_t y = 0; y < 25; y++) {
+            handle->spi_write_cmd(&handle->black_gram[x][y], 1);
+        }
+    }
+    
+    return 0;
+}
+
+// 
+
+uint8_t ssd1681_set_r_ram(ssd1681_handle_t *handle)
+{
+    uint8_t res;
+    uint8_t buf[2];
+    
+    if (handle == NULL) return 2;
+    if (handle->inited != 1) return 3;
+    
+    // 1. Reseta o ponteiro X para 0
+    buf[0] = 0x00; 
+    a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_X_ADDRESS_COUNTER, buf, 1); 
+    
+    // 2. Reseta o ponteiro Y para o início (0xC7)
+    buf[0] = 0xC7; 
+    buf[1] = 0x00; 
+    a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_SET_RAM_Y_ADDRESS_COUNTER, buf, 2); 
+
+    // 3. Envia o comando 0x24 (Write Black RAM)
+    a_ssd1681_multiple_write_byte(handle, SSD1681_CMD_WRITE_RAM_RED, NULL, 0);
+    
+    // 4. Muda o pino DC para DADO e despeja o buffer inteiro
+    handle->spi_cmd_data_gpio_write(SSD1681_DATA);
+    for (uint16_t x = 0; x < 200; x++) {
+        for (uint16_t y = 0; y < 25; y++) {
+            handle->spi_write_cmd(&handle->red_gram[x][y], 1);
+        }
+    }
+    
+    return 0;
 }

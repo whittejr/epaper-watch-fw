@@ -517,6 +517,13 @@ typedef enum
     SSD1681_COLOR_RED   = 0x1,        /**< red color */
 } ssd1681_color_t;
 
+/*
+*/
+typedef enum {
+    SSD1681_UPDATE_FULL = 0xF7,
+    SSD1681_UPDATE_PARTIAL,
+    SSD1681_UPDATE_FAST = 0xC7
+} display_update_mode_t;
 /**
  * @brief ssd1681 font enumeration definition
  */
@@ -782,7 +789,7 @@ uint8_t ssd1681_clear(ssd1681_handle_t *handle, ssd1681_color_t color);
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_color_t color);
+uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_color_t color, display_update_mode_t mode);
 
 /**
  * @brief     clear the screen in the gram
@@ -1599,6 +1606,21 @@ uint8_t ssd1681_write_data(ssd1681_handle_t *handle, uint8_t *buf, uint8_t len);
  * @note       none
  */
 uint8_t ssd1681_read_data(ssd1681_handle_t *handle, uint8_t *buf, uint8_t len);
+
+/**
+ * @brief      update the gram data partially (NO FULL REFRESH)
+ * @param[in] *handle pointer to an ssd1681 handle structure
+ * @return    status code
+ * - 0 success
+ * - 1 gram update failed
+ * - 2 handle is NULL
+ * - 3 handle is not initialized
+ */
+uint8_t ssd1681_gram_partial_update(ssd1681_handle_t *handle);
+
+uint8_t ssd1681_set_b_ram(ssd1681_handle_t *handle);
+
+uint8_t ssd1681_set_r_ram(ssd1681_handle_t *handle);
 
 /**
  * @}

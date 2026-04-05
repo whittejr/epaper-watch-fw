@@ -8,9 +8,8 @@
 
 #ifndef DISPLAY_HAL_H
 #define DISPLAY_HAL_H
-
 #include <stdint.h>
-
+#include "ssd1681.h"
 
 /**
  * @brief ssd1681 basic example default definition
@@ -58,7 +57,7 @@
 
 uint8_t display_init(void);
 uint8_t display_clear(void);
-uint8_t display_update(void);
-uint8_t display_write(void);
+uint8_t display_update(display_update_mode_t mode);
+uint8_t display_write(uint8_t x, uint8_t y, const char *text);
 
 #endif // DISPLAY_HAL_H

@@ -18,18 +18,19 @@ uint8_t app_display_init(void) {
 }
 
 uint8_t app_display_clear(void) {
+    display_clear();
 
     return 0;
 }
 
-uint8_t app_display_draw_text(void) {
-    display_write();
+uint8_t app_display_draw_text(uint8_t x, uint8_t y, const char *text) {
+    display_write(x, y, text);
 
     return 0;
 }
 
-uint8_t app_display_update(void) {
-    display_update();
+uint8_t app_display_update(display_update_mode_t mode) {
+    display_update(mode);
     
     return 0;
 }

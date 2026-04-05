@@ -1,71 +1,48 @@
-// /**
-// * @file    screen_watchface.c
-// * @brief   none
-// * @version 0.1.0
-// * @author  Alessandro Davi
-// * @date    2026-02-27
-// */
+#include "ui_manager.h"
+#include "app_display.h"
+#include <stdio.h>
 
-// #include "ui_manager.h"
-// #include "app_display.h"
-// #include "clock.h"
-// #include <stdio.h>
+extern const AppScreen_t Screen_Menu; // Declara a existência da outra tela
 
-// extern const AppScreen_t Screen_MainMenu;
+static uint32_t segundos = 0;
 
-// // --- LAYOUT ---
-// #define TIME_X      40
-// #define TIME_Y      80
-// #define DATE_X      60
-// #define DATE_Y      110
-
-// static void Watchface_Draw(void) {
-//     char time_str[16];
-//     char date_str[16];
+static void Watchface_Draw(display_update_mode_t mode) {
+    char buffer[32];
     
-
-//     sprintf(time_str, "12:34:56");
-//     sprintf(date_str, "25 FEV");
-
-
-//     App_Display_Clear(WHITE);
+    app_display_clear(); // Limpa o buffer local (RAM preta)
     
+    // Desenha o título e as instruções
+    app_display_draw_text(20, 20, "WATCHFACE");
+    app_display_draw_text(10, 160, "Bem Vindo, Alessandro");
 
-//     App_Display_DrawText(TIME_X, TIME_Y, time_str);
+    // Desenha o dado dinâmico
+    // snprintf(buffer, sizeof(buffer), "Tempo: %u", segundos);
+    // app_display_draw_text(20, 80, buffer);
     
-//     App_Display_DrawText(DATE_X, DATE_Y, date_str);
-    
-//     App_Display_Update();
-// }
+    // Dispara a atualização física
+    app_display_update(mode);
+}
 
-// static void OnEnter(void) {
-//     Watchface_Draw();
-// }
+static void Watchface_OnEnter(void) {
+    // Ao entrar na tela, sempre fazemos um FULL REFRESH
+    Watchface_Draw(SSD1681_UPDATE_FAST);
+}
 
-// static void OnEvent(UI_Event_t event) {
-//     switch (event) {
-//         case EVENT_TICK_1SEC:
+static void Watchface_OnEvent(UI_Event_t event) {
+    if (event == EVENT_TICK_1SEC) {
+        segundos++;
+        // Atualiza apenas os números, sem piscar (PARTIAL)
+        Watchface_Draw(SSD1681_UPDATE_PARTIAL); 
+    }
+    else if (event == EVENT_BTN_SELECT) {
+        // Transição de tela!
+        UI_Manager_SwitchScreen(&Screen_Menu);
+    }
+}
 
-//             Watchface_Draw();
-//             break;
-
-//         case EVENT_BTN_SELECT:
-
-//             UI_Manager_SwitchScreen(&Screen_MainMenu);
-//             break;
-            
-//         default:
-//             break;
-//     }
-// }
-
-// static void OnExit(void) {
-
-// }
-
-// const AppScreen_t Screen_Watchface = {
-//     .name = "Watchface",
-//     .on_enter = OnEnter,
-//     .on_event = OnEvent,
-//     .on_exit = OnExit
-// };
+const AppScreen_t Screen_Watchface = {
+    .name = "Watchface",
+    .on_enter = Watchface_OnEnter,
+    .on_event = Watchface_OnEvent,
+    .on_exit = NULL // Não precisamos fazer nada ao sair
+};
