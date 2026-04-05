@@ -23,14 +23,21 @@
 #define EPD_SCK_PIN      GPIO_PIN_1
 
 /* E-PAPER CONTROL PINS */
-#define EPD_RST_PORT     GPIOB
+#define EPD_BSY_PORT     GPIOA
+#define EPD_BSY_PIN      GPIO_PIN_5
+// #define EPD_RST_PORT     GPIOB
+// #define EPD_RST_PIN      GPIO_PIN_6
+// #define EPD_DC_PORT      GPIOB
+// #define EPD_DC_PIN       GPIO_PIN_7
+// #define EPD_CS_PORT      GPIOA
+// #define EPD_CS_PIN       GPIO_PIN_4
+#define EPD_RST_PORT     GPIOA
 #define EPD_RST_PIN      GPIO_PIN_6
-#define EPD_DC_PORT      GPIOB
-#define EPD_DC_PIN       GPIO_PIN_7
+#define EPD_DC_PORT      GPIOA
+#define EPD_DC_PIN       GPIO_PIN_8
 #define EPD_CS_PORT      GPIOA
-#define EPD_CS_PIN       GPIO_PIN_4
-#define EPD_BSY_PORT     GPIOB
-#define EPD_BSY_PIN      GPIO_PIN_9
+#define EPD_CS_PIN       GPIO_PIN_9
+
 
 /* MIP (MEMORY IN PIXEL) LCD PINS */
 #define MIP_SPI_INSTANCE  SPI1

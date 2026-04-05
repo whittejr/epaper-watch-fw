@@ -9,11 +9,13 @@
 #ifndef DRIVER_SSD1681_BASIC_H
 #define DRIVER_SSD1681_BASIC_H
 
-#include "ssd1681.h"
-#include "ls013b7dh03.h"
+#include "stdint.h"
 
-                                                                                   /**< normal mode */
+#include "ssd1681.h"
 
 uint8_t app_display_init(void);
+uint8_t app_display_clear(void);
+uint8_t app_display_draw_text(void);
+uint8_t app_display_update(void);
 
 #endif // DRIVER_SSD1681_BASIC_H

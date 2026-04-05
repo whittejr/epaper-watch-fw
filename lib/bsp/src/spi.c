@@ -1,5 +1,6 @@
 #include "spi.h"
 #include "board_config.h"
+#include "gpio.h"
 
 static SPI_HandleTypeDef hspi1;
 
@@ -49,11 +50,14 @@ uint8_t spi_deinit(void) {
 }
 
 uint8_t spi_write(uint8_t *buf, uint16_t len) {
+    bsp_gpio_write(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_RESET);
     if (len > 0) {
         if (HAL_SPI_Transmit(&hspi1, buf, len, HAL_MAX_DELAY) != HAL_OK) {
             return 1;
         }
     }
+
+    bsp_gpio_write(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_SET);
     return 0;
 }
 

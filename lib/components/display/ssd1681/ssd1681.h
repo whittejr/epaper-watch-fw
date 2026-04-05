@@ -1,21 +1,60 @@
-/*
- * ssd1681.h
+/**
+ * Copyright (c) 2015 - present LibDriver All rights reserved
+ * 
+ * The MIT License (MIT)
  *
- *  Created on: Apr 13, 2025
- *      Author: alere
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE. 
+ *
+ * @file      driver_ssd1681.h
+ * @brief     driver ssd1681 header file
+ * @version   1.0.0
+ * @author    Shifeng Li
+ * @date      2022-08-30
+ *
+ * <h3>history</h3>
+ * <table>
+ * <tr><th>Date        <th>Version  <th>Author      <th>Description
+ * <tr><td>2022/08/30  <td>1.0      <td>Shifeng Li  <td>first upload
+ * </table>
  */
-#ifndef INC_SSD1681_H_
-#define INC_SSD1681_H_
 
-#include "stdint.h"
-#include "string.h"
+#ifndef DRIVER_SSD1681_H
+#define DRIVER_SSD1681_H
 
-#define EPD_154
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
-#ifdef EPD_154
-#define EPD_W 200
-#define EPD_H 200
+#ifdef __cplusplus
+extern "C"{
 #endif
+
+/**
+ * @defgroup ssd1681_driver ssd1681 driver function
+ * @brief    ssd1681 driver modules
+ * @{
+ */
+
+/**
+ * @addtogroup ssd1681_base_driver
+ * @{
+ */
 
 /**
  * @brief ssd1681 busy max delay definition
@@ -30,52 +69,6 @@
 #ifndef SSD1681_BUSY_MAX_RETRY_TIMES
     #define SSD1681_BUSY_MAX_RETRY_TIMES     2000      /**< 2000 times */
 #endif
-
-
-/**
- * @brief chip command data definition
- */
-#define SSD1681_CMD 0
-#define SSD1681_DATA 1
-
-/*
- * Configuração principal do display e lógica de pintura
- */
-// extern epd_user_config_t epd;
-
-/*
-* Configuração comunicação display
-*/
-// extern spi_config_t spi;
-
-/**
- * @brief ssd1681 handle structure definition
- */
-typedef struct ssd1681_handle_t
-{
-    uint8_t (*spi_init)(void);                                   /**< point to a spi_init function address */
-    uint8_t (*spi_deinit)(void);                                 /**< point to a spi_deinit function address */
-    uint8_t (*spi_write_cmd)(uint8_t *buf, uint16_t len);        /**< point to a spi_write_cmd function address */
-    uint8_t (*spi_read_cmd)(uint8_t *buf, uint16_t len);         /**< point to a spi_read_cmd function address */
-    uint8_t (*spi_cmd_data_gpio_init)(void);                     /**< point to a spi_cmd_data_gpio_init function address */
-    uint8_t (*spi_cmd_data_gpio_deinit)(void);                   /**< point to a spi_cmd_data_gpio_deinit function address */
-    uint8_t (*spi_cmd_data_gpio_write)(uint8_t value);           /**< point to a spi_cmd_data_gpio_write function address */
-    uint8_t (*reset_gpio_init)(void);                            /**< point to a reset_gpio_init function address */
-    uint8_t (*reset_gpio_deinit)(void);                          /**< point to a reset_gpio_deinit function address */
-    uint8_t (*reset_gpio_write)(uint8_t value);                  /**< point to a reset_gpio_write function address */
-    uint8_t (*busy_gpio_init)(void);                             /**< point to a busy_gpio_init function address */
-    uint8_t (*busy_gpio_deinit)(void);                           /**< point to a busy_gpio_deinit function address */
-    uint8_t (*busy_gpio_read)(uint8_t *value);                   /**< point to a busy_gpio_read function address */
-    void (*debug_print)(const char *const fmt, ...);             /**< point to a debug_print function address */
-    void (*delay_ms)(uint32_t ms);                               /**< point to a delay_ms function address */
-    uint8_t inited;                                              /**< inited flag */
-    uint8_t bw_gram[200][25];                                 /**< black gram buffer */
-    uint8_t red_gram[200][25];                                   /**< red gram buffer */
-} ssd1681_handle_t;
-
-
-#define DRIVER_SSD1681_LINK_SPI_INIT(HANDLE, FUC)                      (HANDLE)->spi_init = FUC
-#define DRIVER_SSD1681_LINK_SPI_WRITE_CMD(HANDLE, FUC)                 (HANDLE)->spi_write_cmd = FUC
 
 /**
  * @brief ssd1681 bool enumeration definition
@@ -347,16 +340,6 @@ typedef enum
 } ssd1681_vci_level_t;
 
 /**
- * @brief ssd1681 vci level enumeration definition
- */
-typedef enum  
-{
-    SSD1681_UPDATE_TYPE_FULL =      0xF7,
-    SSD1681_UPDATE_TYPE_FAST =      0xC7,
-    SSD1681_UPDATE_TYPE_PARTIAL =   0xFF,
-} ssd1681_update_type_t;
-
-/**
  * @brief ssd1681 temperature sensor enumeration definition
  */
 typedef enum  
@@ -530,7 +513,7 @@ typedef enum
  */
 typedef enum  
 {
-    SSD1681_COLOR_BW = 0x0,        /**< black color */
+    SSD1681_COLOR_BLACK = 0x0,        /**< black color */
     SSD1681_COLOR_RED   = 0x1,        /**< red color */
 } ssd1681_color_t;
 
@@ -543,6 +526,31 @@ typedef enum
     SSD1681_FONT_16 = 0x10,        /**< font 16 */
     SSD1681_FONT_24 = 0x18,        /**< font 24 */
 } ssd1681_font_t;
+
+/**
+ * @brief ssd1681 handle structure definition
+ */
+typedef struct ssd1681_handle_s
+{
+    uint8_t (*spi_init)(void);                                   /**< point to a spi_init function address */
+    uint8_t (*spi_deinit)(void);                                 /**< point to a spi_deinit function address */
+    uint8_t (*spi_write_cmd)(uint8_t *buf, uint16_t len);        /**< point to a spi_write_cmd function address */
+    uint8_t (*spi_read_cmd)(uint8_t *buf, uint16_t len);         /**< point to a spi_read_cmd function address */
+    uint8_t (*spi_cmd_data_gpio_init)(void);                     /**< point to a spi_cmd_data_gpio_init function address */
+    uint8_t (*spi_cmd_data_gpio_deinit)(void);                   /**< point to a spi_cmd_data_gpio_deinit function address */
+    uint8_t (*spi_cmd_data_gpio_write)(uint8_t value);           /**< point to a spi_cmd_data_gpio_write function address */
+    uint8_t (*reset_gpio_init)(void);                            /**< point to a reset_gpio_init function address */
+    uint8_t (*reset_gpio_deinit)(void);                          /**< point to a reset_gpio_deinit function address */
+    uint8_t (*reset_gpio_write)(uint8_t value);                  /**< point to a reset_gpio_write function address */
+    uint8_t (*busy_gpio_init)(void);                             /**< point to a busy_gpio_init function address */
+    uint8_t (*busy_gpio_deinit)(void);                           /**< point to a busy_gpio_deinit function address */
+    uint8_t (*busy_gpio_read)(uint8_t *value);                   /**< point to a busy_gpio_read function address */
+    void (*debug_print)(const char *const fmt, ...);             /**< point to a debug_print function address */
+    void (*delay_ms)(uint32_t ms);                               /**< point to a delay_ms function address */
+    uint8_t inited;                                              /**< inited flag */
+    uint8_t black_gram[200][25];                                 /**< black gram buffer */
+    uint8_t red_gram[200][25];                                   /**< red gram buffer */
+} ssd1681_handle_t;
 
 /**
  * @brief ssd1681 information structure definition
@@ -560,10 +568,16 @@ typedef struct ssd1681_info_s
     uint32_t driver_version;           /**< driver version */
 } ssd1681_info_t;
 
+/**
+ * @}
+ */
 
-
-uint8_t ssd1681_init(ssd1681_handle_t *handle);
-uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
+/**
+ * @defgroup ssd1681_link_driver ssd1681 link driver function
+ * @brief    ssd1681 link driver modules
+ * @ingroup  ssd1681_driver
+ * @{
+ */
 
 /**
  * @brief     initialize ssd1681_handle_t structure
@@ -571,8 +585,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] STRUCTURE ssd1681_handle_t
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_INIT(HANDLE, STRUCTURE)                            \
-    memset(HANDLE, 0, sizeof(STRUCTURE))
+#define DRIVER_SSD1681_LINK_INIT(HANDLE, STRUCTURE)                     memset(HANDLE, 0, sizeof(STRUCTURE))
 
 /**
  * @brief     link spi_init function
@@ -580,7 +593,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_init function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_INIT(HANDLE, FUC) (HANDLE)->spi_init = FUC
+#define DRIVER_SSD1681_LINK_SPI_INIT(HANDLE, FUC)                      (HANDLE)->spi_init = FUC
 
 /**
  * @brief     link spi_deinit function
@@ -588,7 +601,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_deinit function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_DEINIT(HANDLE, FUC) (HANDLE)->spi_deinit = FUC
+#define DRIVER_SSD1681_LINK_SPI_DEINIT(HANDLE, FUC)                    (HANDLE)->spi_deinit = FUC
 
 /**
  * @brief     link spi_write_cmd function
@@ -596,8 +609,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_write_cmd function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_WRITE_CMD(HANDLE, FUC)                         \
-    (HANDLE)->spi_write_cmd = FUC
+#define DRIVER_SSD1681_LINK_SPI_WRITE_CMD(HANDLE, FUC)                 (HANDLE)->spi_write_cmd = FUC
 
 /**
  * @brief     link spi_read_cmd function
@@ -605,8 +617,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_read_cmd function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_READ_CMD(HANDLE, FUC)                          \
-    (HANDLE)->spi_read_cmd = FUC
+#define DRIVER_SSD1681_LINK_SPI_READ_CMD(HANDLE, FUC)                  (HANDLE)->spi_read_cmd = FUC
 
 /**
  * @brief     link spi_cmd_data_gpio_init function
@@ -614,8 +625,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_cmd_data_gpio_init function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_INIT(HANDLE, FUC)                \
-    (HANDLE)->spi_cmd_data_gpio_init = FUC
+#define DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_INIT(HANDLE, FUC)        (HANDLE)->spi_cmd_data_gpio_init = FUC
 
 /**
  * @brief     link spi_cmd_data_gpio_deinit function
@@ -623,8 +633,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_cmd_data_gpio_deinit function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_DEINIT(HANDLE, FUC)              \
-    (HANDLE)->spi_cmd_data_gpio_deinit = FUC
+#define DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_DEINIT(HANDLE, FUC)      (HANDLE)->spi_cmd_data_gpio_deinit = FUC
 
 /**
  * @brief     link spi_cmd_data_gpio_write function
@@ -632,8 +641,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a spi_cmd_data_gpio_write function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_WRITE(HANDLE, FUC)               \
-    (HANDLE)->spi_cmd_data_gpio_write = FUC
+#define DRIVER_SSD1681_LINK_SPI_CMD_DATA_GPIO_WRITE(HANDLE, FUC)       (HANDLE)->spi_cmd_data_gpio_write = FUC
 
 /**
  * @brief     link reset_gpio_init function
@@ -641,8 +649,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a reset_gpio_init function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_RESET_GPIO_INIT(HANDLE, FUC)                       \
-    (HANDLE)->reset_gpio_init = FUC
+#define DRIVER_SSD1681_LINK_RESET_GPIO_INIT(HANDLE, FUC)               (HANDLE)->reset_gpio_init = FUC
 
 /**
  * @brief     link reset_gpio_deinit function
@@ -650,8 +657,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a reset_gpio_deinit function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_RESET_GPIO_DEINIT(HANDLE, FUC)                     \
-    (HANDLE)->reset_gpio_deinit = FUC
+#define DRIVER_SSD1681_LINK_RESET_GPIO_DEINIT(HANDLE, FUC)             (HANDLE)->reset_gpio_deinit = FUC
 
 /**
  * @brief     link reset_gpio_write function
@@ -659,8 +665,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a reset_gpio_write function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_RESET_GPIO_WRITE(HANDLE, FUC)                      \
-    (HANDLE)->reset_gpio_write = FUC
+#define DRIVER_SSD1681_LINK_RESET_GPIO_WRITE(HANDLE, FUC)              (HANDLE)->reset_gpio_write = FUC
 
 /**
  * @brief     link busy_gpio_init function
@@ -668,8 +673,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a busy_gpio_init function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_BUSY_GPIO_INIT(HANDLE, FUC)                        \
-    (HANDLE)->busy_gpio_init = FUC
+#define DRIVER_SSD1681_LINK_BUSY_GPIO_INIT(HANDLE, FUC)                (HANDLE)->busy_gpio_init = FUC
 
 /**
  * @brief     link busy_gpio_deinit function
@@ -677,8 +681,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a busy_gpio_init function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_BUSY_GPIO_DEINIT(HANDLE, FUC)                      \
-    (HANDLE)->busy_gpio_deinit = FUC
+#define DRIVER_SSD1681_LINK_BUSY_GPIO_DEINIT(HANDLE, FUC)              (HANDLE)->busy_gpio_deinit = FUC
 
 /**
  * @brief     link busy_gpio_read function
@@ -686,8 +689,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a busy_gpio_read function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_BUSY_GPIO_READ(HANDLE, FUC)                        \
-    (HANDLE)->busy_gpio_read = FUC
+#define DRIVER_SSD1681_LINK_BUSY_GPIO_READ(HANDLE, FUC)                (HANDLE)->busy_gpio_read = FUC
 
 /**
  * @brief     link delay_ms function
@@ -695,7 +697,7 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a delay_ms function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_DELAY_MS(HANDLE, FUC) (HANDLE)->delay_ms = FUC
+#define DRIVER_SSD1681_LINK_DELAY_MS(HANDLE, FUC)                      (HANDLE)->delay_ms = FUC
 
 /**
  * @brief     link debug_print function
@@ -703,9 +705,18 @@ uint8_t ssd1681_software_reset(ssd1681_handle_t *handle);
  * @param[in] FUC pointer to a debug_print function address
  * @note      none
  */
-#define DRIVER_SSD1681_LINK_DEBUG_PRINT(HANDLE, FUC) (HANDLE)->debug_print = FUC
+#define DRIVER_SSD1681_LINK_DEBUG_PRINT(HANDLE, FUC)                   (HANDLE)->debug_print = FUC
 
+/**
+ * @}
+ */
 
+/**
+ * @defgroup ssd1681_base_driver ssd1681 base driver function
+ * @brief    ssd1681 base driver modules
+ * @ingroup  ssd1681_driver
+ * @{
+ */
 
 /**
  * @brief      get chip's information
@@ -771,7 +782,7 @@ uint8_t ssd1681_clear(ssd1681_handle_t *handle, ssd1681_color_t color);
  *            - 3 handle is not initialized
  * @note      none
  */
-uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_update_type_t type);
+uint8_t ssd1681_gram_update(ssd1681_handle_t *handle, ssd1681_color_t color);
 
 /**
  * @brief     clear the screen in the gram
@@ -881,9 +892,6 @@ uint8_t ssd1681_gram_fill_rect(ssd1681_handle_t *handle, ssd1681_color_t color, 
  * @note      none
  */
 uint8_t ssd1681_gram_draw_picture(ssd1681_handle_t *handle, ssd1681_color_t color, uint8_t left, uint8_t top, uint8_t right, uint8_t bottom, uint8_t *img);
-
-uint8_t ssd1681_gram_draw_bitmap(ssd1681_handle_t *handle, uint8_t left, uint8_t top, uint8_t width, uint8_t height,
-                                 const uint8_t *img);
 
 /**
  * @brief     set the driver output
@@ -1592,20 +1600,16 @@ uint8_t ssd1681_write_data(ssd1681_handle_t *handle, uint8_t *buf, uint8_t len);
  */
 uint8_t ssd1681_read_data(ssd1681_handle_t *handle, uint8_t *buf, uint8_t len);
 
+/**
+ * @}
+ */
 
-/*
-* 
-*/
+/**
+ * @}
+ */
 
+#ifdef __cplusplus
+}
+#endif
 
-/*
-*
-*/
-
-uint8_t ssd1681_gram_draw_partial(ssd1681_handle_t *handle, uint16_t x_start, uint16_t y_start,
-                                    const unsigned char *datas, uint16_t PART_COLUMN, uint16_t PART_LINE);
-
-void EPD_Update(ssd1681_handle_t *handle, ssd1681_update_type_t type);
-
-
-#endif /* INC_SSD1681_H_ */
+#endif

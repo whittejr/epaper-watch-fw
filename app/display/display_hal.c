@@ -7,21 +7,19 @@
 */
 #include <string.h>
 #include "display_hal.h"
-#include "ls013b7dh03.h"
 #include "ssd1681.h"
-#include "ls013b7dh03_interface.h"
 #include "ssd1681_interface.h"
 #include "stm32wbxx_hal.h"
 
-/* define display */
-#define LS013B7DH03
-
 ssd1681_handle_t gs_handle;
-extern uint8_t gs_lut[];
+uint8_t gs_lut[153] = {
+    0x80, 0x48, 0x40, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x40, 0x48, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x80, 0x48, 0x40, 0x0, 0x0, 0x0, 0x0,
+    0x0,  0x0,  0x0,  0x0, 0x0, 0x40, 0x48, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0xA, 0x0,
+    0x0,  0x0,  0x0,  0x0, 0x0, 0x8,  0x1,  0x0,  0x8, 0x1, 0x0, 0x2, 0xA,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+    0x0,  0x0,  0x0,  0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0,
+    0x0,  0x0,  0x0,  0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x0,  0x0, 0x0,
+};
 
-ls013b7dh03_handle_t sharp_handle;
-static uint8_t sharp_video_buffer[128 * 128 / 8];
-extern TIM_HandleTypeDef htim17;
 
 /* static functions */
 static uint8_t ssd1681_setup(ssd1681_handle_t *handle) {
@@ -240,7 +238,7 @@ static uint8_t ssd1681_setup(ssd1681_handle_t *handle) {
         }
 
         /* clear the black */
-        res = ssd1681_clear(handle, SSD1681_COLOR_BW);
+        res = ssd1681_clear(handle, SSD1681_COLOR_BLACK);
         if (res != 0) {
             ssd1681_interface_debug_print("ssd1681: clear failed.\n");
             (void)ssd1681_deinit(&gs_handle);
@@ -260,19 +258,8 @@ static uint8_t ssd1681_setup(ssd1681_handle_t *handle) {
     return 0;
 }
 
-
-/*
-* @brief       
-* @param[in]   
-* @return      
-*            - 
-*            - 
-* @note       
-*/
-uint8_t display_init() {
+uint8_t display_init() {extern uint8_t gs_lut[];
     uint8_t res;
-
-    #ifdef SSD1681
         /* link functions */
         DRIVER_SSD1681_LINK_INIT(&gs_handle, ssd1681_handle_t);
         DRIVER_SSD1681_LINK_SPI_INIT(&gs_handle, ssd1681_interface_spi_init);
@@ -292,73 +279,48 @@ uint8_t display_init() {
         DRIVER_SSD1681_LINK_DEBUG_PRINT(&gs_handle, ssd1681_interface_debug_print);
 
         res = ssd1681_init(&gs_handle);
-        if (res != 0) ssd1681_interface_debug_print("ssd1681: init failed.\n");;
+        if (res != 0) {
+            ssd1681_interface_debug_print("ssd1681: init failed.\n");;
+            return 1;
+        }
 
         res = ssd1681_software_reset(&gs_handle);
-        if (res != 0) ssd1681_interface_debug_print("ssd1681: software reset failed.\n");
-
+        if (res != 0) {
+            ssd1681_interface_debug_print("ssd1681: software reset failed.\n");
+            return 1;
+        }
+        
         res = ssd1681_setup(&gs_handle); 
-        if(res != 0) ssd1681_interface_debug_print("ssd1681: setup failed\n");;
-        
-    #elif defined(LS013B7DH03)
-        DRIVER_LS013B7DH03_LINK_INIT(&sharp_handle, ls013b7dh03_handle_t);
-        DRIVER_LS013B7DH03_LINK_SPI_INIT(&sharp_handle, ls013b7dh03_interface_spi_init);
-        DRIVER_LS013B7DH03_LINK_SPI_DEINIT(&sharp_handle, ls013b7dh03_interface_spi_deinit);
-        DRIVER_LS013B7DH03_LINK_SPI_WRITE(&sharp_handle, ls013b7dh03_interface_spi_write);
-        DRIVER_LS013B7DH03_LINK_SPI_WRITE_REFRESH(&sharp_handle, ls013b7dh03_interface_spi_write_refresh);
-        DRIVER_LS013B7DH03_LINK_CS_CONTROL(&sharp_handle, ls013b7dh03_interface_cs_control);
-        DRIVER_LS013B7DH03_LINK_GPIO_INIT(&sharp_handle, ls013b7dh03_interface_gpio_init);
-        DRIVER_LS013B7DH03_LINK_DELAY_MS(&sharp_handle, ls013b7dh03_interface_delay_ms);
-        
-        sharp_handle.framebuffer = sharp_video_buffer;
-        sharp_handle.width = 128;
-        sharp_handle.height = 128;
-
-        res = ls013b7dh03_init(&sharp_handle);
-        if (res != 0) return 1;   
-
-    #endif
-
+        if(res != 0) {
+            ssd1681_interface_debug_print("ssd1681: setup failed\n");
+            return 1;
+        }
     return 0;
 }
 
 uint8_t display_clear() {
-    uint8_t res;
-
-    res = ls013b7dh03_clear(&sharp_handle);
-    if (res != 0) return 1;
 
     return 0;
 }
 
 uint8_t display_write() {
-    
+    uint8_t res = 0;
+    char value[] = "78 BPM";
+    uint16_t size = strlen(value);
+
+    res = ssd1681_gram_write_string(&gs_handle, SSD1681_COLOR_BLACK, 0, 0,
+                                    value, size, SSD1681_COLOR_BLACK, SSD1681_FONT_24);
+    if (res != 0) gs_handle.debug_print("failed to write");
+
     return 0;
 }
 
 uint8_t display_update() {
-    ls013b7dh03_refresh(&sharp_handle);
+    uint8_t res;
 
-    return 0;
-}
+    res = ssd1681_gram_update(&gs_handle, SSD1681_COLOR_BLACK);
 
-uint8_t display_test() {
-
-    DRIVER_LS013B7DH03_LINK_INIT(&sharp_handle, ls013b7dh03_handle_t);
-    DRIVER_LS013B7DH03_LINK_SPI_INIT(&sharp_handle, ls013b7dh03_interface_spi_init);
-    DRIVER_LS013B7DH03_LINK_SPI_DEINIT(&sharp_handle, ls013b7dh03_interface_spi_deinit);
-    DRIVER_LS013B7DH03_LINK_SPI_WRITE(&sharp_handle, ls013b7dh03_interface_spi_write);
-    DRIVER_LS013B7DH03_LINK_SPI_WRITE_REFRESH(&sharp_handle, ls013b7dh03_interface_spi_write_refresh);
-    DRIVER_LS013B7DH03_LINK_CS_CONTROL(&sharp_handle, ls013b7dh03_interface_cs_control);
-    DRIVER_LS013B7DH03_LINK_GPIO_INIT(&sharp_handle, ls013b7dh03_interface_gpio_init);
-    DRIVER_LS013B7DH03_LINK_DELAY_MS(&sharp_handle, ls013b7dh03_interface_delay_ms);
-    
-
-    sharp_handle.framebuffer = sharp_video_buffer;
-    sharp_handle.width = 128;
-    sharp_handle.height = 128;
-
-    ls013b7dh03_test(&sharp_handle);
+    if (res != 0) gs_handle.debug_print("failed to update");
 
     return 0;
 }

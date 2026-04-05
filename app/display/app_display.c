@@ -11,25 +11,27 @@
 #include "display_hal.h"
 #include "stm32wbxx_hal.h"
 
-
-
-#define BMP_DEFINE
-#include "bmp.h"
-
-
-extern uint32_t red_buffer[32];
-extern uint32_t ir_buffer[32];
-
-/*
-* MIP
-*/
 uint8_t app_display_init(void) {
     display_init();
-    
-    // display_split();
-    // display_update();
-    // display_clear();  
-    
-    // display_test();
+
     return 0;
 }
+
+uint8_t app_display_clear(void) {
+
+    return 0;
+}
+
+uint8_t app_display_draw_text(void) {
+    display_write();
+
+    return 0;
+}
+
+uint8_t app_display_update(void) {
+    display_update();
+    
+    return 0;
+}
+
+

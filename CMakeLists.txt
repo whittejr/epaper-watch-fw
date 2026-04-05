@@ -23,13 +23,15 @@ endif()
 
 file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
     "core/src/*.c"
-    "lib/BSP/src/*.c"
+    "lib/bsp/src/*.c"
     "lib/components/*.c"
+    "app/*.c"
 )
 file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS 
     "core/inc/*.h" 
-    "lib/BSP/inc/*.h" 
+    "lib/bsp/inc/*.h" 
     "lib/components/*.h"
+    "app/*.c"
 )
 
 set(APP_INCLUDES "")
@@ -55,6 +57,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
     -Wpedantic 
     -Wno-unused-parameter
     -Wno-macro-redefined
+    -fdiagnostics-color=always 
 )
 
 target_link_options(${EXECUTABLE} PRIVATE
