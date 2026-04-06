@@ -59,5 +59,7 @@ uint8_t display_init(void);
 uint8_t display_clear(void);
 uint8_t display_update(display_update_mode_t mode);
 uint8_t display_write(uint8_t x, uint8_t y, const char *text);
+uint8_t display_draw_pixel(uint8_t x, uint8_t y);
+uint8_t display_draw_bitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h);
 
 #endif // DISPLAY_HAL_H

@@ -2,7 +2,7 @@
 * @file    it.h
 * @brief   none
 * @version 0.1.0
-* @author  Your name here
+* @author  Alessandro Davi
 * @date    2026-04-01
 */
 

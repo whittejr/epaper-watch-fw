@@ -1,7 +1,16 @@
+/**
+* @file    screen_config.c
+* @brief   none
+* @version 0.1.0
+* @author  Alessandro Davi
+* @date    2026-04-05
+*/
+
 #include "ui_manager.h"
 #include "app_display.h"
+#include "ui_layout.h"
+#include "icons.h"
 
-// Para poder voltar
 extern const AppScreen_t Screen_Menu; 
 
 static const char *config_items[] = {
@@ -16,15 +25,21 @@ static uint8_t cursor_cfg = 0;
 static void Config_Draw(display_update_mode_t mode) {
     app_display_clear();
     
-    app_display_draw_text(30, 5, "CONFIGS");
+    // 1. Título Fixo
+    app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, LAYOUT_STATUS_Y, 1, "CONFIGURACOES");
+    
+    // 2. Ícone estático de voltar (Demonstração do layout livre)
+    app_display_draw_bitmap(LAYOUT_STATUS_BACK_X, LAYOUT_STATUS_Y, icon_back_16x16, 16, 16);
 
+    // 3. Lista de Opções (Usando o mesmo espaçamento padrão do menu)
     for (int i = 0; i < CONFIG_COUNT; i++) {
-        uint16_t pos_y = 50 + (i * 40); // Mais espaçado, só tem 3 opções
+        uint16_t pos_y = LAYOUT_MENU_START_Y + (i * LAYOUT_MENU_SPACING); 
         
         if (i == cursor_cfg) {
-            app_display_draw_text(10, pos_y, ">");
+            app_display_draw_text(LAYOUT_MENU_CURSOR_X, pos_y, ">");
         }
-        app_display_draw_text(30, pos_y, config_items[i]);
+        // Aqui não temos array de ícones, então desenhamos apenas o texto
+        app_display_draw_text(LAYOUT_MENU_TEXT_X, pos_y, config_items[i]);
     }
     
     app_display_update(mode);
@@ -32,7 +47,7 @@ static void Config_Draw(display_update_mode_t mode) {
 
 static void Config_OnEnter(void) {
     cursor_cfg = 0;
-    Config_Draw(SSD1681_UPDATE_FULL); // Pisca a tela inteira pra limpar o Menu Antigo
+    Config_Draw(SSD1681_UPDATE_FULL); 
 }
 
 static void Config_OnEvent(UI_Event_t event) {
@@ -40,13 +55,13 @@ static void Config_OnEvent(UI_Event_t event) {
         cursor_cfg++;
         if (cursor_cfg >= CONFIG_COUNT) cursor_cfg = 0;
         
-        Config_Draw(SSD1681_UPDATE_PARTIAL); // Move o cursor macio
+        Config_Draw(SSD1681_UPDATE_PARTIAL); 
     }
     else if (event == EVENT_BTN_SELECT) {
-        // if (cursor_cfg == 2) { 
-            // "Voltar" é o índice 2
+        // Se for o "Voltar" (índice 2)
+        if (cursor_cfg == 2) { 
             UI_Manager_SwitchScreen(&Screen_Menu);
-        // }
+        }
     }
 }
 

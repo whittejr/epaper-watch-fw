@@ -21,7 +21,12 @@
                 "mcu-debug.memory-view",
                 "mcu-debug.rtos-views",
                 "eamodio.gitlens"
-            ]
-        }     
+            ],
+            "settings": {
+                "clangd.arguments": [
+                    "--query-driver=/usr/bin/arm-none-eabi-*"
+                ]
+            }
+        }   
     }
 }

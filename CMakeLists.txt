@@ -31,7 +31,7 @@ file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
     "core/inc/*.h" 
     "lib/bsp/inc/*.h" 
     "lib/components/*.h"
-    "app/*.c"
+    "app/*.h"
 )
 
 set(APP_INCLUDES "")

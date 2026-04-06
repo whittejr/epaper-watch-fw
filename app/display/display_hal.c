@@ -19,9 +19,8 @@ uint8_t gs_lut[153] = {
     0x0,  0x0,  0x0,  0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x0,  0x0, 0x0,
 };
 
-
-/* static functions */
-static uint8_t ssd1681_setup(ssd1681_handle_t *handle) {
+/* static function */
+static uint8_t display_setup(ssd1681_handle_t *handle) {
     uint8_t res;
 
     /* set the default driver output */
@@ -289,7 +288,7 @@ uint8_t display_init() {extern uint8_t gs_lut[];
             return 1;
         }
         
-        res = ssd1681_setup(&gs_handle); 
+        res = display_setup(&gs_handle); 
         if(res != 0) {
             ssd1681_interface_debug_print("ssd1681: setup failed\n");
             return 1;
@@ -309,6 +308,36 @@ uint8_t display_write(uint8_t x, uint8_t y, const char *text) {
 
     ssd1681_gram_write_string(&gs_handle, SSD1681_COLOR_BLACK, x, y, 
                             (char*)text, size, SSD1681_COLOR_BLACK, SSD1681_FONT_24);
+    return 0;
+}
+
+uint8_t display_draw_pixel(uint8_t x, uint8_t y) {
+    // Escreve um pixel preto na RAM
+    ssd1681_gram_write_point(&gs_handle, SSD1681_COLOR_BLACK, x, y, SSD1681_COLOR_BLACK);
+    return 0;
+}
+
+uint8_t display_draw_bitmap(uint8_t x, uint8_t y, const uint8_t *bitmap, uint8_t w, uint8_t h) {
+    int16_t byteWidth = (w + 7) / 8; // Calcula bytes por linha
+    uint8_t byte = 0;
+
+    for (int16_t j = 0; j < h; j++) { // Removemos o y++ daqui
+        for (int16_t i = 0; i < w; i++) {
+            
+            // Pega o byte correto da matriz
+            if (i & 7) {
+                byte <<= 1;
+            } else {
+                byte = bitmap[j * byteWidth + i / 8];
+            }
+            
+            // Se o bit mais significativo (MSB) for 1, desenha o pixel
+            if (byte & 0x80) {
+                // CORRIGIDO: Usando a macro de cor preta em vez de '1'
+                ssd1681_gram_write_point(&gs_handle, SSD1681_COLOR_BLACK, x + i, y + j, SSD1681_COLOR_BLACK);
+            }
+        }
+    }
     return 0;
 }
 
