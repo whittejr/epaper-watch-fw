@@ -57,7 +57,7 @@ static void Menu_Draw(display_update_mode_t mode) {
 
 static void Menu_OnEnter(void) {
     cursor_menu = 0;
-    Menu_Draw(SSD1681_UPDATE_FULL);
+    Menu_Draw(SSD1681_UPDATE_FAST);
 }
 
 static void Menu_OnEvent(UI_Event_t event) {

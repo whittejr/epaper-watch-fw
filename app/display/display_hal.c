@@ -7,6 +7,7 @@
 */
 #include <string.h>
 #include "display_hal.h"
+#include "font_digital_disco.h"
 #include "ssd1681.h"
 #include "ssd1681_interface.h"
 
@@ -19,7 +20,7 @@ uint8_t gs_lut[153] = {
     0x0,  0x0,  0x0,  0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x0,  0x0, 0x0,
 };
 
-/* static function */
+/* static functions */
 static uint8_t display_setup(ssd1681_handle_t *handle) {
     uint8_t res;
 
@@ -256,6 +257,25 @@ static uint8_t display_setup(ssd1681_handle_t *handle) {
     return 0;
 }
 
+static uint8_t display_load_fast_lut(void) {
+    // 1. Configura sensor de temperatura para interno (0x18 -> 0x80)
+    if (ssd1681_set_temperature_sensor(&gs_handle, 0x80) != 0) return 1;
+
+    // 2. Comando para carregar a temperatura lida (0x22 -> 0xB1, seguido de 0x20)
+    if (ssd1681_set_display_sequence(&gs_handle, 0xB1) != 0) return 1;
+    if (ssd1681_set_master_activate(&gs_handle) != 0) return 1;
+
+    // 3. Escreve a temperatura "fake" de 100ºC (0x1A -> 0x64 0x00)
+    // 0x0640 é convertido pela lib para 0x64 e 0x00
+    if (ssd1681_write_temperature_sensor(&gs_handle, 0x0640) != 0) return 1;
+
+    // 4. Carrega a LUT rápida baseada na nova temperatura (0x22 -> 0x91, seguido de 0x20)
+    if (ssd1681_set_display_sequence(&gs_handle, 0x91) != 0) return 1;
+    if (ssd1681_set_master_activate(&gs_handle) != 0) return 1;
+
+    return 0;
+}
+
 uint8_t display_init() {extern uint8_t gs_lut[];
     uint8_t res;
         /* link functions */
@@ -307,9 +327,67 @@ uint8_t display_write(uint8_t x, uint8_t y, const char *text) {
     uint16_t size = strlen(text);
 
     ssd1681_gram_write_string(&gs_handle, SSD1681_COLOR_BLACK, x, y, 
-                            (char*)text, size, SSD1681_COLOR_BLACK, SSD1681_FONT_24);
+                            (char*)text, size, SSD1681_COLOR_BLACK, SSD1681_FONT_16);
     return 0;
 }
+
+// uint8_t display_write(uint8_t x, uint8_t y, const char *text) {
+
+//     const FONT_INFO *font = &digitalDisco_16ptFontInfo;
+
+//     if (!font || !text) return 1;
+
+//     uint8_t cursor_x = x;
+//     uint8_t cursor_y = y;
+
+//     while (*text) {
+//         char c = *text++;
+
+//         // Lida com quebra de linha
+//         if (c == '\n') {
+//             cursor_y += font->height + 2; 
+//             cursor_x = x;
+//             continue;
+//         }
+
+//         // Ignora caracteres fora do range gerado
+//         if (c < font->start_char || c > font->end_char) {
+//             continue; 
+//         }
+
+//         uint8_t char_idx = c - font->start_char;
+//         uint8_t char_width = font->char_info[char_idx].width;
+//         uint16_t char_offset = font->char_info[char_idx].offset;
+
+//         // Trata o espaço
+//         if (c == ' ' || char_width == 0) {
+//             cursor_x += font->space_width;
+//             continue;
+//         }
+
+//         const uint8_t *bitmap = &font->data[char_offset];
+//         uint8_t bytes_per_row = (char_width + 7) / 8; 
+
+//         // Lê os bits da matriz gerada no formato Row-Major
+//         for (uint8_t row = 0; row < font->height; row++) {
+//             for (uint8_t col = 0; col < char_width; col++) {
+                
+//                 uint8_t byte_idx = (row * bytes_per_row) + (col / 8);
+//                 uint8_t bit_mask = 0x80 >> (col % 8);
+
+//                 // No driver do SSD1681, data = 1 acende o pixel na cor selecionada
+//                 if (bitmap[byte_idx] & bit_mask) {
+//                     ssd1681_gram_write_point(&gs_handle, SSD1681_COLOR_BLACK, cursor_x + col, cursor_y + row, 1);
+//                 }
+//             }
+//         }
+
+//         // Avança o cursor (largura da letra + 1 pixel de espaçamento)
+//         cursor_x += char_width + 1; 
+//     }
+    
+//     return 0;
+// }
 
 uint8_t display_draw_pixel(uint8_t x, uint8_t y) {
     // Escreve um pixel preto na RAM
@@ -366,16 +444,19 @@ uint8_t display_update(display_update_mode_t mode) {
             break;
             
         case SSD1681_UPDATE_FAST:
+            display_load_fast_lut();
+
+            // 2. Envia a imagem nova para a RAM Preta
             ssd1681_set_b_ram(&gs_handle);
             
-            // 2. Manda a tela atualizar fisicamente
-            res = ssd1681_gram_update(&gs_handle, SSD1681_COLOR_BLACK, SSD1681_UPDATE_FAST);
+            // 3. Dispara o Fast Update nativamente (0xC7)
+            res = ssd1681_set_display_sequence(&gs_handle, 0xC7);
+            if (res == 0) res = ssd1681_set_master_activate(&gs_handle);
             
-            // 3. AGORA SIM! A tela já atualizou.
-            // Copiamos a imagem nova para a RAM Vermelha (passado), 
-            // para que a PRÓXIMA transição não borre (evita ghosting).
+            // 4. Copiamos a imagem nova para a RAM Vermelha (passado), 
+            // para evitar ghosting na próxima transição.
             memcpy(gs_handle.red_gram, gs_handle.black_gram, sizeof(gs_handle.black_gram));
-            ssd1681_set_r_ram(&gs_handle); 
+            ssd1681_set_r_ram(&gs_handle);
             
             break;
 

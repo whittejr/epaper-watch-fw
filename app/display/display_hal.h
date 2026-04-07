@@ -54,6 +54,20 @@
 #define SSD1681_BASIC_DEFAULT_DURATION               ((SSD1681_PHASE_DURATION_10MS << 4) | (SSD1681_PHASE_DURATION_40MS << 2) | (SSD1681_PHASE_DURATION_40MS << 0)) /**< 10ms && 40ms && 40ms */
 #define SSD1681_BASIC_DEFAULT_MODE                   SSD1681_MODE_NORMAL         
 
+typedef struct {
+    uint8_t width;      
+    uint16_t offset;    
+} FONT_CHAR_INFO;
+
+typedef struct {
+    uint8_t height;      
+    char start_char;     
+    char end_char;       
+    uint8_t space_width; 
+    const FONT_CHAR_INFO* char_info; 
+    const uint8_t* data;             
+} FONT_INFO;
+
 
 uint8_t display_init(void);
 uint8_t display_clear(void);

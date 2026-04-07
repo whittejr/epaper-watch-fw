@@ -18,6 +18,7 @@ extern const uint8_t icon_accel_16x16[];
 extern const uint8_t icon_data_16x16[];
 extern const uint8_t icon_clock_16x16[];
 extern const uint8_t icon_back_16x16[];
+extern const uint8_t icon_battery_16x16[];
 
 
 

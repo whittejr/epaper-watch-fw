@@ -6,7 +6,7 @@
       " * @file ${TM_FILENAME}",
       " * @brief  none",
       " * @version 0.1",
-      " * @author Your name here",
+      " * @author Alessandro Davi",
       " * @date ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}",
       " */",
       "",
@@ -26,7 +26,7 @@
     "* @file    ${TM_FILENAME}",
     "* @brief   none", 
     "* @version 0.1.0",
-    "* @author  Your name here",
+    "* @author  Alessandro Davi",
     "* @date    ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}",
     "*/"
     ],

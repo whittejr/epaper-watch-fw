@@ -47,7 +47,7 @@ static void Config_Draw(display_update_mode_t mode) {
 
 static void Config_OnEnter(void) {
     cursor_cfg = 0;
-    Config_Draw(SSD1681_UPDATE_FULL); 
+    Config_Draw(SSD1681_UPDATE_FAST); 
 }
 
 static void Config_OnEvent(UI_Event_t event) {

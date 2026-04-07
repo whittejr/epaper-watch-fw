@@ -25,18 +25,20 @@ uint8_t ssd1681_interface_spi_deinit(void) {
 
 uint8_t ssd1681_interface_spi_write_cmd(uint8_t *buf, uint16_t len) {
     uint8_t res;
+    
+    bsp_gpio_write(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_RESET);
     res = spi_write(buf, len);
+    bsp_gpio_write(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_SET);
 
     return res;
 }
 
 uint8_t ssd1681_interface_spi_read_cmd(uint8_t *buf, uint16_t len) {
-    uint8_t res;
+    // uint8_t res;
+    // res = spi_read(buf, len);
+    // return res;
 
-    res = spi_read(buf, len);
-
-
-    return res;
+    return 0;
 }
 
 void ssd1681_interface_delay_ms(uint32_t ms) {

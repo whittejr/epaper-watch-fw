@@ -8,8 +8,10 @@
 
 #include "gpio.h"
 #include "board_config.h"
+#include "stm32wb55xx.h"
+#include "stm32wbxx_hal_gpio.h"
 
-// static TIM_HandleTypeDef htim17;
+volatile uint8_t bsp_btn_exti_flag = 0;
 
 uint8_t gpio_init(void) {
     GPIO_InitTypeDef GPIOHandle = {0};
@@ -52,15 +54,23 @@ uint8_t gpio_init(void) {
     HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(EXTI4_IRQn);
 
+    /* BUTTON INT PIN */
+    GPIOHandle.Pin = BUTTON_PIN;
+    GPIOHandle.Mode = GPIO_MODE_IT_RISING_FALLING;
+    GPIOHandle.Pull = GPIO_PULLUP;
+    HAL_GPIO_Init(GPIOB, &GPIOHandle);
+
+    HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
     return 0;
 }
 
 void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
-    if (state) {
+    if (state)
         HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
-    } else {
+    else
         HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
-    }
 }
 
 uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
@@ -69,4 +79,16 @@ uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
 
 void bsp_delay_ms(uint32_t ms) {
     HAL_Delay(ms);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    
+    // Roteia a interrupção: Foi o botão?
+    if (GPIO_Pin == BUTTON_PIN) 
+        bsp_btn_exti_flag = 1;
+    
+    
+    // else if (GPIO_Pin == ADXL_INT_PIN) {
+    //     bsp_adxl_exti_flag = true;
+    // }
 }

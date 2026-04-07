@@ -24,7 +24,7 @@ static void Watchface_Draw(display_update_mode_t mode) {
     app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, LAYOUT_STATUS_Y, 1, "WATCHFACE");
     
     // Mensagem de boas vindas
-    app_display_draw_text(LAYOUT_WF_MSG_X, LAYOUT_WF_MSG_Y, "Bem Vindo, Alessandro");
+    app_display_draw_text(LAYOUT_WF_MSG_X, LAYOUT_WF_MSG_Y, "Bem Vindo!");
 
     // Dado dinâmico (exemplo comentado)
     // snprintf(buffer, sizeof(buffer), "Tempo: %u", segundos);

@@ -9,6 +9,7 @@
 #ifndef IT_H
 #define IT_H
 
+void EXTI0_IRQHandler(void);
 void SysTick_Handler(void);
 
 #endif // IT_H

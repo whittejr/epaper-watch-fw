@@ -16,11 +16,11 @@
 #define EPD_H 200
 
 /* SPI BUS CONFIGURATION (SPI1) */
-#define EPD_SPI_INSTANCE SPI1
-#define EPD_MOSI_PORT    GPIOA
-#define EPD_MOSI_PIN     GPIO_PIN_7
-#define EPD_SCK_PORT     GPIOA
-#define EPD_SCK_PIN      GPIO_PIN_1
+#define SPI_INSTANCE SPI1
+#define MOSI_PORT    GPIOA
+#define MOSI_PIN     GPIO_PIN_7
+#define SCK_PORT     GPIOA
+#define SCK_PIN      GPIO_PIN_1
 
 /* E-PAPER CONTROL PINS */
 #define EPD_BSY_PORT     GPIOA
@@ -37,6 +37,10 @@
 #define EPD_DC_PIN       GPIO_PIN_8
 #define EPD_CS_PORT      GPIOA
 #define EPD_CS_PIN       GPIO_PIN_9
+
+/* ACCELEROMETER PINS */
+#define ACCEL_CS_PORT   GPIOE
+#define ACCEL_CS_PIN    GPIO_PIN_4
 
 
 /* MIP (MEMORY IN PIXEL) LCD PINS */
@@ -59,5 +63,9 @@
 #define I2C_SCL_PIN       GPIO_PIN_9
 #define I2C_SDA_PORT      GPIOA
 #define I2C_SDA_PIN       GPIO_PIN_10
+
+/* BUTTONS */
+#define BUTTON_PORT GPIOB
+#define BUTTON_PIN  GPIO_PIN_0
 
 #endif // BOARD_CONFIG_H
