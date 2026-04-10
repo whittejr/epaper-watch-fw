@@ -98,7 +98,7 @@ uint8_t adxl362_interface_spi_read(uint8_t reg, uint8_t *buf, uint16_t len) {
  */
 uint8_t adxl362_interface_spi_read_address16(uint16_t addr, uint8_t *buf, uint16_t len) {
     uint8_t res;
-
+    
     __set_BASEPRI(1);
 
     bsp_gpio_write(ACCEL_CS_PORT, ACCEL_CS_PIN, GPIO_PIN_RESET);

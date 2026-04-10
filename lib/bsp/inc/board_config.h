@@ -17,6 +17,8 @@
 
 /* SPI BUS CONFIGURATION (SPI1) */
 #define SPI_INSTANCE SPI1
+#define MISO_PORT    GPIOA
+#define MISO_PIN     GPIO_PIN_6
 #define MOSI_PORT    GPIOA
 #define MOSI_PIN     GPIO_PIN_7
 #define SCK_PORT     GPIOA
@@ -31,16 +33,17 @@
 // #define EPD_DC_PIN       GPIO_PIN_7
 // #define EPD_CS_PORT      GPIOA
 // #define EPD_CS_PIN       GPIO_PIN_4
-#define EPD_RST_PORT     GPIOA
-#define EPD_RST_PIN      GPIO_PIN_6
+#define EPD_RST_PORT     GPIOB
+#define EPD_RST_PIN      GPIO_PIN_2
 #define EPD_DC_PORT      GPIOA
 #define EPD_DC_PIN       GPIO_PIN_8
 #define EPD_CS_PORT      GPIOA
 #define EPD_CS_PIN       GPIO_PIN_9
 
 /* ACCELEROMETER PINS */
-#define ACCEL_CS_PORT   GPIOE
-#define ACCEL_CS_PIN    GPIO_PIN_4
+#define ACCEL_CS_PORT   GPIOB
+#define ACCEL_CS_PIN    GPIO_PIN_1
+
 
 
 /* MIP (MEMORY IN PIXEL) LCD PINS */

@@ -63,6 +63,17 @@ uint8_t gpio_init(void) {
     HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
+    /*
+    *   ADXL362 CS PIN
+    */
+    GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIOHandle.Pull = GPIO_PULLUP;
+    GPIOHandle.Pin = ACCEL_CS_PIN;
+    HAL_GPIO_Init(ACCEL_CS_PORT, &GPIOHandle);
+    HAL_GPIO_WritePin(ACCEL_CS_PORT, ACCEL_CS_PIN, GPIO_PIN_SET);
+
+
     return 0;
 }
 

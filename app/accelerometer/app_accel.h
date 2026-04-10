@@ -9,6 +9,9 @@
 #ifndef APP_ACCEL_H
 #define APP_ACCEL_H
 
+#include <stdint.h>
 
+uint8_t app_accel_init(void);
+uint8_t app_accel_read(float g[3]);
 
 #endif // APP_ACCEL_H

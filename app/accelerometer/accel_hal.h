@@ -14,16 +14,12 @@
 
 
 /**
- * @brief adxl362 fifo example default definition
+ * @brief adxl362 basic example default definition
  */
-#define ADXL362_FIFO_DEFAULT_FIFO_TEMPERATURE           ADXL362_BOOL_FALSE                   /**<disable fifo temperature */
-#define ADXL362_FIFO_DEFAULT_FIFO_MODE                  ADXL362_FIFO_MODE_STREAM             /**< stream mode */
-#define ADXL362_FIFO_DEFAULT_FIFO_SAMPLE                128                                  /**< 128 */
-#define ADXL362_FIFO_DEFAULT_INTERRUPT_PIN_LEVEL        ADXL362_INTERRUPT_PIN_LOW            /**< activity low */
-#define ADXL362_FIFO_DEFAULT_BANDWIDTH_ODR              ADXL362_BANDWIDTH_ODR_DIV_2          /**< bandwidth odr 1/2 */
-#define ADXL362_FIFO_DEFAULT_NOISE_MODE                 ADXL362_NOISE_MODE_NORMAL            /**< normal noise mode */
-#define ADXL362_FIFO_DEFAULT_ODR                        ADXL362_ODR_12P5HZ                   /**< 12.5Hz */
-#define ADXL362_FIFO_DEFAULT_RANGE                      ADXL362_RANGE_2G                     /**< 2g */
+#define ADXL362_BASIC_DEFAULT_BANDWIDTH_ODR        ADXL362_BANDWIDTH_ODR_DIV_2        /**< bandwidth odr 1/2 */
+#define ADXL362_BASIC_DEFAULT_NOISE_MODE           ADXL362_NOISE_MODE_NORMAL          /**< normal noise mode */
+#define ADXL362_BASIC_DEFAULT_ODR                  ADXL362_ODR_12P5HZ                 /**< 12.5Hz */
+#define ADXL362_BASIC_DEFAULT_RANGE                ADXL362_RANGE_2G                   /**< 2g */
 
 /*
 *   FUNCTIONS
@@ -37,7 +33,7 @@
  *            - 1 init failed
  * @note      none
  */
-uint8_t accel_init(void (*callback)(adxl362_frame_t *frame, uint16_t frame_len));
+uint8_t accel_init(void);
 
 /**
  * @brief  fifo example deinit
@@ -56,5 +52,7 @@ uint8_t accel_fifo_deinit(void);
  * @note   none
  */
 uint8_t accel_fifo_irq_handler(void);
+
+uint8_t accel_basic_read(float g[3]);
 
 #endif // ACCEL_HAL_H

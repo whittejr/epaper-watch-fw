@@ -10,6 +10,7 @@
 #include "board_config.h"
 #include "app_system.h"
 #include "app_display.h"
+#include "app_accel.h"
 #include "clock.h"
 #include "gpio.h"
 #include "spi.h"
@@ -21,6 +22,8 @@ extern const AppScreen_t Screen_Watchface; // A tela inicial
 
 extern volatile uint8_t bsp_btn_exti_flag;
 
+float g[3];
+
 static button_t button;
 
 uint8_t app_system_init() {
@@ -29,12 +32,16 @@ uint8_t app_system_init() {
     gpio_init();
     uart_init();
     spi_init();
+
+    // app_display_init();
+    app_accel_init();
     
-    app_display_init();
+    app_accel_read(g);
 
     button_init(&button);
-    UI_Manager_Init(&Screen_Watchface);
 
+    // UI_Manager_Init(&Screen_Watchface);
+    while (1);
     return 0;
 }
 

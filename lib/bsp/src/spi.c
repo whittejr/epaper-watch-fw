@@ -1,6 +1,8 @@
 #include "spi.h"
 #include "board_config.h"
 #include "gpio.h"
+#include "stm32wbxx_hal_gpio.h"
+#include "stm32wbxx_hal_spi.h"
 
 static SPI_HandleTypeDef hspi1;
 
@@ -14,6 +16,9 @@ uint8_t spi_init(void) {
 
     GPIOHandle.Pin = SCK_PIN;
     HAL_GPIO_Init(SCK_PORT, &GPIOHandle);
+    
+    GPIOHandle.Pin = MISO_PIN;
+    HAL_GPIO_Init(MISO_PORT, &GPIOHandle);
 
     GPIOHandle.Pin = MOSI_PIN;
     HAL_GPIO_Init(MOSI_PORT, &GPIOHandle);
@@ -58,7 +63,7 @@ uint8_t spi_write(uint8_t *buf, uint16_t len) {
     return 0;
 }
 
-uint8_t spi_write_address16(uint8_t addr, uint8_t *buf, uint16_t len) {
+uint8_t spi_write_address16(uint16_t addr, uint8_t *buf, uint16_t len) {
     uint8_t buffer[2];
     uint8_t res;
 
@@ -97,25 +102,29 @@ uint8_t spi_read(uint8_t *buf, uint16_t len) {
     return 0;
 }
 
-uint8_t spi_read_cmd(uint8_t addr, uint8_t *buf, uint16_t len) {
-    uint8_t buffer;
+uint8_t spi_read_cmd(uint16_t addr, uint8_t *buf, uint16_t len) {
+    uint8_t buffer[2];
     uint8_t res;
 
-    buffer = addr;
-    res = HAL_SPI_Transmit(&hspi1, (uint8_t *)&buffer, 1, 1000);
+    buffer[0] = (uint8_t)(addr >> 8);   
+    buffer[1] = (uint8_t)(addr & 0xFF); 
+    
+    // Fixed: Transmit length from 1 to 2 bytes
+    res = HAL_SPI_Transmit(&hspi1, buffer, 2, 1000);
     if (res != HAL_OK){       
         return 1;
     }
 
     if (len > 0) {
-        res = HAL_SPI_Receive(&hspi1, buf, len, HAL_MAX_DELAY != 0);
-        if (res != 0) {
+        // Fixed: Removed accidental boolean evaluation (HAL_MAX_DELAY != 0)
+        res = HAL_SPI_Receive(&hspi1, buf, len, HAL_MAX_DELAY);
+        if (res != HAL_OK) {
             return 1;
         }
     }
-
     return 0;
 }
+
 
 // uint8_t spi_read_cmd(uint8_t addr, uint8_t *buf, uint16_t len) {
 //     bsp_gpio_write(ACCEL_CS_PORT, ACCEL_CS_PIN, GPIO_PIN_RESET);
