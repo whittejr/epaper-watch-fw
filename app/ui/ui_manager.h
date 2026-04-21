@@ -17,7 +17,8 @@ typedef enum {
     EVENT_BTN_SELECT, 
     EVENT_BTN_BACK,   
     EVENT_TICK_1SEC,  
-    EVENT_SENSOR_READY
+    EVENT_SENSOR_READY,
+    EVENT_ALARM_TRIGGERED
 } UI_Event_t;
 
 

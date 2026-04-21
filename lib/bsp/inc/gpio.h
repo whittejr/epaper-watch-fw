@@ -17,5 +17,6 @@ uint8_t gpio_init(void);
 void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state);
 uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin);
 void bsp_delay_ms(uint32_t ms);
+void gpio_cs_control(uint8_t state);
 
 #endif // GPIO_H

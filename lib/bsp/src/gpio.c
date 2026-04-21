@@ -1,105 +1,100 @@
-/**
- * @file    gpio.c
- * @brief   none
- * @version 0.1.0
- * @author  Alessandro Davi
- * @date    2025-11-05
- */
-
 #include "gpio.h"
 #include "board_config.h"
-#include "stm32wb55xx.h"
-#include "stm32wbxx_hal_gpio.h"
+#include "stm32wbxx_hal.h"
+#include "stm32wbxx_hal_lptim.h"
 
 volatile uint8_t bsp_btn_exti_flag = 0;
 
 uint8_t gpio_init(void) {
-    GPIO_InitTypeDef GPIOHandle = {0};
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    static LPTIM_HandleTypeDef hlptim1 = {0};
 
-    /* LPUART1 */
-    GPIOHandle.Mode = GPIO_MODE_AF_PP;
-    GPIOHandle.Alternate = GPIO_AF8_LPUART1;
-    GPIOHandle.Pin = GPIO_PIN_2;
-    GPIOHandle.Speed = GPIO_SPEED_FREQ_MEDIUM;
-    GPIOHandle.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIOHandle);
+    // Habilita Clocks
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_LPTIM1_CLK_ENABLE();
 
-    /* SSD1681 */
-    GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIOHandle.Pull = GPIO_PULLDOWN;
-    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIOHandle.Pin = EPD_RST_PIN;
-    HAL_GPIO_Init(EPD_RST_PORT, &GPIOHandle);
-    HAL_GPIO_WritePin(EPD_RST_PORT, EPD_RST_PIN, GPIO_PIN_SET);
+    // Button Init (PC13)
+    GPIO_InitStruct.Pin = BUTTON_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
 
-    GPIOHandle.Pull = GPIO_NOPULL;
-    GPIOHandle.Pin = EPD_DC_PIN;
-    HAL_GPIO_Init(EPD_DC_PORT, &GPIOHandle);
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
-    GPIOHandle.Pin = EPD_CS_PIN;
-    HAL_GPIO_Init(EPD_CS_PORT, &GPIOHandle);
-    HAL_GPIO_WritePin(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_SET);
+    // CS, DISP as output
+    HAL_GPIO_WritePin(DISP_CS_PORT, DISP_CS_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(DISP_ON_PORT, DISP_ON_PIN, GPIO_PIN_RESET);
 
-    GPIOHandle.Mode = GPIO_MODE_INPUT;
-    GPIOHandle.Pull = GPIO_NOPULL;
-    GPIOHandle.Pin = EPD_BSY_PIN;
-    HAL_GPIO_Init(EPD_BSY_PORT, &GPIOHandle);
+    GPIO_InitStruct.Pin = DISP_CS_PIN | DISP_ON_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* MAX30102 INT PIN */
-    GPIOHandle.Pin = GPIO_PIN_4; 
-    GPIOHandle.Mode = GPIO_MODE_IT_FALLING;
-    GPIOHandle.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(GPIOB, &GPIOHandle);
+    // spi configuration
+    GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1; 
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
-    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+    // enables display (disp = high)
+    HAL_GPIO_WritePin(DISP_ON_PORT, DISP_ON_PIN, GPIO_PIN_SET);
 
-    /* BUTTON INT PIN */
-    GPIOHandle.Pin = BUTTON_PIN;
-    GPIOHandle.Mode = GPIO_MODE_IT_RISING_FALLING;
-    GPIOHandle.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(GPIOB, &GPIOHandle);
+    // pwm init
+    GPIO_InitStruct.Pin = DISP_EXTCOM_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF1_LPTIM1; 
+    HAL_GPIO_Init(DISP_EXTCOM_PORT, &GPIO_InitStruct);
 
-    HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
-    HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+    hlptim1.Instance = LPTIM1;
+    hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC; 
+    hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV4; 
+    hlptim1.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
+    hlptim1.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
+    hlptim1.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
+    hlptim1.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
 
-    /*
-    *   ADXL362 CS PIN
-    */
-    GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIOHandle.Pull = GPIO_PULLUP;
-    GPIOHandle.Pin = ACCEL_CS_PIN;
-    HAL_GPIO_Init(ACCEL_CS_PORT, &GPIOHandle);
-    HAL_GPIO_WritePin(ACCEL_CS_PORT, ACCEL_CS_PIN, GPIO_PIN_SET);
+    if (HAL_LPTIM_Init(&hlptim1) != HAL_OK) {
+        return 1;
+    }
 
+    // period = 16666, pulse (Duty 50%) = 8333
+    if (HAL_LPTIM_PWM_Start(&hlptim1, 16666, 8333) != HAL_OK) {
+        return 1;
+    }
 
     return 0;
 }
 
-void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
+void gpio_cs_control(uint8_t state) {
     if (state)
-        HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(DISP_CS_PORT, DISP_CS_PIN, GPIO_PIN_SET);
     else
-        HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
-}
-
-uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
-    return HAL_GPIO_ReadPin(port, pin);
+        HAL_GPIO_WritePin(DISP_CS_PORT, DISP_CS_PIN, GPIO_PIN_RESET);
 }
 
 void bsp_delay_ms(uint32_t ms) {
     HAL_Delay(ms);
 }
 
+void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
+    HAL_GPIO_WritePin(port, pin, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
+    return (uint8_t)HAL_GPIO_ReadPin(port, pin);
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    
-    // Roteia a interrupção: Foi o botão?
-    if (GPIO_Pin == BUTTON_PIN) 
+    if (GPIO_Pin == BUTTON_PIN) {
         bsp_btn_exti_flag = 1;
-    
-    
-    // else if (GPIO_Pin == ADXL_INT_PIN) {
-    //     bsp_adxl_exti_flag = true;
-    // }
+    }
 }

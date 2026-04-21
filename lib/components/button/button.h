@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 /* Tempos de configuração (em milissegundos) */
-#define BUTTON_DEBOUNCE_MS     5 
+#define BUTTON_DEBOUNCE_MS     5
 #define BUTTON_LONG_PRESS_MS   200
 
 typedef enum {

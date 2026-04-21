@@ -16,7 +16,7 @@ uint8_t app_accel_init(void) {
 
 uint8_t app_accel_deinit(void) {
 
-    return app_accel_deinit();
+    return accel_deinit();
 }
 
 uint8_t app_accel_read(float g[3]) {

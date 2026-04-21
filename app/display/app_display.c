@@ -10,6 +10,7 @@
 #include "app_display.h"
 #include "display_hal.h"
 #include "stm32wbxx_hal.h"
+#include <string.h>
 
 uint8_t app_display_init(void) {
     display_init();

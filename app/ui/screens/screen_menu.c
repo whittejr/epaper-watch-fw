@@ -10,9 +10,11 @@
 #include "app_display.h"
 #include "ui_layout.h"
 #include "icons.h" 
-
+#include <stddef.h>
 extern const AppScreen_t Screen_Config;
 extern const AppScreen_t Screen_Watchface; 
+extern const AppScreen_t Screen_AdjustTime;
+extern const AppScreen_t Screen_Alarms;
 
 typedef struct {
     const char *text;
@@ -22,7 +24,7 @@ typedef struct {
 static const MenuItem_t menu_items[] = {
     {"Oxi", icon_oximeter_16x16},
     {"Accel", icon_accel_16x16},
-    {"Ver Dados", icon_data_16x16},       
+    {"Alarmes", icon_data_16x16}, // Reusing icon for now       
     {"Hora", icon_clock_16x16},
     {"Config", icon_config_16x16},
     {"Voltar", icon_back_16x16}
@@ -57,7 +59,7 @@ static void Menu_Draw(display_update_mode_t mode) {
 
 static void Menu_OnEnter(void) {
     cursor_menu = 0;
-    Menu_Draw(SSD1681_UPDATE_FAST);
+    Menu_Draw(DISPLAY_UPDATE_NORMAL);
 }
 
 static void Menu_OnEvent(UI_Event_t event) {
@@ -65,17 +67,22 @@ static void Menu_OnEvent(UI_Event_t event) {
         cursor_menu++;
         if (cursor_menu >= MENU_COUNT) cursor_menu = 0;
         
-        Menu_Draw(SSD1681_UPDATE_PARTIAL); 
+        Menu_Draw(DISPLAY_UPDATE_PARTIAL); 
     }
     else if (event == EVENT_BTN_SELECT) {
         switch (cursor_menu) {
+            case 2:
+                UI_Manager_SwitchScreen(&Screen_Alarms);
+                break;
+            case 3:
+                UI_Manager_SwitchScreen(&Screen_AdjustTime);
+                break;
             case 4: 
                 UI_Manager_SwitchScreen(&Screen_Config);
                 break;
             case 5: 
                 UI_Manager_SwitchScreen(&Screen_Watchface);
                 break;
-            // Adicione os outros cases futuramente
         }
     }
 }
@@ -86,3 +93,4 @@ const AppScreen_t Screen_Menu = {
     .on_event = Menu_OnEvent,
     .on_exit = NULL
 };
+

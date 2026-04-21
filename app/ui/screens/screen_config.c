@@ -10,6 +10,7 @@
 #include "app_display.h"
 #include "ui_layout.h"
 #include "icons.h"
+#include <stddef.h>
 
 extern const AppScreen_t Screen_Menu; 
 
@@ -47,7 +48,7 @@ static void Config_Draw(display_update_mode_t mode) {
 
 static void Config_OnEnter(void) {
     cursor_cfg = 0;
-    Config_Draw(SSD1681_UPDATE_FAST); 
+    Config_Draw(DISPLAY_UPDATE_NORMAL); 
 }
 
 static void Config_OnEvent(UI_Event_t event) {
@@ -55,7 +56,7 @@ static void Config_OnEvent(UI_Event_t event) {
         cursor_cfg++;
         if (cursor_cfg >= CONFIG_COUNT) cursor_cfg = 0;
         
-        Config_Draw(SSD1681_UPDATE_PARTIAL); 
+        Config_Draw(DISPLAY_UPDATE_PARTIAL); 
     }
     else if (event == EVENT_BTN_SELECT) {
         // Se for o "Voltar" (índice 2)
@@ -71,3 +72,4 @@ const AppScreen_t Screen_Config = {
     .on_event = Config_OnEvent,
     .on_exit = NULL
 };
+

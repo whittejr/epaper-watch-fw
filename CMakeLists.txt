@@ -26,6 +26,7 @@ file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
     "lib/bsp/src/*.c"
     "lib/components/*.c"
     "app/*.c"
+    "app/alarm/*.c"
 )
 file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS 
     "core/inc/*.h" 
