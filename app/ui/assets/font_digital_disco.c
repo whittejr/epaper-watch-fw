@@ -1243,7 +1243,7 @@ const FONT_CHAR_INFO digitalDisco_16ptDescriptors[] =
 	{17, 1734}, 		// Y 
 	{17, 1785}, 		// Z 
 	{0, 0}, 		// [ 
-	{0, 0}, 		// \ 
+	{0, 0}, 		// backslash 
 	{0, 0}, 		// ] 
 	{0, 0}, 		// ^ 
 	{0, 0}, 		// _ 

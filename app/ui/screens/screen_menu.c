@@ -1,9 +1,6 @@
 /**
 * @file    screen_menu.c
-* @brief   none
-* @version 0.1.0
-* @author  Alessandro Davi
-* @date    2026-04-05
+* @brief   Main menu with Card Style (1 App per screen)
 */
 
 #include "ui_manager.h"
@@ -11,47 +8,61 @@
 #include "ui_layout.h"
 #include "icons.h" 
 #include <stddef.h>
-extern const AppScreen_t Screen_Config;
+
 extern const AppScreen_t Screen_Watchface; 
 extern const AppScreen_t Screen_AdjustTime;
 extern const AppScreen_t Screen_Alarms;
+extern const AppScreen_t Screen_Oximeter;
+extern const AppScreen_t Screen_Accel;
+extern const AppScreen_t Screen_Games;
+extern const AppScreen_t Screen_BLE;
 
 typedef struct {
     const char *text;
     const uint8_t *icon;
+    const AppScreen_t *screen;
 } MenuItem_t;
 
 static const MenuItem_t menu_items[] = {
-    {"Oxi", icon_oximeter_16x16},
-    {"Accel", icon_accel_16x16},
-    {"Alarmes", icon_data_16x16}, // Reusing icon for now       
-    {"Hora", icon_clock_16x16},
-    {"Config", icon_config_16x16},
-    {"Voltar", icon_back_16x16}
+    {"CONEXAO", icon_bt_on_8x8, &Screen_BLE},
+    {"OXIMETRO", icon_oximeter_16x16, &Screen_Oximeter},
+    {"ATIVIDADE", icon_accel_16x16, &Screen_Accel},
+    {"JOGOS", icon_data_16x16, &Screen_Games},
+    {"ALARMES", icon_data_16x16, &Screen_Alarms},       
+    {"RELOGIO", icon_clock_16x16, &Screen_AdjustTime},
+    {"VOLTAR", icon_back_16x16, &Screen_Watchface}
 };
-#define MENU_COUNT 6
+#define MENU_COUNT 7
 
 static uint8_t cursor_menu = 0;
 
 static void Menu_Draw(display_update_mode_t mode) {
     app_display_clear();
-    
-    // 1. Título Fixo no topo
-    app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, LAYOUT_STATUS_Y, 1, "MENU PRINCIPAL");
+    app_display_draw_status_bar();
 
-    // 2. Desenha a lista de opções obedecendo ao ui_layout.h
+    // CARD FRAME
+    app_display_draw_rect(10, 20, 108, 90, 0); // Border
+    app_display_draw_rect(12, 22, 104, 86, 1); // Inner clear
+
+    // ICON (Centered in card)
+    // Scale 16x16 to look bigger or just center it
+    app_display_draw_bitmap(64 - 8, 45, menu_items[cursor_menu].icon, 16, 16, 0);
+
+    // APP NAME
+    app_display_draw_text_aligned(64, 80, 1, menu_items[cursor_menu].text, 0);
+
+    // PAGINATION DOTS
     for (int i = 0; i < MENU_COUNT; i++) {
-        uint16_t pos_y = LAYOUT_MENU_START_Y + (i * LAYOUT_MENU_SPACING); 
-        
+        uint8_t dot_x = 64 - (MENU_COUNT * 4) + (i * 8);
         if (i == cursor_menu) {
-            app_display_draw_text(LAYOUT_MENU_CURSOR_X, pos_y, ">");
+            app_display_draw_rect(dot_x, 115, 4, 4, 0); // Selected dot
+        } else {
+            // Unselected dot (empty square)
+            app_display_draw_rect(dot_x, 115, 4, 1, 0);
+            app_display_draw_rect(dot_x, 118, 4, 1, 0);
+            app_display_draw_rect(dot_x, 115, 1, 4, 0);
+            app_display_draw_rect(dot_x + 3, 115, 1, 4, 0);
         }
-        
-        if (menu_items[i].icon != NULL) {
-            app_display_draw_bitmap(LAYOUT_MENU_ICON_X, pos_y, menu_items[i].icon, 16, 16);
-        }
-
-        app_display_draw_text(LAYOUT_MENU_TEXT_X, pos_y, menu_items[i].text); 
     }
     
     app_display_update(mode);
@@ -66,24 +77,10 @@ static void Menu_OnEvent(UI_Event_t event) {
     if (event == EVENT_BTN_NEXT) {
         cursor_menu++;
         if (cursor_menu >= MENU_COUNT) cursor_menu = 0;
-        
         Menu_Draw(DISPLAY_UPDATE_PARTIAL); 
     }
     else if (event == EVENT_BTN_SELECT) {
-        switch (cursor_menu) {
-            case 2:
-                UI_Manager_SwitchScreen(&Screen_Alarms);
-                break;
-            case 3:
-                UI_Manager_SwitchScreen(&Screen_AdjustTime);
-                break;
-            case 4: 
-                UI_Manager_SwitchScreen(&Screen_Config);
-                break;
-            case 5: 
-                UI_Manager_SwitchScreen(&Screen_Watchface);
-                break;
-        }
+        UI_Manager_SwitchScreen(menu_items[cursor_menu].screen);
     }
 }
 
@@ -93,4 +90,3 @@ const AppScreen_t Screen_Menu = {
     .on_event = Menu_OnEvent,
     .on_exit = NULL
 };
-

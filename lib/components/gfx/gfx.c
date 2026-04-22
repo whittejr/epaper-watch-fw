@@ -52,6 +52,16 @@ void gfx_draw_pixel(gfx_context_t *ctx, uint16_t x, uint16_t y, uint8_t color) {
     }
 }
 
+void gfx_draw_rect(gfx_context_t *ctx, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t color) {
+    if (ctx == NULL) return;
+
+    for (uint16_t i = 0; i < h; i++) {
+        for (uint16_t j = 0; j < w; j++) {
+            gfx_draw_pixel(ctx, x + j, y + i, color);
+        }
+    }
+}
+
 void gfx_write_char(gfx_context_t *ctx, uint16_t x, uint16_t y, char ch, FontDef font, uint8_t color) {
     if (ctx == NULL || ch < 32 || ch > 126) return;
 
@@ -111,4 +121,79 @@ void gfx_draw_bitmap(gfx_context_t *ctx, uint16_t x, uint16_t y, const uint8_t *
             }
         }
     }
+}
+
+void gfx_write_char_v(gfx_context_t *ctx, uint16_t x, uint16_t y, char ch, const FONT_INFO *font, uint8_t color) {
+    if (ctx == NULL || font == NULL) return;
+
+    if (ch == ' ') {
+        for (uint16_t j = 0; j < font->height; j++) {
+            for (uint16_t i = 0; i < font->space_width; i++) {
+                gfx_draw_pixel(ctx, x + i, y + j, !color);
+            }
+        }
+        return;
+    }
+
+    if (ch < font->start_char || ch > font->end_char) return;
+
+    uint8_t char_index = ch - font->start_char;
+    const FONT_CHAR_INFO *char_info = &font->descriptors[char_index];
+    
+    if (char_info->width == 0) return;
+
+    // Clear background first
+    for (uint16_t j = 0; j < font->height; j++) {
+        for (uint16_t i = 0; i < char_info->width; i++) {
+            gfx_draw_pixel(ctx, x + i, y + j, !color);
+        }
+    }
+
+    gfx_draw_bitmap(ctx, x, y, &font->bitmaps[char_info->offset], char_info->width, font->height, color);
+}
+
+void gfx_write_string_v(gfx_context_t *ctx, uint16_t x, uint16_t y, const char *str, const FONT_INFO *font, uint8_t color) {
+    if (ctx == NULL || str == NULL || font == NULL) return;
+
+    uint16_t current_x = x;
+
+    while (*str) {
+        uint8_t w = font->space_width;
+        if (*str != ' ') {
+            if (*str >= font->start_char && *str <= font->end_char) {
+                w = font->descriptors[*str - font->start_char].width;
+            } else {
+                w = 0;
+            }
+        }
+
+        if (current_x + w > ctx->width) {
+            current_x = 0;
+            y += font->height;
+        }
+        
+        if (y + font->height > ctx->height) {
+            break;
+        }
+
+        if (w > 0) {
+            gfx_write_char_v(ctx, current_x, y, *str, font, color);
+            current_x += w;
+        }
+        str++;
+    }
+}
+
+uint16_t gfx_get_string_width_v(const char *str, const FONT_INFO *font) {
+    if (str == NULL || font == NULL) return 0;
+    uint16_t width = 0;
+    while (*str) {
+        if (*str == ' ') {
+            width += font->space_width;
+        } else if (*str >= font->start_char && *str <= font->end_char) {
+            width += font->descriptors[*str - font->start_char].width;
+        }
+        str++;
+    }
+    return width;
 }

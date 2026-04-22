@@ -27,20 +27,20 @@ static void Config_Draw(display_update_mode_t mode) {
     app_display_clear();
     
     // 1. Título Fixo
-    app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, LAYOUT_STATUS_Y, 1, "CONFIGURACOES");
+    app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, LAYOUT_STATUS_Y, 1, "CONFIGURACOES", 0);
     
     // 2. Ícone estático de voltar (Demonstração do layout livre)
-    app_display_draw_bitmap(LAYOUT_STATUS_BACK_X, LAYOUT_STATUS_Y, icon_back_16x16, 16, 16);
+    app_display_draw_bitmap(LAYOUT_STATUS_BACK_X, LAYOUT_STATUS_Y, icon_back_16x16, 16, 16, 0);
 
     // 3. Lista de Opções (Usando o mesmo espaçamento padrão do menu)
     for (int i = 0; i < CONFIG_COUNT; i++) {
         uint16_t pos_y = LAYOUT_MENU_START_Y + (i * LAYOUT_MENU_SPACING); 
         
         if (i == cursor_cfg) {
-            app_display_draw_text(LAYOUT_MENU_CURSOR_X, pos_y, ">");
+            app_display_draw_text(LAYOUT_MENU_CURSOR_X, pos_y, ">", 0);
         }
         // Aqui não temos array de ícones, então desenhamos apenas o texto
-        app_display_draw_text(LAYOUT_MENU_TEXT_X, pos_y, config_items[i]);
+        app_display_draw_text(LAYOUT_MENU_TEXT_X, pos_y, config_items[i], 0);
     }
     
     app_display_update(mode);

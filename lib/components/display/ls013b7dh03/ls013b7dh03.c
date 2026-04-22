@@ -84,6 +84,29 @@ uint8_t ls013b7dh03_refresh(ls013b7dh03_handle_t *handle) {
     return 0;
 }
 
+uint8_t ls013b7dh03_write_raw_frame(ls013b7dh03_handle_t *handle, const uint8_t *frame) {
+    if (handle == NULL || !handle->inited || frame == NULL) return 1;
+
+    uint8_t linebuf[18];
+    uint8_t dummy = 0x00;
+    uint8_t cmd = a_ls013b7dh03_reverse_byte(BIT_WRITECMD);
+
+    handle->cs_control(1);
+    handle->spi_write(&cmd, 1);
+
+    for (uint16_t line = 1; line <= 128; line++) {
+        linebuf[0] = a_ls013b7dh03_reverse_byte((uint8_t)line);
+        memcpy(&linebuf[1], &frame[16 * (line - 1)], 16);
+        linebuf[17] = 0x00; 
+        handle->spi_write(linebuf, 18);
+    }
+
+    handle->spi_write(&dummy, 1);
+    handle->cs_control(0);
+
+    return 0;
+}
+
 uint8_t ls013b7dh03_refresh_partial(ls013b7dh03_handle_t *handle, uint8_t start_line, uint8_t num_lines) {
     if (handle == NULL || !handle->inited || handle->buffer == NULL) return 1;
     if (start_line < 1 || (start_line + num_lines - 1) > LS013B7DH03_HEIGHT) return 1;

@@ -2,6 +2,7 @@
 #include "stm32wbxx_hal.h"
 
 int main(void) {
+    HAL_Init();
     app_system_init();
     app_system_loop();
     return 0;

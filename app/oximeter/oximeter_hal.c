@@ -274,8 +274,8 @@ uint8_t oximeter_event() {
             char tx_buffer[64];
 
             for (uint8_t i = 0; i < samples; i++) {
-                len = snprintf(tx_buffer, sizeof(tx_buffer), "%u,%u\r\n", 
-                                    g_raw_red[i], g_raw_ir[i]);
+                len = snprintf(tx_buffer, sizeof(tx_buffer), "%lu,%lu\r\n", 
+                                                    g_raw_red[i], g_raw_ir[i]);
 
                 if (len > 0)
                     uart_write((uint8_t*) tx_buffer, len);  

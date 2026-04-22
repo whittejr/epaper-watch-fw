@@ -40,6 +40,13 @@ uint8_t ls013b7dh03_basic_clear(void);
  */
 uint8_t ls013b7dh03_basic_refresh(void);
 
+/**
+ * @brief  Write a raw frame directly (bypass internal buffer)
+ * @param  frame pointer to raw bitmap
+ * @return 0: success, 1: error
+ */
+uint8_t ls013b7dh03_basic_write_raw_frame(const uint8_t *frame);
+
 #ifdef __cplusplus
 }
 #endif

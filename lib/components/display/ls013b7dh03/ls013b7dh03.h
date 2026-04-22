@@ -71,6 +71,14 @@ uint8_t ls013b7dh03_clear(ls013b7dh03_handle_t *handle);
 uint8_t ls013b7dh03_refresh(ls013b7dh03_handle_t *handle);
 
 /**
+ * @brief  Write a raw frame buffer directly to display (bypass handle->buffer)
+ * @param  handle pointer to ls013b7dh03 handle
+ * @param  frame pointer to raw 2048 bytes frame
+ * @return 0: success, 1: error
+ */
+uint8_t ls013b7dh03_write_raw_frame(ls013b7dh03_handle_t *handle, const uint8_t *frame);
+
+/**
  * @brief  Partial display refresh from handle->buffer
  * @param  handle pointer to ls013b7dh03 handle
  * @param  start_line line index (1-128)

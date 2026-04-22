@@ -13,9 +13,9 @@ extern const AppScreen_t Screen_Watchface;
 static void AlarmRinging_Draw(void) {
     app_display_clear();
     
-    app_display_draw_text_aligned(64, 40, 1, "!!! ATENCAO !!!");
-    app_display_draw_text_aligned(64, 60, 1, "HORA DO REMEDIO");
-    app_display_draw_text_aligned(64, 100, 1, "CLIQUE P/ SAIR");
+    app_display_draw_text_aligned(64, 40, 1, "!!! ATENCAO !!!", 0);
+    app_display_draw_text_aligned(64, 60, 1, "HORA DO REMEDIO", 0);
+    app_display_draw_text_aligned(64, 100, 1, "CLIQUE P/ SAIR", 0);
     
     app_display_update(DISPLAY_UPDATE_NORMAL);
 }

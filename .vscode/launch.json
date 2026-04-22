@@ -11,7 +11,7 @@
       "interface": "swd",
       "runToEntryPoint": "main",
       "gdbPath": "/usr/bin/gdb-multiarch",
-
+      "rtos": "FreeRTOS",
       "preLaunchTask": "Build",
       "configFiles": [
         "interface/stlink.cfg",

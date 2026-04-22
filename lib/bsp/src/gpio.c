@@ -2,8 +2,11 @@
 #include "board_config.h"
 #include "stm32wbxx_hal.h"
 #include "stm32wbxx_hal_lptim.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "ui_manager.h"
 
-volatile uint8_t bsp_btn_exti_flag = 0;
+extern QueueHandle_t xSystemEventQueue;
 
 uint8_t gpio_init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -22,7 +25,7 @@ uint8_t gpio_init(void) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
 
-    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
     // CS, DISP as output
@@ -92,6 +95,8 @@ void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
 uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
     return (uint8_t)HAL_GPIO_ReadPin(port, pin);
 }
+
+extern volatile uint8_t bsp_btn_exti_flag;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == BUTTON_PIN) {

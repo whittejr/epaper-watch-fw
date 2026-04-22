@@ -1,63 +1,54 @@
 /**
- * @file max30102_app.h
- * @brief  none
- * @version 0.1
- * @author Alessandro Davi
- * @date 2025-12-26
+ * @file app_oximeter.h
+ * @brief  Oximeter application interface
+ * @version 0.2
+ * @author Gemini CLI
+ * @date 2026-04-21
  */
 
-#ifndef MAX30102_APP_H
-#define MAX30102_APP_H
+#ifndef APP_OXIMETER_H
+#define APP_OXIMETER_H
 
-#include "max30102_interface.h"
 #include <stdint.h>
+#include "FreeRTOS.h"
+#include "task.h"
 
 /**
- * @brief  fifo example irq handler
- * @return status code
- *         - 0 success
- *         - 1 run failed
- * @note   none
- */
-uint8_t max30102_fifo_irq_handler(void);
-
-/**
- * @brief     fifo example init
- * @param[in] *fifo_receive_callback pointer to a fifo receive callback
- * @return    status code
- *            - 0 success
- *            - 1 init failed
- * @note      none
+ * @brief Initializes the oximeter application
+ * @return status code (0 for success)
  */
 uint8_t app_oximeter_init(void);
 
 /**
- * @brief  fifo example deinit
- * @return status code
- *         - 0 success
- *         - 1 deinit failed
- * @note   none
+ * @brief Updates the oximeter with a new sample
+ * @param red Raw RED led sample
+ * @param ir Raw IR led sample
+ * @return 1 if new HR/SpO2 result is calculated, 0 otherwise
  */
-uint8_t max30102_fifo_deinit(void);
+uint8_t app_oximeter_update(uint32_t red, uint32_t ir);
 
 /**
- * @brief         read the data
- * @param[out]    *raw_red pointer to a read raw data buffer
- * @param[out]    *raw_ir pointer to a ir raw data buffer
- * @param[in,out] *len pointer to a length buffer
- * @return        status code
- *                - 0 success
- *                - 1 read failed
- * @note          none
+ * @brief Gets the last calculated heart rate
+ * @return BPM
  */
-uint8_t max30102_fifo_read(uint32_t *raw_red, uint32_t *raw_ir, uint8_t *len);
+uint8_t app_oximeter_get_hr(void);
 
 /**
- * @}
+ * @brief Gets the last calculated SpO2 percentage
+ * @return SpO2 %
  */
- uint8_t max30102_event();
+uint8_t app_oximeter_get_spo2(void);
 
- uint8_t oximeter_proccess();
+/**
+ * @brief Triggers calculation manually (if needed)
+ */
+void app_oximeter_calculate(void);
 
+/**
+ * @brief Oximeter background task
+ */
+void vOximeterTask(void *pvParameters);
 
-#endif // MAX30102_APP_H
+extern TaskHandle_t xOximeterTaskHandle;
+
+#endif // APP_OXIMETER_H

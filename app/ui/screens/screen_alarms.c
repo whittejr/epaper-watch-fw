@@ -27,13 +27,13 @@ static void Alarms_Draw(void) {
     char buffer[32];
 
     if (alarm_state == STATE_LIST) {
-        app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, 20, 1, "ALARMES");
+        app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, 20, 1, "ALARMES", 0);
         
         alarm_t* list = app_alarm_get_list();
         for (int i = 0; i < MAX_ALARMS; i++) {
             uint16_t y = 40 + (i * 12);
             if (i == cursor_alarm) {
-                app_display_draw_text(10, y, ">");
+                app_display_draw_text(10, y, ">", 0);
             }
             
             if (list[i].active) {
@@ -41,29 +41,29 @@ static void Alarms_Draw(void) {
             } else {
                 snprintf(buffer, sizeof(buffer), "AL%d: ---", i+1);
             }
-            app_display_draw_text(25, y, buffer);
+            app_display_draw_text(25, y, buffer, 0);
         }
         
         uint16_t footer_y = 110;
-        if (cursor_alarm == MAX_ALARMS) app_display_draw_text(10, footer_y, ">");
-        app_display_draw_text(25, footer_y, "ADICIONAR NOVO");
+        if (cursor_alarm == MAX_ALARMS) app_display_draw_text(10, footer_y, ">", 0);
+        app_display_draw_text(25, footer_y, "ADICIONAR NOVO", 0);
         
-        if (cursor_alarm == MAX_ALARMS + 1) app_display_draw_text(10, footer_y + 12, ">");
-        app_display_draw_text(25, footer_y + 12, "VOLTAR");
+        if (cursor_alarm == MAX_ALARMS + 1) app_display_draw_text(10, footer_y + 12, ">", 0);
+        app_display_draw_text(25, footer_y + 12, "VOLTAR", 0);
 
     } else {
-        app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, 20, 1, "NOVO ALARME");
+        app_display_draw_text_aligned(LAYOUT_STATUS_TITLE_X, 20, 1, "NOVO ALARME", 0);
         
         snprintf(buffer, sizeof(buffer), "%02d:%02d", new_hours, new_minutes);
-        app_display_draw_text_aligned(64, 60, 1, buffer);
+        app_display_draw_text_aligned(64, 60, 1, buffer, 0);
         
         if (alarm_state == STATE_ADD_HOURS) {
-            app_display_draw_text_aligned(64, 80, 1, "^^   ");
+            app_display_draw_text_aligned(64, 80, 1, "^^   ", 0);
         } else {
-            app_display_draw_text_aligned(64, 80, 1, "   ^^");
+            app_display_draw_text_aligned(64, 80, 1, "   ^^", 0);
         }
         
-        app_display_draw_text_aligned(64, 100, 1, "LONG CLICK CONFIRMA");
+        app_display_draw_text_aligned(64, 100, 1, "LONG CLICK CONFIRMA", 0);
     }
     
     app_display_update(DISPLAY_UPDATE_NORMAL);

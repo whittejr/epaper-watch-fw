@@ -35,3 +35,7 @@ uint8_t ls013b7dh03_basic_clear(void) {
 uint8_t ls013b7dh03_basic_refresh(void) {
     return ls013b7dh03_refresh(&gs_handle);
 }
+
+uint8_t ls013b7dh03_basic_write_raw_frame(const uint8_t *frame) {
+    return ls013b7dh03_write_raw_frame(&gs_handle, frame);
+}

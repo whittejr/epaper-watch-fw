@@ -22,8 +22,10 @@ set(HAL_SOURCES
     "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_lptim.c"
     "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc.c"
     "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc_ex.c"
-    
-
+    "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_ipcc.c"
+    "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_hsem.c"
+    "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash.c"
+    "${THIRD_PARTY}/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash_ex.c"
     "${THIRD_PARTY}/CMSIS/Device/ST/STM32WBxx/Source/Templates/system_stm32wbxx.c"
 )
 

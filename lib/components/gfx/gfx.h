@@ -10,6 +10,7 @@
 #define GFX_H
 
 #include "shmfonts.h"
+#include "display_hal.h"
 #include <stdint.h>
 
 typedef struct {
@@ -22,8 +23,13 @@ typedef struct {
 void gfx_init(gfx_context_t *ctx, uint8_t *buffer, uint16_t w, uint16_t h, uint8_t inverted);
 void gfx_clear(gfx_context_t *ctx, uint8_t color);
 void gfx_draw_pixel(gfx_context_t *ctx, uint16_t x, uint16_t y, uint8_t color);
+void gfx_draw_rect(gfx_context_t *ctx, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t color);
 void gfx_draw_bitmap(gfx_context_t *ctx, uint16_t x, uint16_t y, const uint8_t *bitmap, uint16_t w, uint16_t h, uint8_t color);
 void gfx_write_char(gfx_context_t *ctx, uint16_t x, uint16_t y, char ch, FontDef font, uint8_t color);
 void gfx_write_string(gfx_context_t *ctx, uint16_t x, uint16_t y, const char *str, FontDef font, uint8_t color);
+
+void gfx_write_char_v(gfx_context_t *ctx, uint16_t x, uint16_t y, char ch, const FONT_INFO *font, uint8_t color);
+void gfx_write_string_v(gfx_context_t *ctx, uint16_t x, uint16_t y, const char *str, const FONT_INFO *font, uint8_t color);
+uint16_t gfx_get_string_width_v(const char *str, const FONT_INFO *font);
 
 #endif // GFX_H

@@ -25,21 +25,21 @@ static void AdjustTime_Draw(void) {
     char buffer[32];
     app_display_clear();
     
-    app_display_draw_text_aligned(64, 20, 1, "AJUSTAR HORA");
+    app_display_draw_text_aligned(64, 20, 1, "AJUSTAR HORA", 0);
 
     // Hours
     snprintf(buffer, sizeof(buffer), "%02d", adj_hours);
-    app_display_draw_text_aligned(64 - 15, 60, 1, buffer);
-    if (adj_state == ADJUST_HOURS) app_display_draw_text_aligned(64 - 15, 75, 1, "^^");
+    app_display_draw_text_aligned(64 - 15, 60, 1, buffer, 0);
+    if (adj_state == ADJUST_HOURS) app_display_draw_text_aligned(64 - 15, 75, 1, "^^", 0);
 
-    app_display_draw_text_aligned(64, 60, 1, ":");
+    app_display_draw_text_aligned(64, 60, 1, ":", 0);
 
     // Minutes
     snprintf(buffer, sizeof(buffer), "%02d", adj_minutes);
-    app_display_draw_text_aligned(64 + 15, 60, 1, buffer);
-    if (adj_state == ADJUST_MINUTES) app_display_draw_text_aligned(64 + 15, 75, 1, "^^");
+    app_display_draw_text_aligned(64 + 15, 60, 1, buffer, 0);
+    if (adj_state == ADJUST_MINUTES) app_display_draw_text_aligned(64 + 15, 75, 1, "^^", 0);
 
-    app_display_draw_text_aligned(64, 100, 1, (adj_state == ADJUST_HOURS) ? "SET HORAS" : "SET MINUTOS");
+    app_display_draw_text_aligned(64, 100, 1, (adj_state == ADJUST_HOURS) ? "SET HORAS" : "SET MINUTOS", 0);
     
     app_display_update(DISPLAY_UPDATE_NORMAL);
 }
