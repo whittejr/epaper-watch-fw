@@ -40,6 +40,12 @@ uint8_t app_oximeter_get_hr(void);
 uint8_t app_oximeter_get_spo2(void);
 
 /**
+ * @brief Gets the current collection progress (0 to 100)
+ * @return Percentage
+ */
+uint16_t app_oximeter_get_progress(void);
+
+/**
  * @brief Triggers calculation manually (if needed)
  */
 void app_oximeter_calculate(void);

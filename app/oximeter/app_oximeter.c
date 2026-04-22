@@ -45,9 +45,13 @@ static uint8_t last_spo2 = 0;
 TaskHandle_t xOximeterTaskHandle = NULL;
 
 uint8_t app_oximeter_init(void) {
-    buffer_index = 0;
-    last_hr = 0;
-    last_spo2 = 0;
+    // Se o buffer já estiver cheio (já estávamos medindo antes), 
+    // não resetamos para permitir retorno imediato.
+    if (buffer_index < WINDOW_SIZE) {
+        buffer_index = 0;
+        last_hr = 0;
+        last_spo2 = 0;
+    }
 
     /* Initialize Hardware */
     if (oximeter_init() != 0) {
@@ -61,44 +65,53 @@ uint8_t app_oximeter_init(void) {
     return 0;
 }
 
-void app_oximeter_calculate(void) {
-    if (buffer_index < WINDOW_SIZE) return;
-
-    // SENSOR FUSION: Skip calculation if moving significantly
-    if (app_accel_is_moving()) {
-        last_hr = 0;
-        last_spo2 = 0;
-        buffer_index = 0;
-        return;
-    }
+void app_oximeter_calculate_core(uint16_t samples) {
+    if (samples < 200) return; 
 
     float32_t mean_red, mean_ir;
     float32_t rms_red, rms_ir;
 
-    // 1. DC Removal using CMSIS Mean
-    arm_mean_f32(red_f32, WINDOW_SIZE, &mean_red);
-    arm_mean_f32(ir_f32, WINDOW_SIZE, &mean_ir);
+    // Resetar o estado do filtro para cada calculo novo (evita viciar o sinal)
+    memset(biquad_state_red, 0, sizeof(biquad_state_red));
+    memset(biquad_state_ir, 0, sizeof(biquad_state_ir));
+    arm_biquad_cascade_df1_init_f32(&S_red, NUM_STAGES, biquad_coeffs, biquad_state_red);
+    arm_biquad_cascade_df1_init_f32(&S_ir, NUM_STAGES, biquad_coeffs, biquad_state_ir);
 
-    for(int i=0; i<WINDOW_SIZE; i++) {
-        red_f32[i] -= mean_red;
-        ir_f32[i] -= mean_ir;
+    // 1. DC Removal
+    arm_mean_f32(red_f32, samples, &mean_red);
+    arm_mean_f32(ir_f32, samples, &mean_ir);
+
+    // Usar buffers temporarios para nao estragar o original da janela deslizante
+    static float32_t red_tmp[WINDOW_SIZE];
+    static float32_t ir_tmp[WINDOW_SIZE];
+
+    for(int i=0; i<samples; i++) {
+        red_tmp[i] = red_f32[i] - mean_red;
+        ir_tmp[i] = ir_f32[i] - mean_ir;
     }
 
-    // 2. Bandpass Filtering using CMSIS Biquad
-    arm_biquad_cascade_df1_f32(&S_red, red_f32, red_filtered, WINDOW_SIZE);
-    arm_biquad_cascade_df1_f32(&S_ir, ir_f32, ir_filtered, WINDOW_SIZE);
+    // 2. Filtering
+    arm_biquad_cascade_df1_f32(&S_red, red_tmp, red_filtered, samples);
+    arm_biquad_cascade_df1_f32(&S_ir, ir_tmp, ir_filtered, samples);
 
-    // 3. RMS Calculation using CMSIS
-    arm_rms_f32(red_filtered, WINDOW_SIZE, &rms_red);
-    arm_rms_f32(ir_filtered, WINDOW_SIZE, &rms_ir);
+    // 3. RMS
+    arm_rms_f32(red_filtered, samples, &rms_red);
+    arm_rms_f32(ir_filtered, samples, &rms_ir);
 
-    // 4. Peak Detection for HR (on filtered IR)
+    // 4. Peak Detection Dinâmico
     uint16_t peaks = 0;
+    int last_peak_idx = -100;
     bool ascending = true;
-    for(int i=1; i<WINDOW_SIZE; i++) {
+    
+    // Threshold dinâmico: 50% do valor RMS (força do sinal)
+    float32_t dynamic_threshold = rms_ir * 0.5f;
+    if (dynamic_threshold < 0.005f) dynamic_threshold = 0.005f; // Piso minimo
+
+    for(int i=1; i<samples; i++) {
         if (ascending && ir_filtered[i] < ir_filtered[i-1]) {
-            if (ir_filtered[i-1] > 0.1f) { // Threshold to avoid noise peaks
+            if (ir_filtered[i-1] > dynamic_threshold && (i - last_peak_idx) > 35) { 
                 peaks++;
+                last_peak_idx = i;
             }
             ascending = false;
         } else if (!ascending && ir_filtered[i] > ir_filtered[i-1]) {
@@ -106,32 +119,59 @@ void app_oximeter_calculate(void) {
         }
     }
 
-    last_hr = (uint8_t)(peaks * 12); // peaks in 5s -> BPM
-    if (last_hr < 40 || last_hr > 220) last_hr = 0;
+    float seconds = (float)samples / 100.0f;
+    uint8_t current_hr = (uint8_t)(peaks * (60.0f / seconds)); 
+    
+    if (current_hr >= 45 && current_hr <= 180) {
+        // Suavização mais lenta (80/20) para evitar oscilações bruscas
+        if (last_hr == 0) last_hr = current_hr;
+        else last_hr = (uint8_t)(last_hr * 0.8f + current_hr * 0.2f);
+    } else if (current_hr < 45) {
+        last_hr = 0; // Sinal muito fraco ou sem dedo
+    }
 
-    // 5. SpO2 Calculation (Ratio of Ratios)
+    // 5. SpO2 Calculation
     if (mean_red > 0 && mean_ir > 0 && rms_ir > 0) {
         float32_t R = (rms_red / mean_red) / (rms_ir / mean_ir);
         float32_t spo2_f = 110.0f - 25.0f * R;
         if (spo2_f > 100.0f) spo2_f = 100.0f;
         if (spo2_f < 70.0f) spo2_f = 0;
         last_spo2 = (uint8_t)spo2_f;
-    } else {
-        last_spo2 = 0;
     }
+}
 
-    buffer_index = 0;
+void app_oximeter_calculate(void) {
+    app_oximeter_calculate_core(buffer_index);
 }
 
 uint8_t app_oximeter_update(uint32_t red, uint32_t ir) {
-    red_f32[buffer_index] = (float32_t)red;
-    ir_f32[buffer_index] = (float32_t)ir;
-
-    buffer_index++;
-
-    if (buffer_index >= WINDOW_SIZE) {
-        app_oximeter_calculate();
-        return 1;
+    static uint8_t tick_counter = 0;
+    
+    if (buffer_index < WINDOW_SIZE) {
+        red_f32[buffer_index] = (float32_t)red;
+        ir_f32[buffer_index] = (float32_t)ir;
+        buffer_index++;
+        
+        // Durante a calibração, calcula a cada 1 segundo (100 amostras)
+        if (buffer_index % 100 == 0) {
+            app_oximeter_calculate_core(buffer_index);
+            return 1;
+        }
+    } else {
+        // Janela Deslizante
+        memmove(red_f32, &red_f32[1], (WINDOW_SIZE - 1) * sizeof(float32_t));
+        memmove(ir_f32, &ir_f32[1], (WINDOW_SIZE - 1) * sizeof(float32_t));
+        
+        red_f32[WINDOW_SIZE - 1] = (float32_t)red;
+        ir_f32[WINDOW_SIZE - 1] = (float32_t)ir;
+        
+        // Após estabilizado, atualiza o cálculo 2 vezes por segundo (a cada 50 amostras)
+        tick_counter++;
+        if (tick_counter >= 50) {
+            tick_counter = 0;
+            app_oximeter_calculate_core(WINDOW_SIZE);
+            return 1;
+        }
     }
     return 0;
 }
@@ -154,3 +194,6 @@ void vOximeterTask(void *pvParameters) {
 
 uint8_t app_oximeter_get_hr(void) { return last_hr; }
 uint8_t app_oximeter_get_spo2(void) { return last_spo2; }
+uint16_t app_oximeter_get_progress(void) {
+    return (uint16_t)((buffer_index * 100) / WINDOW_SIZE);
+}

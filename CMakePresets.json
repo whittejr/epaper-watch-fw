@@ -16,7 +16,7 @@
       "inherits": "base-toolchain",
       "cacheVariables": {
         "MCU_FAMILY": "stm32wb",
-        "TARGET_MCU": "STM32WBXX"
+        "TARGET_MCU": "STM32WB55xx"
       }
     },
     {

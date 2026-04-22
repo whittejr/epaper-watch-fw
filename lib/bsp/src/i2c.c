@@ -23,6 +23,8 @@ static I2C_HandleTypeDef hi2c1;
 uint8_t i2c_init(void) {
     GPIO_InitTypeDef GPIOHandle = {0};
 
+    __HAL_RCC_I2C1_CLK_ENABLE();
+
     GPIOHandle.Pin = I2C_SDA_PIN | I2C_SCL_PIN;
     GPIOHandle.Mode = GPIO_MODE_AF_OD;
     GPIOHandle.Alternate = GPIO_AF4_I2C1;

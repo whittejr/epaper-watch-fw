@@ -25,7 +25,9 @@ uint8_t ls013b7dh03_interface_spi_write(uint8_t *buf, uint16_t len) {
 }
 
 void ls013b7dh03_interface_cs_control(uint8_t state) {
+    if (state) spi_lock();
     gpio_cs_control(state);
+    if (!state) spi_unlock();
 }
 
 void ls013b7dh03_interface_delay_ms(uint32_t ms) {

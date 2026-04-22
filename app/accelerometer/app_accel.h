@@ -25,6 +25,12 @@ uint8_t app_accel_init(void);
 uint8_t app_accel_read(float g[3]);
 
 /**
+ * @brief Gets the last cached acceleration values from the sensor task
+ * @param g Array of 3 floats [X, Y, Z]
+ */
+void app_accel_get_last_g(float g[3]);
+
+/**
  * @brief Gets total steps counted
  * @return Step count
  */

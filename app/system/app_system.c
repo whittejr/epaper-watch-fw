@@ -20,6 +20,18 @@
 #include "queue.h"
 #include "semphr.h"
 
+#include "app_state.h"
+
+/* Global Settings Instance */
+watch_settings_t g_watch_settings = {
+    .time_format_24h = true,
+    .brightness = BRIGHTNESS_MID,
+    .wrist_wake_enabled = false,
+    .vibration_enabled = true,
+    .dark_theme = false,
+    .language_pt = true
+};
+
 extern const AppScreen_t Screen_Watchface; 
 extern const AppScreen_t Screen_AlarmRinging;
 
@@ -44,15 +56,12 @@ void vButtonTask(void *pvParameters);
 uint8_t app_system_init(void) {
     bsp_init();
 
-    /* Ajusta prioridade do SysTick para o FreeRTOS (deve ser a mais baixa) */
-    HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
-
     app_display_init();
 
     /* Boot Animation (GIF) */
     for (int frame = 0; frame < ANIM_NUM_FRAMES; frame++) {
         app_display_write_raw(anim_frames[frame]);
-        HAL_Delay(50); // 50ms (~20 fps)
+        bsp_delay_ms(50); 
     }
 
     app_accel_init();
@@ -82,6 +91,12 @@ uint8_t app_system_init(void) {
     xRet = xTaskCreate(vAccelTask, "Accel_Task", 512, NULL, 2, &xAccelTaskHandle);
     configASSERT(xRet == pdPASS);
 
+    extern void spi_mutex_init(void);
+    spi_mutex_init();
+
+    /* Ajusta prioridade do SysTick para o FreeRTOS (deve ser a mais baixa) apenas AGORA */
+    HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
+
     return 0;
 }
 uint8_t app_system_loop(void) {
@@ -94,40 +109,41 @@ uint8_t app_system_loop(void) {
 void vUITask(void *pvParameters) {
     UI_Event_t event;
     while (1) {
-        /* Fica dormindo até que um evento chegue na fila */
         if (xQueueReceive(xSystemEventQueue, &event, portMAX_DELAY) == pdPASS) {
             UI_Manager_ProcessEvent(event);
-            app_display_update(DISPLAY_UPDATE_NORMAL);
+            // vUITask should not call display update directly if it's already done in ProcessEvent
         }
     }
 }
 
 void vAlarmTask(void *pvParameters) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = pdMS_TO_TICKS(100);
+    const TickType_t xFrequency = pdMS_TO_TICKS(50);
+    UI_Event_t tick_50ms = EVENT_TICK_50MS;
     UI_Event_t tick_100ms = EVENT_TICK_100MS;
     UI_Event_t tick_1s = EVENT_TICK_1SEC;
+    uint8_t count_50ms = 0;
     uint8_t count_1s = 0;
 
     while (1) {
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
-        
-        // Sempre envia o tick de 100ms
-        xQueueSend(xSystemEventQueue, &tick_100ms, 0);
+        xQueueSend(xSystemEventQueue, &tick_50ms, 0);
+
+        count_50ms++;
+        if (count_50ms >= 2) {
+            count_50ms = 0;
+            xQueueSend(xSystemEventQueue, &tick_100ms, 0);
+        }
 
         count_1s++;
-        if (count_1s >= 10) {
+        if (count_1s >= 20) {
             count_1s = 0;
-            
             RTC_TimeTypeDef sTime;
             RTC_DateTypeDef sDate;
             rtc_get_time(&sTime, &sDate);
-            
             if (app_alarm_tick(sTime.Hours, sTime.Minutes)) {
                 UI_Manager_SwitchScreen(&Screen_AlarmRinging);
             }
-
-            // Notifica a UI_Task que um segundo passou
             xQueueSend(xSystemEventQueue, &tick_1s, 0);
         }
     }
@@ -148,12 +164,9 @@ void vButtonTask(void *pvParameters) {
             if ((now - last_short_click_time) < double_click_window) {
                 UI_Event_t ui_evt = EVENT_BTN_DOUBLE;
                 xQueueSend(xSystemEventQueue, &ui_evt, 0);
-                last_short_click_time = 0; // Reset
+                last_short_click_time = 0;
             } else {
                 last_short_click_time = now;
-                // We wait a bit to see if it's a single or start of double
-                // For better responsiveness in menus, we send NEXT immediately,
-                // but Doom will listen for DOUBLE.
                 UI_Event_t ui_evt = EVENT_BTN_NEXT;
                 xQueueSend(xSystemEventQueue, &ui_evt, 0);
             }
@@ -161,7 +174,6 @@ void vButtonTask(void *pvParameters) {
             UI_Event_t ui_evt = EVENT_BTN_SELECT;
             xQueueSend(xSystemEventQueue, &ui_evt, 0);
         }
-
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

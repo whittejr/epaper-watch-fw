@@ -16,7 +16,7 @@ extern QueueHandle_t xSystemEventQueue;
 /* Constants */
 #define STEP_THRESHOLD 1.25f  // Gs
 #define STEP_DEBOUNCE_MS 300
-#define MOTION_THRESHOLD 0.15f // Variance threshold for motion
+#define MOTION_THRESHOLD 0.30f // Variance threshold for motion
 #define TILT_THRESHOLD 0.7f
 #define SLEEP_MOTION_THRESHOLD 0.05f
 
@@ -35,9 +35,15 @@ uint8_t app_accel_init(void) {
 }
 
 uint8_t app_accel_read(float g[3]) {
-    accel_basic_read(g);
-    memcpy(last_g, g, sizeof(last_g));
-    return 0;
+    uint8_t res = accel_basic_read(g);
+    if (res == 0) {
+        memcpy(last_g, g, sizeof(last_g));
+    }
+    return res;
+}
+
+void app_accel_get_last_g(float g[3]) {
+    memcpy(g, last_g, sizeof(last_g));
 }
 
 uint32_t app_accel_get_steps(void) {

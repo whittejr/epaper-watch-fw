@@ -128,7 +128,7 @@ static uint8_t oximeter_setup(void) {
     }
 
     /* set led red pulse amplitude */
-    res = max30102_set_led_red_pulse_amplitude(&gs_handle, 0x2f);
+    res = max30102_set_led_red_pulse_amplitude(&gs_handle, 0x7f);
     if (res != 0) {
         max30102_interface_debug_print("max30102: set led red pulse amplitude failed.\n");
         (void)max30102_deinit(&gs_handle);
@@ -137,49 +137,14 @@ static uint8_t oximeter_setup(void) {
     }
 
     /* set led ir pulse amplitude */
-    res = max30102_set_led_ir_pulse_amplitude(&gs_handle, 0x2f);
+    res = max30102_set_led_ir_pulse_amplitude(&gs_handle, 0x7f);
     if (res != 0) {
         max30102_interface_debug_print("max30102: set led ir pulse amplitude failed.\n");
         (void)max30102_deinit(&gs_handle);
-
         return 1;
     }
 
-    /* set slot */
-    res = max30102_set_slot(&gs_handle, MAX30102_SLOT_1, MAX30102_FIFO_DEFAULT_SLOT1);
-    if (res != 0) {
-        max30102_interface_debug_print("max30102: set slot failed.\n");
-        (void)max30102_deinit(&gs_handle);
-
-        return 1;
-    }
-
-    /* set slot */
-    res = max30102_set_slot(&gs_handle, MAX30102_SLOT_2, MAX30102_FIFO_DEFAULT_SLOT2);
-    if (res != 0) {
-        max30102_interface_debug_print("max30102: set slot failed.\n");
-        (void)max30102_deinit(&gs_handle);
-
-        return 1;
-    }
-
-    /* set slot */
-    res = max30102_set_slot(&gs_handle, MAX30102_SLOT_3, MAX30102_FIFO_DEFAULT_SLOT3);
-    if (res != 0) {
-        max30102_interface_debug_print("max30102: set slot failed.\n");
-        (void)max30102_deinit(&gs_handle);
-
-        return 1;
-    }
-
-    /* set slot */
-    res = max30102_set_slot(&gs_handle, MAX30102_SLOT_4, MAX30102_FIFO_DEFAULT_SLOT4);
-    if (res != 0) {
-        max30102_interface_debug_print("max30102: set slot failed.\n");
-        (void)max30102_deinit(&gs_handle);
-
-        return 1;
-    }
+    /* Slots are only for MULTI_LED mode. In SPO2 mode, they are ignored and setting them returns an error. */
 
     /* set die temperature */
     res = max30102_set_die_temperature(&gs_handle, MAX30102_FIFO_DEFAULT_DIE_TEMPERATURE);

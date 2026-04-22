@@ -91,8 +91,6 @@ target_include_directories(${EXECUTABLE} PRIVATE
     "${FREERTOS_DIR}/include"
     "${FREERTOS_DIR}/portable/GCC/ARM_CM4F"
     "${CMSIS_DSP_DIR}/Include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/third_party/stm32cubewb/Middlewares/ST/STM32_WPAN"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/third_party/stm32cubewb/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl"
 )
 
 target_compile_definitions(${EXECUTABLE} PRIVATE 
@@ -113,6 +111,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map
     --specs=nosys.specs
     --specs=nano.specs
+    -Wl,-u,_printf_float
     -Wl,--print-memory-usage
     -Wl,--gc-sections
 )

@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "OpenOCD Debug",
+      "name": "E-Paper Watch Debug",
       "type": "cortex-debug",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -10,14 +10,15 @@
       "servertype": "openocd",
       "interface": "swd",
       "runToEntryPoint": "main",
-      "gdbPath": "/usr/bin/gdb-multiarch",
+      "gdbPath": "gdb-multiarch",
       "rtos": "FreeRTOS",
       "preLaunchTask": "Build",
+      "armToolchainPath": "/usr/bin",
       "configFiles": [
         "interface/stlink.cfg",
-        "target/stm32wbx.cfg" /* change to the correct target */
+        "target/stm32wbx.cfg"
       ],
-      "svdFile": "${workspaceFolder}/tools/svd/STM32WB55_CM4.svd", /* change to the correct target */
+      "svdFile": "${workspaceFolder}/tools/svd/STM32WB55_CM4.svd",
       "liveWatch": {
         "enabled": true,
         "samplesPerSecond": 20

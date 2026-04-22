@@ -4,7 +4,6 @@
 #include "task.h"
 
 extern void xPortSysTickHandler(void);
-extern IPCC_HandleTypeDef hipcc;
 
 void SysTick_Handler(void) {
     HAL_IncTick();
@@ -13,16 +12,8 @@ void SysTick_Handler(void) {
     }
 }
 
-void EXTI15_10_IRQHandler(void) {
+void EXTI9_5_IRQHandler(void) {
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9); // Button is on PIN 9
-}
-
-void IPCC_C1_RX_IRQHandler(void) {
-    HAL_IPCC_RX_IRQHandler(&hipcc);
-}
-
-void IPCC_C1_TX_IRQHandler(void) {
-    HAL_IPCC_TX_IRQHandler(&hipcc);
 }
 
 void HSEM_IRQHandler(void) {

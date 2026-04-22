@@ -4,6 +4,9 @@
 #include <stdint.h>
 
 uint8_t spi_init(void);
+void spi_mutex_init(void);
+void spi_lock(void);
+void spi_unlock(void);
 uint8_t spi_deinit(void);
 uint8_t spi_write(uint8_t *buf, uint16_t len);
 uint8_t spi_read(uint8_t *buf, uint16_t len);

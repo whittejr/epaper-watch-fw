@@ -17,6 +17,8 @@ extern const AppScreen_t Screen_Accel;
 extern const AppScreen_t Screen_Games;
 extern const AppScreen_t Screen_BLE;
 
+extern const AppScreen_t Screen_Config;
+
 typedef struct {
     const char *text;
     const uint8_t *icon;
@@ -29,54 +31,71 @@ static const MenuItem_t menu_items[] = {
     {"ATIVIDADE", icon_accel_16x16, &Screen_Accel},
     {"JOGOS", icon_data_16x16, &Screen_Games},
     {"ALARMES", icon_data_16x16, &Screen_Alarms},       
+    {"CONFIG", icon_config_16x16, &Screen_Config},
     {"RELOGIO", icon_clock_16x16, &Screen_AdjustTime},
     {"VOLTAR", icon_back_16x16, &Screen_Watchface}
 };
-#define MENU_COUNT 7
+#define MENU_COUNT 8
+#define VISIBLE_ITEMS 4
 
 static uint8_t cursor_menu = 0;
+static uint8_t scroll_offset = 0;
 
 static void Menu_Draw(display_update_mode_t mode) {
     app_display_clear();
     app_display_draw_status_bar();
 
-    // CARD FRAME
-    app_display_draw_rect(10, 20, 108, 90, 0); // Border
-    app_display_draw_rect(12, 22, 104, 86, 1); // Inner clear
+    // TITLE
+    app_display_draw_text_aligned(64, 20, 1, "MENU", 0);
+    app_display_draw_rect(40, 31, 48, 1, 0);
 
-    // ICON (Centered in card)
-    // Scale 16x16 to look bigger or just center it
-    app_display_draw_bitmap(64 - 8, 45, menu_items[cursor_menu].icon, 16, 16, 0);
+    // LIST ITEMS (With Scrolling)
+    for (int i = 0; i < VISIBLE_ITEMS; i++) {
+        uint8_t index = scroll_offset + i;
+        if (index >= MENU_COUNT) break;
 
-    // APP NAME
-    app_display_draw_text_aligned(64, 80, 1, menu_items[cursor_menu].text, 0);
-
-    // PAGINATION DOTS
-    for (int i = 0; i < MENU_COUNT; i++) {
-        uint8_t dot_x = 64 - (MENU_COUNT * 4) + (i * 8);
-        if (i == cursor_menu) {
-            app_display_draw_rect(dot_x, 115, 4, 4, 0); // Selected dot
+        uint8_t y = LAYOUT_MENU_START_Y + (i * LAYOUT_MENU_SPACING);
+        
+        if (index == cursor_menu) {
+            // Reverse Video Selection
+            app_display_draw_rect(10, y - 2, 108, 14, 0);
+            app_display_draw_bitmap(LAYOUT_MENU_ICON_X, y + 1, menu_items[index].icon, 16, 16, 1);
+            app_display_draw_text(LAYOUT_MENU_TEXT_X, y, menu_items[index].text, 1);
         } else {
-            // Unselected dot (empty square)
-            app_display_draw_rect(dot_x, 115, 4, 1, 0);
-            app_display_draw_rect(dot_x, 118, 4, 1, 0);
-            app_display_draw_rect(dot_x, 115, 1, 4, 0);
-            app_display_draw_rect(dot_x + 3, 115, 1, 4, 0);
+            app_display_draw_bitmap(LAYOUT_MENU_ICON_X, y + 1, menu_items[index].icon, 16, 16, 0);
+            app_display_draw_text(LAYOUT_MENU_TEXT_X, y, menu_items[index].text, 0);
         }
     }
     
+    // Scroll Indicator (small arrows or line)
+    if (scroll_offset > 0) app_display_draw_text(115, 35, "^", 0);
+    if (scroll_offset + VISIBLE_ITEMS < MENU_COUNT) app_display_draw_text(115, 110, "v", 0);
+
     app_display_update(mode);
 }
 
 static void Menu_OnEnter(void) {
     cursor_menu = 0;
+    scroll_offset = 0;
     Menu_Draw(DISPLAY_UPDATE_NORMAL);
 }
 
 static void Menu_OnEvent(UI_Event_t event) {
-    if (event == EVENT_BTN_NEXT) {
+    if (event == EVENT_TICK_1SEC) {
+        // Just refresh status bar time if needed, but usually not required for menu
+    }
+    else if (event == EVENT_BTN_NEXT) {
         cursor_menu++;
-        if (cursor_menu >= MENU_COUNT) cursor_menu = 0;
+        if (cursor_menu >= MENU_COUNT) {
+            cursor_menu = 0;
+            scroll_offset = 0;
+        }
+
+        // Adjust scroll offset
+        if (cursor_menu >= scroll_offset + VISIBLE_ITEMS) {
+            scroll_offset = cursor_menu - VISIBLE_ITEMS + 1;
+        }
+        
         Menu_Draw(DISPLAY_UPDATE_PARTIAL); 
     }
     else if (event == EVENT_BTN_SELECT) {

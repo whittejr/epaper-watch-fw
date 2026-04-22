@@ -1,6 +1,6 @@
 /**
 * @file    screen_doom.c
-* @brief   Doom Lite with Enemy and Shooting (Double Click)
+* @brief   Upgraded Doom Lite with Weapon Sprite, Scaled Enemies, and Improved UI
 */
 
 #include "ui_manager.h"
@@ -9,13 +9,31 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define MAP_SIZE 8
 #define FOV 0.66f
-#define STEP_SIZE 0.15f
-#define ROT_SPEED 1.5708f // 90 degrees
+#define STEP_SIZE 0.12f
+#define ROT_SPEED (3.14159f / 4.0f) // 45 degrees
 
 extern const AppScreen_t Screen_Menu;
+
+// Bitmaps
+static const uint8_t doom_gun[] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xc0, 0x00, 0x00, 0x07, 0xe0, 0x00,
+    0x00, 0x0f, 0xf0, 0x00, 0x00, 0x0f, 0xf0, 0x00, 0x00, 0x0f, 0xf0, 0x00, 0x00, 0x1f, 0xf8, 0x00,
+    0x00, 0x1f, 0xf8, 0x00, 0x00, 0x1f, 0xf8, 0x00, 0x00, 0x1f, 0xf8, 0x00, 0x00, 0x3f, 0xfc, 0x00,
+    0x00, 0x3f, 0xfc, 0x00, 0x00, 0x3f, 0xfc, 0x00, 0x00, 0x7f, 0xfe, 0x00, 0x00, 0x7f, 0xfe, 0x00,
+    0x00, 0xff, 0xff, 0x00, 0x01, 0xff, 0xff, 0x80, 0x03, 0xff, 0xff, 0xc0, 0x03, 0xff, 0xff, 0xc0,
+    0x07, 0xff, 0xff, 0xe0, 0x0f, 0xff, 0xff, 0xf0, 0x1f, 0xff, 0xff, 0xf8, 0x3f, 0xff, 0xff, 0xfc,
+    0x7f, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+};
+
+static const uint8_t doom_enemy[] = {
+    0x07, 0xe0, 0x1f, 0xf8, 0x3f, 0xfc, 0x7f, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xf3, 0xcf, 0xf0, 0x0f,
+    0xf0, 0x0f, 0xf3, 0xcf, 0xff, 0xff, 0xff, 0xff, 0x7f, 0xfe, 0x3f, 0xfc, 0x1f, 0xf8, 0x07, 0xe0
+};
 
 static const uint8_t world_map[MAP_SIZE][MAP_SIZE] = {
     {1,1,1,1,1,1,1,1},
@@ -33,18 +51,22 @@ typedef struct {
     bool active;
 } Sprite_t;
 
+#define MAX_ENEMIES 3
+static Sprite_t enemies[MAX_ENEMIES];
 static float posX = 1.5f, posY = 1.5f;
 static float dirX = 1.0f, dirY = 0.0f;
 static float planeX = 0.0f, planeY = 0.66f;
-
-static Sprite_t enemy = {4.5f, 4.5f, true};
-static uint8_t shoot_flash = 0;
-static float z_buffer[128]; // Store wall distances for sprite occlusion
+static float z_buffer[128];
+static uint8_t shoot_anim = 0;
+static uint16_t kill_count = 0;
 
 static void Doom_Draw(void) {
     app_display_clear();
 
-    // 1. Raycasting Walls
+    // 1. Sky & Floor
+    app_display_draw_rect(0, 64, 128, 1, 0); // Horizon line
+
+    // 2. Raycasting Walls
     for (int x = 0; x < 128; x += 2) {
         float cameraX = 2.0f * x / 128.0f - 1.0f;
         float rayDirX = dirX + planeX * cameraX;
@@ -87,10 +109,12 @@ static void Doom_Draw(void) {
         app_display_draw_rect(x, drawStart, 2, drawEnd - drawStart, 0);
     }
 
-    // 2. Sprite Rendering (Enemy)
-    if (enemy.active) {
-        float spriteX = enemy.x - posX;
-        float spriteY = enemy.y - posY;
+    // 3. Sprite Rendering (Enemies)
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (!enemies[i].active) continue;
+
+        float spriteX = enemies[i].x - posX;
+        float spriteY = enemies[i].y - posY;
 
         float invDet = 1.0f / (planeX * dirY - dirX * planeY);
         float transformX = invDet * (dirY * spriteX - dirX * spriteY);
@@ -99,53 +123,65 @@ static void Doom_Draw(void) {
         if (transformY > 0.1f) {
             int spriteScreenX = (int)((128 / 2) * (1 + transformX / transformY));
             int spriteHeight = abs((int)(128 / transformY));
-            int drawStartY = -spriteHeight / 2 + 64;
-            if (drawStartY < 0) drawStartY = 0;
-            int drawEndY = spriteHeight / 2 + 64;
-            if (drawEndY >= 128) drawEndY = 127;
+            if (spriteHeight > 100) spriteHeight = 100;
 
-            int spriteWidth = abs((int)(128 / transformY));
+            int drawStartY = -spriteHeight / 2 + 64;
+            int drawEndY = spriteHeight / 2 + 64;
+
+            int spriteWidth = spriteHeight; // Square sprites
             int drawStartX = -spriteWidth / 2 + spriteScreenX;
-            if (drawStartX < 0) drawStartX = 0;
             int drawEndX = spriteWidth / 2 + spriteScreenX;
-            if (drawEndX >= 128) drawEndX = 127;
 
             for (int stripe = drawStartX; stripe < drawEndX; stripe++) {
-                if (transformY < z_buffer[stripe]) {
-                    // Draw enemy as a simple box or X
-                    app_display_draw_rect(stripe, drawStartY + (spriteHeight/4), 1, spriteHeight/2, 0);
+                if (stripe >= 0 && stripe < 128 && transformY < z_buffer[stripe]) {
+                    // Simple scaled pixel drawing for the enemy bitmap
+                    int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * 16 / spriteWidth) / 256;
+                    for (int y = drawStartY; y < drawEndY; y++) {
+                        if (y >= 0 && y < 128) {
+                            int texY = (int)(256 * (y - (-spriteHeight / 2 + 64)) * 16 / spriteHeight) / 256;
+                            uint8_t pixel = (doom_enemy[texY * 2 + (texX / 8)] >> (7 - (texX % 8))) & 0x01;
+                            if (pixel) {
+                                app_display_draw_rect(stripe, y, 1, 1, 0);
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    // 3. UI and Flash
-    if (shoot_flash > 0) {
-        app_display_draw_rect(40, 100, 48, 20, 0); // Muzzle flash
-        shoot_flash--;
-    } else {
-        // Simple Crosshair
-        app_display_draw_rect(62, 64, 4, 1, 0);
-        app_display_draw_rect(64, 62, 1, 4, 0);
+    // 4. Weapon
+    int gun_y_offset = (shoot_anim > 0) ? 10 : 0;
+    app_display_draw_bitmap(48, 96 + gun_y_offset, doom_gun, 32, 32, 0);
+    if (shoot_anim > 0) {
+        app_display_draw_rect(60, 85, 8, 8, 0); // Muzzle flash
+        shoot_anim--;
     }
 
+    // 5. HUD
+    char hud[16];
+    snprintf(hud, sizeof(hud), "KILLS: %d", kill_count);
+    app_display_draw_text(2, 2, hud, 0);
+    
     app_display_update(DISPLAY_UPDATE_NORMAL);
 }
 
 static void Doom_Shoot(void) {
-    shoot_flash = 2;
-    if (enemy.active) {
-        float spriteX = enemy.x - posX;
-        float spriteY = enemy.y - posY;
+    shoot_anim = 2;
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (!enemies[i].active) continue;
+
+        float spriteX = enemies[i].x - posX;
+        float spriteY = enemies[i].y - posY;
         float invDet = 1.0f / (planeX * dirY - dirX * planeY);
         float transformX = invDet * (dirY * spriteX - dirX * spriteY);
         float transformY = invDet * (-planeY * spriteX + planeX * spriteY);
         
-        // If enemy is roughly in the center of the screen
         if (transformY > 0) {
             int spriteScreenX = (int)((128 / 2) * (1 + transformX / transformY));
-            if (abs(spriteScreenX - 64) < 20) {
-                enemy.active = false;
+            if (abs(spriteScreenX - 64) < 15) {
+                enemies[i].active = false;
+                kill_count++;
             }
         }
     }
@@ -166,11 +202,13 @@ static void Doom_Update(void) {
     if (world_map[(int)nextX][(int)posY] == 0) posX = nextX;
     if (world_map[(int)posX][(int)nextY] == 0) posY = nextY;
 
-    // Respawn enemy if killed
-    if (!enemy.active && (rand() % 20 == 0)) {
-        enemy.x = 2 + (rand() % (MAP_SIZE - 4));
-        enemy.y = 2 + (rand() % (MAP_SIZE - 4));
-        enemy.active = true;
+    // Respawn enemies
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (!enemies[i].active && (rand() % 10 == 0)) {
+            enemies[i].x = 2 + (rand() % (MAP_SIZE - 4)) + 0.5f;
+            enemies[i].y = 2 + (rand() % (MAP_SIZE - 4)) + 0.5f;
+            enemies[i].active = true;
+        }
     }
 }
 
@@ -178,14 +216,18 @@ static void Doom_OnEnter(void) {
     posX = 1.5f; posY = 1.5f;
     dirX = 1.0f; dirY = 0.0f;
     planeX = 0.0f; planeY = 0.66f;
-    enemy.active = true;
+    kill_count = 0;
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        enemies[i].active = (i == 0);
+        enemies[i].x = 4.5f; enemies[i].y = 4.5f;
+    }
     Doom_Draw();
 }
 
 static void Doom_OnEvent(UI_Event_t event) {
     if (event == EVENT_TICK_100MS) {
         static uint8_t move_tick = 0;
-        if (++move_tick >= 3) {
+        if (++move_tick >= 2) {
             move_tick = 0;
             Doom_Update();
             Doom_Draw();

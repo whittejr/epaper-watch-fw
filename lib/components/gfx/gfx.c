@@ -22,30 +22,19 @@ void gfx_init(gfx_context_t *ctx, uint8_t *buffer, uint16_t w, uint16_t h, uint8
 void gfx_clear(gfx_context_t *ctx, uint8_t color) {
     if (ctx == NULL || ctx->buffer == NULL) return;
 
-
-    uint8_t actual_color = ctx->inverted ? !color : color;
-    
-
+    // Se o bit for 1, preenche com 0xFF, se 0, com 0x00
+    uint8_t fill_val = color ? 0xFF : 0x00;
     uint32_t buffer_size = (ctx->width * ctx->height) / 8;
-
-    if (actual_color) {
-        memset(ctx->buffer, 0xFF, buffer_size); 
-    } else {
-        memset(ctx->buffer, 0x00, buffer_size);
-    }
+    memset(ctx->buffer, fill_val, buffer_size);
 }
 
 void gfx_draw_pixel(gfx_context_t *ctx, uint16_t x, uint16_t y, uint8_t color) {
-    if (ctx == NULL || ctx->buffer == NULL) return;
-    
     if (x >= ctx->width || y >= ctx->height) return;
 
-    uint16_t byte_index = (y * (ctx->width / 8)) + (x / 8);
-    uint8_t bit_mask = 1 << (7 - (x % 8)); // Assumindo MSB-first dentro do byte
+    uint32_t byte_index = (y * (ctx->width / 8)) + (x / 8);
+    uint8_t bit_mask = 1 << (7 - (x % 8));
 
-    uint8_t actual_color = ctx->inverted ? !color : color;
-
-    if (actual_color) {
+    if (color) {
         ctx->buffer[byte_index] |= bit_mask;
     } else {
         ctx->buffer[byte_index] &= ~bit_mask;

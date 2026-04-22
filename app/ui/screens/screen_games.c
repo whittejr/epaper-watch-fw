@@ -13,24 +13,28 @@ extern const AppScreen_t Screen_Snake;
 extern const AppScreen_t Screen_Doom;
 extern const AppScreen_t Screen_Flappy;
 extern const AppScreen_t Screen_Parkour;
+extern const AppScreen_t Screen_Temple;
+extern const AppScreen_t Screen_Doodle;
 
 static const char *game_items[] = {
     "Snake",
     "Doom Lite",
     "Flappy Watch",
     "Parkour Watch",
+    "Temple Watch",
+    "Seu Decio Jump",
     "Voltar"
 };
-#define GAMES_COUNT 5
+#define GAMES_COUNT 7
 
 static uint8_t cursor_games = 0;
 
 static void Games_Draw(display_update_mode_t mode) {
     app_display_clear();
-    app_display_draw_text_aligned(64, 10, 1, "JOGOS", 0);
+    app_display_draw_text_aligned(64, 5, 1, "JOGOS", 0);
 
     for (int i = 0; i < GAMES_COUNT; i++) {
-        uint16_t pos_y = 40 + (i * 20);
+        uint16_t pos_y = 20 + (i * 14);
         if (i == cursor_games) {
             app_display_draw_text(10, pos_y, ">", 0);
         }
@@ -57,7 +61,9 @@ static void Games_OnEvent(UI_Event_t event) {
             case 1: UI_Manager_SwitchScreen(&Screen_Doom); break;
             case 2: UI_Manager_SwitchScreen(&Screen_Flappy); break;
             case 3: UI_Manager_SwitchScreen(&Screen_Parkour); break;
-            case 4: UI_Manager_SwitchScreen(&Screen_Menu); break;
+            case 4: UI_Manager_SwitchScreen(&Screen_Temple); break;
+            case 5: UI_Manager_SwitchScreen(&Screen_Doodle); break;
+            case 6: UI_Manager_SwitchScreen(&Screen_Menu); break;
         }
     }
 }
