@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Configure",
+      "type": "shell",
+      "command": "cmake --preset chip-debug"
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "cmake --build --preset chip-debug",
+      "dependsOn": [
+        "Configure"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Flash",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32wbx.cfg -c 'program build/debug/firmware.elf verify reset exit'", /* change to the correct target */
+      "dependsOn": [
+        "Build"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

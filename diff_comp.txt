@@ -1,0 +1,15 @@
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/components/button/button.h ./lib/components/button/button.h
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/components/button/button.h	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/components/button/button.h	2026-04-21 21:20:28.955937643 +0000
+@@ -13,7 +13,7 @@
+ #include <stdbool.h>
+ 
+ /* Tempos de configuração (em milissegundos) */
+-#define BUTTON_DEBOUNCE_MS     5 
++#define BUTTON_DEBOUNCE_MS     5
+ #define BUTTON_LONG_PRESS_MS   200
+ 
+ typedef enum {
+Only in ./lib/components/display: ls013b7dh03
+Only in epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/components/display: ssd1681
+Only in ./lib/components: gfx

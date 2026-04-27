@@ -1,0 +1,32 @@
+{
+    "name": "embedded environment",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+
+    "runArgs": [
+        "--privileged",
+        "-v", "/dev/bus/usb:/dev/bus/usb"
+    ],
+    "remoteUser": "root",
+    
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "llvm-vs-code-extensions.vscode-clangd",
+                "twxs.cmake",
+                "mcu-debug.debug-tracker-vscode",
+                "marus25.cortex-debug",
+                "mcu-debug.memory-view",
+                "mcu-debug.rtos-views",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "clangd.arguments": [
+                    "--query-driver=/usr/bin/arm-none-eabi-*"
+                ]
+            }
+        }   
+    }
+}

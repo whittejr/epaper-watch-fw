@@ -1,0 +1,78 @@
+Only in ./core/inc: FreeRTOSConfig.h
+Only in ./core/inc: app_conf.h
+Only in ./core/inc: ble_conf.h
+Only in ./core/inc: ble_dbg_conf.h
+Only in ./core/inc: hw_if.h
+Only in ./core/inc: shci_user_config.h
+Only in ./core/inc: stm32wbxx_hal_conf.h
+Only in ./core/inc: tl_conf.h
+Only in ./core/inc: tl_dbg_conf.h
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/core/src/it.c ./core/src/it.c
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/core/src/it.c	2026-04-07 22:46:55.000000000 +0000
++++ ./core/src/it.c	2026-04-22 00:56:45.089779763 +0000
+@@ -1,18 +1,30 @@
+-/**
+-* @file    it.c
+-* @brief   none
+-* @version 0.1.0
+-* @author  Alessandro Davi
+-* @date    2026-04-01
+-*/
+-
+ #include "it.h"
+ #include "stm32wbxx_hal.h"
++#include "FreeRTOS.h"
++#include "task.h"
++
++extern void xPortSysTickHandler(void);
++extern IPCC_HandleTypeDef hipcc;
+ 
+ void SysTick_Handler(void) {
+     HAL_IncTick();
++    if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
++        xPortSysTickHandler();
++    }
++}
++
++void EXTI15_10_IRQHandler(void) {
++    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9); // Button is on PIN 9
++}
++
++void IPCC_C1_RX_IRQHandler(void) {
++    HAL_IPCC_RX_IRQHandler(&hipcc);
++}
++
++void IPCC_C1_TX_IRQHandler(void) {
++    HAL_IPCC_TX_IRQHandler(&hipcc);
+ }
+ 
+-void EXTI0_IRQHandler(void) {
+-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
++void HSEM_IRQHandler(void) {
++    HAL_HSEM_IRQHandler();
+ }
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/core/src/main.c ./core/src/main.c
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/core/src/main.c	2026-04-07 22:46:55.000000000 +0000
++++ ./core/src/main.c	2026-04-22 03:44:33.289053468 +0000
+@@ -1,19 +1,9 @@
+-/**
+-* @file     main.c
+-* @brief    none
+-* @version  0.1.0
+-* @author   Alessandro Davi
+-* @date     2026-03-31
+-*/
+-
+-#include "app_display.h"
+ #include "app_system.h"
+-
+-
++#include "stm32wbxx_hal.h"
+ 
+ int main(void) {
++    HAL_Init();
+     app_system_init();
+-
+     app_system_loop();
+     return 0;
+ }

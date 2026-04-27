@@ -1,0 +1,515 @@
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc/board_config.h ./lib/bsp/inc/board_config.h
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc/board_config.h	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/inc/board_config.h	2026-04-21 21:13:14.219790804 +0000
+@@ -1,71 +1,43 @@
+-/**
+- * @file board_config.h
+- * @brief  none
+- * @version 0.1
+- * @author Alessandro Davi
+- * @date 2026-02-26
+- */
+-
+ #ifndef BOARD_CONFIG_H
+ #define BOARD_CONFIG_H
+ 
+ #include "stm32wbxx_hal.h"
+ 
+ /* DISPLAY DIMENSIONS */
+-#define EPD_W 200
+-#define EPD_H 200
++#define DISP_W 128
++#define DISP_H 128
++
++/* USER DISPLAY PINS (LS013B7DH03) */
++#define DISP_CS_PORT      GPIOB
++#define DISP_CS_PIN       GPIO_PIN_0
++#define DISP_ON_PORT      GPIOB
++#define DISP_ON_PIN       GPIO_PIN_1
++#define DISP_EXTCOM_PORT  GPIOB
++#define DISP_EXTCOM_PIN   GPIO_PIN_2
++
++/* Compatibility aliases for display HAL */
++#define MIP_CS_PORT       DISP_CS_PORT
++#define MIP_CS_PIN        DISP_CS_PIN
++#define MIP_DISP_PORT     DISP_ON_PORT
++#define MIP_DISP_PIN      DISP_ON_PIN
+ 
+-/* SPI BUS CONFIGURATION (SPI1) */
+-#define SPI_INSTANCE SPI1
++/* SPI1 PINS (Standard for WB55) */
++#define SCK_PORT     GPIOA
++#define SCK_PIN      GPIO_PIN_5
+ #define MOSI_PORT    GPIOA
+ #define MOSI_PIN     GPIO_PIN_7
+-#define SCK_PORT     GPIOA
+-#define SCK_PIN      GPIO_PIN_1
+-
+-/* E-PAPER CONTROL PINS */
+-#define EPD_BSY_PORT     GPIOA
+-#define EPD_BSY_PIN      GPIO_PIN_5
+-// #define EPD_RST_PORT     GPIOB
+-// #define EPD_RST_PIN      GPIO_PIN_6
+-// #define EPD_DC_PORT      GPIOB
+-// #define EPD_DC_PIN       GPIO_PIN_7
+-// #define EPD_CS_PORT      GPIOA
+-// #define EPD_CS_PIN       GPIO_PIN_4
+-#define EPD_RST_PORT     GPIOA
+-#define EPD_RST_PIN      GPIO_PIN_6
+-#define EPD_DC_PORT      GPIOA
+-#define EPD_DC_PIN       GPIO_PIN_8
+-#define EPD_CS_PORT      GPIOA
+-#define EPD_CS_PIN       GPIO_PIN_9
+-
+-/* ACCELEROMETER PINS */
+-#define ACCEL_CS_PORT   GPIOE
+-#define ACCEL_CS_PIN    GPIO_PIN_4
+-
+-
+-/* MIP (MEMORY IN PIXEL) LCD PINS */
+-#define MIP_SPI_INSTANCE  SPI1
+-#define MIP_MOSI_PORT     GPIOA
+-#define MIP_MOSI_PIN      GPIO_PIN_7
+-#define MIP_SCK_PORT      GPIOA
+-#define MIP_SCK_PIN       GPIO_PIN_1
+-#define MIP_CS_PORT       GPIOA
+-#define MIP_CS_PIN        GPIO_PIN_4
+-#define MIP_DISP_PORT     GPIOA
+-#define MIP_DISP_PIN      GPIO_PIN_9
+-#define MIP_EXTCOMIN_PORT GPIOA
+-#define MIP_EXTCOMIN_PIN  GPIO_PIN_0 // PWM
+ 
+-/* I2C BUS CONFIGURATION (I2C1) */
+-#define I2C_SLAVE_ADDR    0x57
++/* I2C BUS (Restored for compilation) */
+ #define I2C_INSTANCE      I2C1
+-#define I2C_SCL_PORT      GPIOA
+-#define I2C_SCL_PIN       GPIO_PIN_9
+ #define I2C_SDA_PORT      GPIOA
+ #define I2C_SDA_PIN       GPIO_PIN_10
++#define I2C_SCL_PORT      GPIOA
++#define I2C_SCL_PIN       GPIO_PIN_9
+ 
+-/* BUTTONS */
+-#define BUTTON_PORT GPIOB
+-#define BUTTON_PIN  GPIO_PIN_0
++/* BUTTONS & ACCEL (Restored for compilation) */
++#define BUTTON_PORT       GPIOB
++#define BUTTON_PIN        GPIO_PIN_9
++#define ACCEL_CS_PORT     GPIOA
++#define ACCEL_CS_PIN      GPIO_PIN_1
+ 
+ #endif // BOARD_CONFIG_H
+Only in ./lib/bsp/inc: bsp.h
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc/gpio.h ./lib/bsp/inc/gpio.h
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc/gpio.h	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/inc/gpio.h	2026-04-21 19:29:48.571911797 +0000
+@@ -17,5 +17,6 @@
+ void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state);
+ uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin);
+ void bsp_delay_ms(uint32_t ms);
++void gpio_cs_control(uint8_t state);
+ 
+ #endif // GPIO_H
+Only in ./lib/bsp/inc: ls013b7dh03_interface.h
+Only in ./lib/bsp/inc: rtc.h
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc/spi.h ./lib/bsp/inc/spi.h
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc/spi.h	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/inc/spi.h	2026-04-21 19:18:16.957739527 +0000
+@@ -7,7 +7,7 @@
+ uint8_t spi_deinit(void);
+ uint8_t spi_write(uint8_t *buf, uint16_t len);
+ uint8_t spi_read(uint8_t *buf, uint16_t len);
+-uint8_t spi_read_cmd(uint8_t addr, uint8_t *buf, uint16_t len);
+-uint8_t spi_write_address16(uint8_t addr, uint8_t *buf, uint16_t len);
++uint8_t spi_read_cmd(uint16_t addr, uint8_t *buf, uint16_t len);
++uint8_t spi_write_address16(uint16_t addr, uint8_t *buf, uint16_t len);
+ 
+ #endif // SPI_H
+Only in epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/inc: ssd1681_interface.h
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/adxl362_interface.c ./lib/bsp/src/adxl362_interface.c
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/adxl362_interface.c	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/src/adxl362_interface.c	2026-04-21 19:18:16.957993243 +0000
+@@ -98,7 +98,7 @@
+  */
+ uint8_t adxl362_interface_spi_read_address16(uint16_t addr, uint8_t *buf, uint16_t len) {
+     uint8_t res;
+-
++    
+     __set_BASEPRI(1);
+ 
+     bsp_gpio_write(ACCEL_CS_PORT, ACCEL_CS_PIN, GPIO_PIN_RESET);
+Only in ./lib/bsp/src: bsp.c
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/clock.c ./lib/bsp/src/clock.c
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/clock.c	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/src/clock.c	2026-04-21 20:56:32.467821340 +0000
+@@ -27,9 +27,10 @@
+   /** Initializes the RCC Oscillators according to the specified parameters
+   * in the RCC_OscInitTypeDef structure.
+   */
+-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
++  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSI1;
+   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
++  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+@@ -72,6 +73,20 @@
+   __HAL_RCC_SPI1_CLK_ENABLE();
+   __HAL_RCC_I2C1_CLK_ENABLE();
+   __HAL_RCC_LPUART1_CLK_ENABLE();
++  __HAL_RCC_LPTIM1_CLK_ENABLE();
++
++  /* RTC Clock Configuration */
++  // __HAL_RCC_PWR_CLK_ENABLE();
++  HAL_PWR_EnableBkUpAccess();
++  
++  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
++  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
++  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
++  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
++  {
++    return 1;
++  }
++  __HAL_RCC_RTC_ENABLE();
+   
+   return 0;
+ }
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/gpio.c ./lib/bsp/src/gpio.c
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/gpio.c	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/src/gpio.c	2026-04-21 23:15:33.156240136 +0000
+@@ -1,94 +1,105 @@
+-/**
+- * @file    gpio.c
+- * @brief   none
+- * @version 0.1.0
+- * @author  Alessandro Davi
+- * @date    2025-11-05
+- */
+-
+ #include "gpio.h"
+ #include "board_config.h"
+-#include "stm32wb55xx.h"
+-#include "stm32wbxx_hal_gpio.h"
++#include "stm32wbxx_hal.h"
++#include "stm32wbxx_hal_lptim.h"
++#include "FreeRTOS.h"
++#include "queue.h"
++#include "ui_manager.h"
+ 
+-volatile uint8_t bsp_btn_exti_flag = 0;
++extern QueueHandle_t xSystemEventQueue;
+ 
+ uint8_t gpio_init(void) {
+-    GPIO_InitTypeDef GPIOHandle = {0};
+-
+-    /* LPUART1 */
+-    GPIOHandle.Mode = GPIO_MODE_AF_PP;
+-    GPIOHandle.Alternate = GPIO_AF8_LPUART1;
+-    GPIOHandle.Pin = GPIO_PIN_2;
+-    GPIOHandle.Speed = GPIO_SPEED_FREQ_MEDIUM;
+-    GPIOHandle.Pull = GPIO_NOPULL;
+-    HAL_GPIO_Init(GPIOA, &GPIOHandle);
+-
+-    /* SSD1681 */
+-    GPIOHandle.Mode = GPIO_MODE_OUTPUT_PP;
+-    GPIOHandle.Pull = GPIO_PULLDOWN;
+-    GPIOHandle.Speed = GPIO_SPEED_FREQ_LOW;
+-    GPIOHandle.Pin = EPD_RST_PIN;
+-    HAL_GPIO_Init(EPD_RST_PORT, &GPIOHandle);
+-    HAL_GPIO_WritePin(EPD_RST_PORT, EPD_RST_PIN, GPIO_PIN_SET);
+-
+-    GPIOHandle.Pull = GPIO_NOPULL;
+-    GPIOHandle.Pin = EPD_DC_PIN;
+-    HAL_GPIO_Init(EPD_DC_PORT, &GPIOHandle);
+-
+-    GPIOHandle.Pin = EPD_CS_PIN;
+-    HAL_GPIO_Init(EPD_CS_PORT, &GPIOHandle);
+-    HAL_GPIO_WritePin(EPD_CS_PORT, EPD_CS_PIN, GPIO_PIN_SET);
+-
+-    GPIOHandle.Mode = GPIO_MODE_INPUT;
+-    GPIOHandle.Pull = GPIO_NOPULL;
+-    GPIOHandle.Pin = EPD_BSY_PIN;
+-    HAL_GPIO_Init(EPD_BSY_PORT, &GPIOHandle);
+-
+-    /* MAX30102 INT PIN */
+-    GPIOHandle.Pin = GPIO_PIN_4; 
+-    GPIOHandle.Mode = GPIO_MODE_IT_FALLING;
+-    GPIOHandle.Pull = GPIO_PULLUP;
+-    HAL_GPIO_Init(GPIOB, &GPIOHandle);
+-
+-    HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 0);
+-    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+-
+-    /* BUTTON INT PIN */
+-    GPIOHandle.Pin = BUTTON_PIN;
+-    GPIOHandle.Mode = GPIO_MODE_IT_RISING_FALLING;
+-    GPIOHandle.Pull = GPIO_PULLUP;
+-    HAL_GPIO_Init(GPIOB, &GPIOHandle);
++    GPIO_InitTypeDef GPIO_InitStruct = {0};
++    static LPTIM_HandleTypeDef hlptim1 = {0};
+ 
+-    HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
+-    HAL_NVIC_EnableIRQ(EXTI0_IRQn);
++    // Habilita Clocks
++    __HAL_RCC_GPIOA_CLK_ENABLE();
++    __HAL_RCC_GPIOB_CLK_ENABLE();
++    __HAL_RCC_GPIOC_CLK_ENABLE();
++    __HAL_RCC_LPTIM1_CLK_ENABLE();
++
++    // Button Init (PC13)
++    GPIO_InitStruct.Pin = BUTTON_PIN;
++    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
++    GPIO_InitStruct.Pull = GPIO_PULLUP;
++    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
++    HAL_GPIO_Init(BUTTON_PORT, &GPIO_InitStruct);
++
++    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
++    HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
++
++    // CS, DISP as output
++    HAL_GPIO_WritePin(DISP_CS_PORT, DISP_CS_PIN, GPIO_PIN_RESET);
++    HAL_GPIO_WritePin(DISP_ON_PORT, DISP_ON_PIN, GPIO_PIN_RESET);
++
++    GPIO_InitStruct.Pin = DISP_CS_PIN | DISP_ON_PIN;
++    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
++    GPIO_InitStruct.Pull = GPIO_NOPULL;
++    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
++    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
++
++    // spi configuration
++    GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7;
++    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
++    GPIO_InitStruct.Pull = GPIO_NOPULL;
++    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
++    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1; 
++    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
++
++    // enables display (disp = high)
++    HAL_GPIO_WritePin(DISP_ON_PORT, DISP_ON_PIN, GPIO_PIN_SET);
++
++    // pwm init
++    GPIO_InitStruct.Pin = DISP_EXTCOM_PIN;
++    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
++    GPIO_InitStruct.Pull = GPIO_NOPULL;
++    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
++    GPIO_InitStruct.Alternate = GPIO_AF1_LPTIM1; 
++    HAL_GPIO_Init(DISP_EXTCOM_PORT, &GPIO_InitStruct);
++
++    hlptim1.Instance = LPTIM1;
++    hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC; 
++    hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV4; 
++    hlptim1.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
++    hlptim1.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
++    hlptim1.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
++    hlptim1.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
++
++    if (HAL_LPTIM_Init(&hlptim1) != HAL_OK) {
++        return 1;
++    }
++
++    // period = 16666, pulse (Duty 50%) = 8333
++    if (HAL_LPTIM_PWM_Start(&hlptim1, 16666, 8333) != HAL_OK) {
++        return 1;
++    }
+ 
+     return 0;
+ }
+ 
+-void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
++void gpio_cs_control(uint8_t state) {
+     if (state)
+-        HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
++        HAL_GPIO_WritePin(DISP_CS_PORT, DISP_CS_PIN, GPIO_PIN_SET);
+     else
+-        HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
+-}
+-
+-uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
+-    return HAL_GPIO_ReadPin(port, pin);
++        HAL_GPIO_WritePin(DISP_CS_PORT, DISP_CS_PIN, GPIO_PIN_RESET);
+ }
+ 
+ void bsp_delay_ms(uint32_t ms) {
+     HAL_Delay(ms);
+ }
+ 
++void bsp_gpio_write(GPIO_TypeDef *port, uint16_t pin, uint8_t state) {
++    HAL_GPIO_WritePin(port, pin, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
++}
++
++uint8_t bsp_gpio_read(GPIO_TypeDef *port, uint16_t pin) {
++    return (uint8_t)HAL_GPIO_ReadPin(port, pin);
++}
++
++extern volatile uint8_t bsp_btn_exti_flag;
++
+ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+-    
+-    // Roteia a interrupção: Foi o botão?
+-    if (GPIO_Pin == BUTTON_PIN) 
++    if (GPIO_Pin == BUTTON_PIN) {
+         bsp_btn_exti_flag = 1;
+-    
+-    
+-    // else if (GPIO_Pin == ADXL_INT_PIN) {
+-    //     bsp_adxl_exti_flag = true;
+-    // }
++    }
+ }
+Only in ./lib/bsp/src: hw_ipcc.c
+Only in ./lib/bsp/src: ls013b7dh03_interface.c
+Only in ./lib/bsp/src: rtc.c
+diff -ur epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/spi.c ./lib/bsp/src/spi.c
+--- epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src/spi.c	2026-04-07 22:46:55.000000000 +0000
++++ ./lib/bsp/src/spi.c	2026-04-21 21:37:02.507763993 +0000
+@@ -1,123 +1,54 @@
++#include "stm32wbxx_hal.h"
+ #include "spi.h"
+-#include "board_config.h"
++#include "stm32wbxx_hal_spi.h"
+ #include "gpio.h"
+ 
+-static SPI_HandleTypeDef hspi1;
++SPI_HandleTypeDef hspi1;
+ 
+ uint8_t spi_init(void) {
+-    GPIO_InitTypeDef GPIOHandle = {0};
++    __HAL_RCC_SPI1_CLK_ENABLE();
+ 
+-    GPIOHandle.Mode = GPIO_MODE_AF_PP;
+-    GPIOHandle.Pull = GPIO_NOPULL;
+-    GPIOHandle.Speed = GPIO_SPEED_FREQ_HIGH;
+-    GPIOHandle.Alternate = GPIO_AF5_SPI1; 
+-
+-    GPIOHandle.Pin = SCK_PIN;
+-    HAL_GPIO_Init(SCK_PORT, &GPIOHandle);
+-
+-    GPIOHandle.Pin = MOSI_PIN;
+-    HAL_GPIO_Init(MOSI_PORT, &GPIOHandle);
+-
+-    hspi1.Instance = SPI_INSTANCE;
++    hspi1.Instance = SPI1;
+     hspi1.Init.Mode = SPI_MODE_MASTER;
+-    hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+-    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+-    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+-    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+-    hspi1.Init.NSS = SPI_NSS_SOFT;
+-    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+-    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
++    hspi1.Init.Direction = SPI_DIRECTION_2LINES; 
++    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;   
++    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;       
++    hspi1.Init.NSS = SPI_NSS_SOFT;              
++    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32; // ~1MHz
++    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;      
+     hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+-    hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
++    hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+     hspi1.Init.CRCPolynomial = 7;
+ 
+-    if (HAL_SPI_Init(&hspi1) != HAL_OK) {
+-        return 1;
+-    }
++    if (HAL_SPI_Init(&hspi1) != HAL_OK) return 1;
+ 
+     return 0;
+ }
+ 
+ uint8_t spi_deinit(void) {
+-    HAL_GPIO_DeInit(SCK_PORT, SCK_PIN);
+-    HAL_GPIO_DeInit(MOSI_PORT, MOSI_PIN);
+-
+-    if (HAL_SPI_DeInit(&hspi1) != HAL_OK) {
+-        return 1;
+-    }
+-    
++    if (HAL_SPI_DeInit(&hspi1) != HAL_OK) return 1;
+     return 0;
+ }
+ 
+-uint8_t spi_write(uint8_t *buf, uint16_t len) {    
+-    if (len > 0) {
+-        if (HAL_SPI_Transmit(&hspi1, buf, len, HAL_MAX_DELAY) != HAL_OK) {
+-            return 1;
+-        }
+-    }
++uint8_t spi_write(uint8_t *buf, uint16_t len) {
++    if (HAL_SPI_Transmit(&hspi1, buf, len, HAL_MAX_DELAY) != HAL_OK) return 1;
+     return 0;
+ }
+ 
+-uint8_t spi_write_address16(uint8_t addr, uint8_t *buf, uint16_t len) {
+-    uint8_t buffer[2];
+-    uint8_t res;
+-
+-    /* transmit the addr  */
+-    buffer[0] = (addr >> 8) & 0xFF;
+-    buffer[1] = addr & 0xFF;
+-    res = HAL_SPI_Transmit(&hspi1, (uint8_t *)buffer, 2, 1000);
+-    if (res != 0) {
+-        return 1;
+-    }
+-
+-    /* if len > 0 */
++uint8_t spi_write_address16(uint16_t addr, uint8_t *buf, uint16_t len) {
++    uint8_t buffer[2] = {(addr >> 8) & 0xFF, addr & 0xFF};
++    if (HAL_SPI_Transmit(&hspi1, buffer, 2, 1000) != HAL_OK) return 1;
+     if (len > 0) {
+-        /* transmit the buffer */
+-        res = HAL_SPI_Transmit(&hspi1, buf, len, 1000);
+-        if (res != 0) {           
+-            return 1;
+-        }
++        if (HAL_SPI_Transmit(&hspi1, buf, len, 1000) != HAL_OK) return 1;
+     }
+-
+-    return 0; // OK
+-}
+-
+-uint8_t spi_read(uint8_t *buf, uint16_t len) {
+-    uint8_t res;
+-
+-    if (len > 0)
+-    {
+-        /* receive to the buffer */
+-        res = HAL_SPI_Receive(&hspi1, buf, len, 1000);
+-        if (res != 0) {  
+-            return 1;
+-        }
+-    }
+-
+     return 0;
+ }
+ 
+-uint8_t spi_read_cmd(uint8_t addr, uint8_t *buf, uint16_t len) {
+-    uint8_t buffer;
+-    uint8_t res;
+-
+-    buffer = addr;
+-    res = HAL_SPI_Transmit(&hspi1, (uint8_t *)&buffer, 1, 1000);
+-    if (res != HAL_OK){       
+-        return 1;
+-    }
+-
++uint8_t spi_read_cmd(uint16_t addr, uint8_t *buf, uint16_t len) {
++    uint8_t buffer[2] = {(uint8_t)(addr >> 8), (uint8_t)(addr & 0xFF)};
++    if (HAL_SPI_Transmit(&hspi1, buffer, 2, 1000) != HAL_OK) return 1;
+     if (len > 0) {
+-        res = HAL_SPI_Receive(&hspi1, buf, len, HAL_MAX_DELAY != 0);
+-        if (res != 0) {
+-            return 1;
+-        }
++        if (HAL_SPI_Receive(&hspi1, buf, len, HAL_MAX_DELAY) != HAL_OK) return 1;
+     }
+-
+     return 0;
+ }
+-
+-// uint8_t spi_read_cmd(uint8_t addr, uint8_t *buf, uint16_t len) {
+-//     bsp_gpio_write(ACCEL_CS_PORT, ACCEL_CS_PIN, GPIO_PIN_RESET);
+-    
+-// }
+Only in epaper-watch-fw-29e92080819f532bb49c012d36be0dab6de2da4f/lib/bsp/src: ssd1681_interface.c

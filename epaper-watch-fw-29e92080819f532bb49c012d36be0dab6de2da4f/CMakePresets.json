@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base-toolchain",
+      "hidden": true,
+      "generator": "Ninja",
+      "toolchainFile": "${sourceDir}/cmake/gcc-arm-none-eabi.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "chip-base",
+      "hidden": true,
+      "inherits": "base-toolchain",
+      "cacheVariables": {
+        "MCU_FAMILY": "stm32wb",
+        "TARGET_MCU": "STM32WBXX"
+      }
+    },
+    {
+      "name": "chip-debug",
+      "displayName": "Debug",
+      "inherits": "chip-base",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "chip-debug",
+      "configurePreset": "chip-debug"
+    }
+  ]
+}
