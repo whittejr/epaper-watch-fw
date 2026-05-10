@@ -2,7 +2,6 @@
 * @file    screen_oximeter.c
 * @brief   Oximeter display screen
 * @version 0.1.0
-* @author  Gemini CLI
 * @date    2026-04-21
 */
 

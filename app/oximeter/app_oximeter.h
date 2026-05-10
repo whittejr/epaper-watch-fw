@@ -2,7 +2,6 @@
  * @file app_oximeter.h
  * @brief  Oximeter application interface
  * @version 0.2
- * @author Gemini CLI
  * @date 2026-04-21
  */
 

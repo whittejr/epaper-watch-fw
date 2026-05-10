@@ -2,7 +2,6 @@
  * @file    app_oximeter.c
  * @brief   Oximeter application logic with CMSIS-DSP
  * @version 0.2.0
- * @author  Gemini CLI
  * @date    2026-04-21
  */
 
