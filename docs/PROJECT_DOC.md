@@ -29,10 +29,10 @@ Esta camada lida com a comunicação direta com os periféricos.
 - **Drivers de Sensores**: Oximetro (MAX30102) e Acelerômetro (ADXL362).
 - **Display HAL**: Abstrai o controlador do display, gerenciando o Framebuffer em RAM e transferindo dados via SPI.
 
-### B. Camada de Abstração Gráfica (Seiko UI Toolkit)
+### B. Camada de Abstração Gráfica (SHM-5 UI Toolkit)
 Para manter o código limpo e visualmente consistente:
 - **`display_hal`**: Oferece primitivas básicas (`display_draw_rect`, `display_draw_bitmap`).
-- **`app_display`**: Um conjunto de ferramentas de UI que implementa o estilo "Seiko" (Barra de status, alinhamento de texto, widgets de bateria).
+- **`app_display`**: Um conjunto de ferramentas de UI que implementa o estilo "SHM-5" (Barra de status, alinhamento de texto, widgets de bateria).
 
 ### C. Sistema de Interface (UI Manager)
 Baseado em uma máquina de estados:
@@ -60,8 +60,8 @@ O sistema utiliza uma fila central de eventos (`xSystemEventQueue`) para comunic
 
 ---
 
-## 5. Design Visual (Estética Seiko)
-O projeto segue uma estética inspirada na linha **Seiko 5** e relógios analógicos clássicos:
+## 5. Design Visual (Estética SHM-5)
+O projeto segue uma estética inspirada na linha **SHM-5** e relógios analógicos clássicos:
 - **Cores**: Alto contraste (Preto no Branco) otimizado para E-Paper.
 - **Layout**: Uso de linhas finas (hairlines) e tipografia limpa.
 - **Branding**: Logotipo "SHM-5" e janela de data clássica na posição de 3 horas.

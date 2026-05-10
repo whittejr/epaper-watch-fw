@@ -1,6 +1,6 @@
 /**
 * @file    screen_config.c
-* @brief   Advanced Watch Settings (Seiko Style with Scrolling)
+* @brief   Advanced Watch Settings (SHM-5 Style with Scrolling)
 */
 
 #include "ui_manager.h"

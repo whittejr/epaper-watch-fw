@@ -1,6 +1,6 @@
 /**
  * @file app_display.h
- * @brief High-level Seiko UI Toolkit and compatibility wrappers.
+ * @brief High-level SHM-5 UI Toolkit and compatibility wrappers.
  */
 
 #ifndef APP_DISPLAY_H
@@ -18,7 +18,7 @@ void app_display_draw_text_aligned_v(uint16_t x, uint16_t y, uint8_t align_cente
 uint16_t app_display_get_string_width(const char *text);
 uint16_t app_display_get_string_width_v(const char *text, const FONT_INFO *font);
 
-/* --- Seiko UI Widgets --- */
+/* --- SHM-5 UI Widgets --- */
 void app_display_draw_status_bar(void);
 void app_display_draw_battery(uint8_t x, uint8_t y, uint8_t level);
 

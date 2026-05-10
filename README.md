@@ -1,46 +1,60 @@
-# E-Paper Watch Firmware (Seiko Homage)
+# SHM-5 Watch Firmware
 
-Firmware de alta performance para smartwatch baseado no **STM32WB55**, com foco em baixíssimo consumo, multitarefa em tempo real e uma interface elegante inspirada nos relógios clássicos da Seiko.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build](https://img.shields.io/badge/Build-CMake-green.svg)](#-building)
 
-## 🚀 Destaques do Projeto
+[English](#english) | [Português](#português)
 
--   **Interface Seiko Style**: Design de alto contraste (Preto no Branco) com janela de data clássica, logotipo "SHM-5" e menus profissionais.
--   **Sistema de Menus com Scroll**: Navegação fluida em listas longas com rolagem automática e indicadores visuais.
--   **Configurações Reais**: Ajuste de formato de hora (12/24h), brilho, vibração, temas e ativação por pulso diretamente no relógio.
--   **Ecossistema de Jogos (1 Botão)**:
-    -   **Doom Lite**: Motor 3D com raycasting e inimigos animados.
-    -   **Temple Watch**: Runner 3D de evasão.
-    -   **Doodle Watch**: Jogo de plataforma vertical infinito.
-    -   **Snake & Flappy**: Clássicos adaptados.
--   **Arquitetura Robusta**: Baseada em **FreeRTOS** com separação clara entre drivers de hardware (HAL), ferramentas de UI (Toolkit) e lógica de telas.
+---
 
-## 🛠️ Arquitetura e Tecnologia
+<a name="english"></a>
+## English
 
--   **Microcontrolador**: STM32WB55 (Dual Core, ARM Cortex-M4).
--   **Display**: E-Paper / MIP (Memory-In-Pixel) 128x128.
--   **RTOS**: FreeRTOS para gerenciamento de tarefas de Sensores, UI e Eventos.
--   **Gráficos**: Biblioteca GFX otimizada para monocromático com fontes customizadas.
--   **Build System**: CMake com suporte a Presets.
+Smartwatch firmware for the STM32WB55 platform, designed for high-efficiency multitasking and a clean monochrome interface.
 
-## 📁 Documentação Detalhada
+### Features
+*   **OS:** Powered by FreeRTOS for reliable real-time operation.
+*   **Display:** Native support for Sharp Memory LCD (128x128) with ultra-low power consumption.
+*   **Applications:** Includes system utilities and specialized apps (Doom Lite, Temple Watch, etc.).
+*   **Sensors:** Integrated support for motion tracking and biometric data processing.
 
-Para uma visão técnica aprofundada das camadas, fluxos de dados e estrutura do código, consulte:
--   [Arquitetura do Sistema](docs/ARCHITECTURE.md)
--   [Documentação Técnica Completa](docs/PROJECT_DOC.md)
+### Technical Specifications
+| Category | Specification |
+| :--- | :--- |
+| **Microcontroller** | STM32WB55VG (ARM Cortex-M4/M0+) |
+| **Kernel** | FreeRTOS v10.x |
+| **Graphics** | Custom monochrome GFX toolkit |
+| **Build System** | CMake + GCC Arm Toolchain |
 
-## ⚡ Como Compilar
-
-Certifique-se de ter o `arm-none-eabi-gcc` e o `CMake` instalados.
-
+### Building
 ```bash
-# Configurar e Gerar o Build
 cmake --preset chip-debug
-
-# Compilar o Firmware
 cmake --build --preset chip-debug
 ```
 
-O binário gerado estará em `build/debug/firmware.elf`.
-
 ---
-*Este projeto foi desenvolvido com foco em eficiência energética e elegância visual.*
+
+<a name="português"></a>
+## Português
+
+Firmware para smartwatch baseado no STM32WB55, focado em multitarefa eficiente e uma interface monocromática limpa.
+
+### Recursos
+- **Sistema:** Baseado em FreeRTOS para operação robusta em tempo real.
+- **Display:** Suporte nativo para Sharp Memory LCD (128x128) de baixíssimo consumo.
+- **Aplicações:** Inclui ferramentas de sistema e apps especializados (Doom Lite, Temple Watch, etc).
+- **Sensores:** Suporte integrado para rastreamento de movimento e biometria.
+
+### Especificações Técnicas
+| Categoria | Especificação |
+| :--- | :--- |
+| **Microcontrolador** | STM32WB55VG (ARM Cortex-M4/M0+) |
+| **Kernel** | FreeRTOS v10.x |
+| **Gráficos** | Biblioteca GFX customizada |
+| **Build System** | CMake + GCC Arm Toolchain |
+
+### Compilação
+```bash
+cmake --preset chip-debug
+cmake --build --preset chip-debug
+```

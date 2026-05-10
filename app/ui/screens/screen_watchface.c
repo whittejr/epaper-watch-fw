@@ -29,7 +29,7 @@ static void Watchface_Draw(display_update_mode_t mode) {
     app_display_clear(); 
     app_display_draw_status_bar();
     
-    // BRANDING (Seiko Homage)
+    // BRANDING (SHM-5)
     app_display_draw_text_aligned(64, 25, 1, "SHM-5", 0);
     app_display_draw_rect(50, 36, 28, 1, 0);
 
@@ -42,7 +42,7 @@ static void Watchface_Draw(display_update_mode_t mode) {
     snprintf(buffer, sizeof(buffer), "%02d:%02d", hours, sTime.Minutes);
     app_display_draw_text_aligned_v(64, 45, 1, buffer, &digitalDisco_16ptFontInfo, 0);
 
-    // DATE WINDOW (Seiko style at 3 o'clock position)
+    // DATE WINDOW (Classic style at 3 o'clock position)
     // Box
     app_display_draw_rect(90, 52, 32, 18, 0);
     app_display_draw_rect(91, 53, 30, 16, 1); // inner clear
@@ -53,8 +53,8 @@ static void Watchface_Draw(display_update_mode_t mode) {
     app_display_draw_text(93, 56, buffer, 0);
 
     // "AUTOMATIC" / "21 JEWELS" Style text
-    app_display_draw_text_aligned(64, LAYOUT_SEIKO_BRAND_Y, 1, "AUTOMATIC", 0);
-    app_display_draw_text_aligned(64, LAYOUT_SEIKO_BRAND_Y + 12, 1, "WATER RESIST", 0);
+    app_display_draw_text_aligned(64, LAYOUT_SHM5_BRAND_Y, 1, "AUTOMATIC", 0);
+    app_display_draw_text_aligned(64, LAYOUT_SHM5_BRAND_Y + 12, 1, "WATER RESIST", 0);
 
     // DASHBOARD DIVIDER (Thin hairlines)
     app_display_draw_rect(10, 108, 108, 1, 0);

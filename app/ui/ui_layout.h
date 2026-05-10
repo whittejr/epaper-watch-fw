@@ -18,12 +18,12 @@
 #define LAYOUT_STATUS_BATTERY_X     110
 
 // ==========================================
-// ESTILO SEIKO (Classic Analog)
+// ESTILO SHM-5 (Classic Analog)
 // ==========================================
-#define LAYOUT_SEIKO_MARGIN          6
-#define LAYOUT_SEIKO_DATE_X          95
-#define LAYOUT_SEIKO_DATE_Y          58
-#define LAYOUT_SEIKO_BRAND_Y         85
+#define LAYOUT_SHM5_MARGIN          6
+#define LAYOUT_SHM5_DATE_X          95
+#define LAYOUT_SHM5_DATE_Y          58
+#define LAYOUT_SHM5_BRAND_Y         85
 
 // ==========================================
 // CONFIGURAÇÕES DAS LISTAS E MENUS

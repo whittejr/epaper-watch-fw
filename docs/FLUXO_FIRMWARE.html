@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxo de Firmware - E-Paper Watch</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fcfcfc;
+        }
+        h1, h2, h3 {
+            color: #111;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 1.8em; border-bottom: 2px solid #eaecef; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        h3 { font-size: 1.25em; }
+        p, ul, ol { margin-bottom: 1em; }
+        ul, ol { padding-left: 20px; }
+        li { margin-bottom: 0.5em; }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: #f6f8fa;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #d73a49;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            overflow: auto;
+            border-radius: 6px;
+            font-size: 0.9em;
+            line-height: 1.45;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        hr {
+            height: 1px;
+            background-color: #eaecef;
+            border: none;
+            margin: 24px 0;
+        }
+        .highlight-c .keyword { color: #d73a49; font-weight: bold; }
+        .highlight-c .function { color: #6f42c1; }
+        .highlight-c .comment { color: #6a737d; font-style: italic; }
+        
+        @media (max-width: 600px) {
+            body { padding: 15px; }
+            h1 { font-size: 1.5em; }
+            h2 { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Documentação do Fluxo de Firmware - E-Paper Watch</h1>
+    <p>Este documento descreve detalhadamente o funcionamento do firmware do smartwatch, desde a energização (inicialização) até o seu estado de estabilização (loop principal) e como ele reage às interações do usuário.</p>
+
+    <hr>
+
+    <h2>1. Ponto de Entrada: O Início de Tudo (<code>main.c</code>)</h2>
+    <p>Quando o relógio é ligado, o microcontrolador executa o arquivo <code>core/src/main.c</code>. A função <code>main()</code> é intencionalmente mantida simples para delegar a lógica ao orquestrador do sistema:</p>
+
+    <pre><code class="highlight-c"><span class="keyword">int</span> <span class="function">main</span>(<span class="keyword">void</span>) {
+    <span class="function">HAL_Init</span>();          <span class="comment">// 1. Inicializa a camada de abstração de hardware (HAL da ST)</span>
+    <span class="function">app_system_init</span>();   <span class="comment">// 2. Inicializa o sistema, módulos e tarefas</span>
+    <span class="function">app_system_loop</span>();   <span class="comment">// 3. Inicia o escalonador do RTOS (loop infinito)</span>
+    <span class="keyword">return</span> 0;
+}</code></pre>
+
+    <h2>2. Inicialização do Sistema (<code>app_system_init</code>)</h2>
+    <p>Localizado em <code>app/system/app_system.c</code>, a função <code>app_system_init()</code> é responsável por preparar todo o ambiente antes que o controle seja entregue ao sistema operacional em tempo real (FreeRTOS). A ordem das inicializações é crucial:</p>
+
+    <ol>
+        <li><strong>Hardware (BSP):</strong> <code>bsp_init()</code> configura os pinos básicos, clocks e barramentos de comunicação (I2C, SPI, UART).</li>
+        <li><strong>Display:</strong> <code>app_display_init()</code> liga o display e-paper e prepara seu buffer de memória.</li>
+        <li><strong>Animação de Boot:</strong> Imediatamente após ligar a tela, um loop envia frames de uma animação inicial (<code>anim_frames</code>) para o display.</li>
+        <li><strong>Sensores e Funcionalidades:</strong>
+            <ul>
+                <li><code>app_accel_init()</code>: Inicializa o acelerômetro (para detecção de movimento/tilt).</li>
+                <li><code>app_alarm_init()</code>: Configura a lógica de alarmes.</li>
+                <li><code>app_oximeter_init()</code>: Inicializa o sensor de batimentos e oxigenação.</li>
+            </ul>
+        </li>
+        <li><strong>Gerenciador de Interface (UI):</strong> <code>UI_Manager_Init(&amp;Screen_Watchface)</code> define que a primeira tela a ser exibida quando o sistema estabilizar será o mostrador de horas (Watchface).</li>
+        <li><strong>Fila de Eventos (Queue):</strong> É criada a <code>xSystemEventQueue</code>. Essa fila é a espinha dorsal da arquitetura, pois é por onde botões e temporizadores enviam comandos para a interface de forma segura.</li>
+        <li><strong>Criação das Tarefas (FreeRTOS Tasks):</strong> O sistema se divide em diferentes "processos" (tarefas) que rodam concorrentemente:
+            <ul>
+                <li><code>UI_Task</code>: Gerencia a interface gráfica e telas.</li>
+                <li><code>Alarm_Task</code>: Cuida da passagem do tempo e ativação de alarmes.</li>
+                <li><code>Button_Task</code>: Lê os cliques do botão físico.</li>
+                <li><code>Oximeter_Task</code>: Gerencia a leitura de batimentos.</li>
+                <li><code>Accel_Task</code>: Lê dados de movimento.</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>3. A Estabilização: O RTOS Assume o Controle (<code>app_system_loop</code>)</h2>
+    <p>A última instrução do <code>main()</code> é chamar <code>app_system_loop()</code>, que basicamente executa <code>vTaskStartScheduler()</code>. A partir deste momento, o loop tradicional do C é abandonado. O FreeRTOS assume o controle do processador e começa a chavear a execução entre as tarefas criadas, baseando-se em suas prioridades.</p>
+
+    <hr>
+
+    <h2>4. O Sistema em Execução (Como as coisas funcionam)</h2>
+    <p>Uma vez estabilizado, o relógio passa a operar orientado a eventos. A arquitetura é baseada no padrão Produtor-Consumidor. As tarefas atuam produzindo eventos que são consumidos pela Tarefa de Interface (<code>UI_Task</code>).</p>
+
+    <h3>A Tarefa de Tempo e Alarmes (<code>Alarm_Task</code>)</h3>
+    <p>Esta tarefa roda em um loop contínuo e exato (usando <code>vTaskDelayUntil</code>). A cada intervalo de tempo, ela <strong>produz eventos de relógio</strong> e os injeta na <code>xSystemEventQueue</code>:</p>
+    <ul>
+        <li>Produz <code>EVENT_TICK_50MS</code> a cada 50ms.</li>
+        <li>Produz <code>EVENT_TICK_100MS</code> a cada 100ms.</li>
+        <li>Produz <code>EVENT_TICK_1SEC</code> a cada 1 segundo.</li>
+    </ul>
+    <p>Além disso, ela lê o relógio interno (RTC) e verifica se algum alarme precisa tocar. Se sim, ela força a mudança de tela para <code>Screen_AlarmRinging</code>.</p>
+
+    <h3>A Tarefa do Botão (<code>Button_Task</code>)</h3>
+    <p>Fica analisando o pino do botão físico e lidando com o <em>"debounce"</em> (ruído mecânico). Dependendo da forma como o usuário aperta, ela injeta eventos de controle na Fila:</p>
+    <ul>
+        <li>Clique rápido: <code>EVENT_BTN_NEXT</code> (Avançar/Mudar item).</li>
+        <li>Duplo clique: <code>EVENT_BTN_DOUBLE</code>.</li>
+        <li>Clique longo: <code>EVENT_BTN_SELECT</code> (Confirmar/Entrar).</li>
+    </ul>
+
+    <h3>A Tarefa de Interface (<code>UI_Task</code> e <code>UI_Manager</code>)</h3>
+    <p>A <code>vUITask</code> fica essencialmente dormindo até que chegue um evento na fila <code>xSystemEventQueue</code>. Quando chega um evento (seja um tick de tempo ou um clique de botão), ela o repassa para a função <code>UI_Manager_ProcessEvent()</code>.</p>
+    <p>O Gerenciador de UI (<code>ui_manager.c</code>) age em duas camadas:</p>
+    <ol>
+        <li><strong>Camada Global:</strong>
+            <ul>
+                <li><strong>Timeout de Inatividade:</strong> Se receber eventos de 1 segundo (<code>EVENT_TICK_1SEC</code>) e perceber que não houve interação do usuário (clique em botões) por 10 segundos, ele força o sistema a retornar para a tela inicial (<code>Screen_Watchface</code>). Apenas algumas telas, como jogos e oxímetro, previnem este timeout.</li>
+                <li><strong>Wake On Wrist (Giro do Pulso):</strong> Se receber um <code>EVENT_WAKE</code> (gerado pelo acelerômetro) enquanto está na tela de horas e a configuração estiver ativa, ele abre o Menu (<code>Screen_Menu</code>) automaticamente.</li>
+            </ul>
+        </li>
+        <li><strong>Camada Específica de Tela:</strong><br>
+            Se o evento não foi tratado pelas regras globais, o gerenciador passa o evento para a tela atualmente ativa chamando <code>current_screen-&gt;on_event(event)</code>.<br><br>
+            Por exemplo, se a tela atual for o Menu e recebermos um <code>EVENT_BTN_NEXT</code> do botão, o Menu vai descer um item na lista. Se receber um <code>EVENT_TICK_1SEC</code>, a tela de horas (<code>Watchface</code>) atualizará os dígitos do relógio na tela.
+        </li>
+    </ol>
+
+    <h2>5. Estrutura das Telas (Screens)</h2>
+    <p>Para adicionar uma nova interface, o código utiliza o padrão definido por <code>AppScreen_t</code>. Cada tela (ex: <code>screen_menu.c</code>, <code>screen_oximeter.c</code>) é um conjunto de três funções:</p>
+    <ul>
+        <li><code>on_enter()</code>: Chamada uma única vez quando a tela é aberta (para desenhar a base da tela, zerar variáveis, etc).</li>
+        <li><code>on_event(event)</code>: Chamada cada vez que há um clique de botão, evento de tick (para animações) ou comandos globais. É aqui que a tela processa a interação e se redesenha.</li>
+        <li><code>on_exit()</code>: Chamada antes de sair da tela (para liberar recursos, encerrar medições, salvar placares, etc).</li>
+    </ul>
+
+    <h2>6. Estado e Configurações (<code>app_state.h</code>)</h2>
+    <p>O estado global do relógio — como nível de brilho, idioma, ativação de vibração e tema — fica unificado em uma estrutura global <code>g_watch_settings</code> inicializada no <code>app_system.c</code>. Qualquer tela ou componente pode acessar o arquivo <code>app_state.h</code> para ler essas preferências de forma centralizada.</p>
+
+    <hr>
+
+    <h3>Resumo Visual do Fluxo:</h3>
+    <pre><code>[ ENERGIA LIGADA ] -&gt; HAL_Init() -&gt; bsp_init() -&gt; Hardware Pronto
+                         |
+                         v
+                app_system_init() -&gt; Tela Inicializa -&gt; Animação Toca -&gt; RTOS Configurado
+                         |
+                         v
+[ ESTADO ESTÁVEL ] app_system_loop() -&gt; (FreeRTOS Scheduler Ativo)
+                         |
+      +------------------+------------------+------------------+
+      |                  |                  |                  |
+[Button_Task]      [Alarm_Task]       [Accel_Task]       [UI_Task] (Dormindo até ter evento)
+Lê Botão           Lê Relógio         Lê Sensores             |
+  |                  |                  |                     |
+  +-&gt; Eventos Botão  +-&gt; Eventos Tempo  +-&gt; Eventos Tilt      |
+  |                  |                  |                     |
+  +-----------+------+------------------+                     |
+              |                                               |
+              v                                               |
+        [ Fila: xSystemEventQueue ] &lt;-------------------------+ Acorda a UI_Task!
+              |
+              v
+      UI_Manager_ProcessEvent()
+              |
+              +--&gt; Verifica regras globais (Timeout 10s? Voltar ao inicio!)
+              |
+              +--&gt; current_screen-&gt;on_event(evento) ---&gt; A TELA ATUAL É ATUALIZADA
+</code></pre>
+    <br>
+</body>
+</html>

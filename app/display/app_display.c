@@ -1,6 +1,6 @@
 /**
 * @file    app_display.c
-* @brief   Implementation of High-level Seiko UI Toolkit
+* @brief   Implementation of High-level SHM-5 UI Toolkit
 */
 
 #include "app_display.h"
@@ -50,7 +50,7 @@ void app_display_draw_status_bar(void) {
     RTC_DateTypeDef sDate;
     char time_buf[8];
 
-    // Seiko-style top hairline
+    // SHM-5 style top hairline
     display_draw_rect(0, 12, 128, 1, 0);
 
     // Time (left)
